@@ -44,11 +44,11 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Entities
-    uniqueID: 2963133733
-    locked: 0
   - name: Foreground
     uniqueID: 2729860161
+    locked: 0
+  - name: Entities
+    uniqueID: 2963133733
     locked: 0
   m_RenderingLayers:
   - Default
