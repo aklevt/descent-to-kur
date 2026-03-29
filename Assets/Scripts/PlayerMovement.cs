@@ -19,6 +19,8 @@ namespace Sprites
         private bool isKeyHeld;
         private bool isMoving;
         
+        private bool isPlayerTurn = true;
+        
         private Camera mainCamera;
         
         public Vector3Int CurrentCell => logicalCellPos;
@@ -27,6 +29,23 @@ namespace Sprites
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
             mainCamera = Camera.main;
+        }
+        
+        private void OnEnable()
+        {
+            if (TurnManager.Instance != null)
+                TurnManager.Instance.OnStateChanged += HandleTurnChanged;
+        }
+        
+        private void OnDisable()
+        {
+            if (TurnManager.Instance != null)
+                TurnManager.Instance.OnStateChanged -= HandleTurnChanged;
+        }
+
+        private void HandleTurnChanged(TurnState newState)
+        {
+            isPlayerTurn = (newState == TurnState.PlayerTurn);
         }
 
         private void Start()
@@ -46,7 +65,7 @@ namespace Sprites
         {
             MoveSmoothly();
 
-            if (isMoving) 
+            if (!isPlayerTurn || isMoving) 
                 return;
 
             CheckInput();
