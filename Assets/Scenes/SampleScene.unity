@@ -1692,7 +1692,7 @@ Tilemap:
   m_AnimationFrameRate: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Origin: {x: -22, y: -47, z: 0}
-  m_Size: {x: 144, y: 52, z: 1}
+  m_Size: {x: 144, y: 55, z: 1}
   m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
   m_TileOrientation: 0
   m_TileOrientationMatrix:
@@ -4556,7 +4556,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 843479259417896986, guid: a3c6d1502590c5f488d25d0efa7f189b, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 843479259417896986, guid: a3c6d1502590c5f488d25d0efa7f189b, type: 3}
       propertyPath: playerTarget
