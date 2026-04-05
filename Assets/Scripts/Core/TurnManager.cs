@@ -14,6 +14,7 @@ public class TurnManager : MonoBehaviour
     {
         foreach (var enemy in allEnemies)
         {
+            //???
             if (enemy == null) 
                 continue;
             yield return enemy.DoTurn();
@@ -23,17 +24,14 @@ public class TurnManager : MonoBehaviour
         SetState(TurnState.PlayerTurn);
     }
 
-    private void Start()
-    {
-        SetState(TurnState.PlayerTurn);
-    }
-
+    //?
     public void RegisterEnemy(EnemyController enemy) => allEnemies.Add(enemy);
 
     public static TurnManager Instance { get; private set; }
 
     public TurnState CurrentState { get; private set; }
 
+    // Действия при смене State?
     public event Action<TurnState> OnStateChanged;
 
     private void Awake()
@@ -43,9 +41,15 @@ public class TurnManager : MonoBehaviour
             Instance = this;
         }
         else
-        {
+        {   
+            // ???
             Destroy(gameObject);
         }
+    }
+
+    private void Start()
+    {
+        SetState(TurnState.PlayerTurn);
     }
 
     private void SetState(TurnState newState)
@@ -53,19 +57,25 @@ public class TurnManager : MonoBehaviour
         CurrentState = newState;
         Debug.Log($"<color=yellow>[TurnManager]</color> Ход сменился на: <b>{newState}</b>");
 
+        // Выключить кнопки?
         OnStateChanged?.Invoke(newState);
 
         if (newState == TurnState.EnemyTurn)
         {
+            // Выполнять действие параллельно
             StartCoroutine(EnemyTurnSequence());
         }
     }
-    
+
+    // Заготовка на будущее?
     public void BeginLevel() 
     {
         SetState(TurnState.PlayerTurn);
     }
 
+    /// <summary>
+    /// Метод вызывается, когда игрок жмет на кнопку "Завершить ход"
+    /// </summary>
     public void EndPlayerTurn()
     {
         if (CurrentState == TurnState.PlayerTurn)

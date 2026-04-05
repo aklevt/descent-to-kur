@@ -13,6 +13,7 @@ public class EnemyController : MonoBehaviour
 
     private void Start()
     {
+        // Добавить монстра в обработчик ходов
         TurnManager.Instance.RegisterEnemy(this);
         
         UpdateTargetPosition(logicalCellPos);

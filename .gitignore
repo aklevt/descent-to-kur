@@ -186,5 +186,8 @@ http-client.private.env.json
 .idea/**/copilot.data.migration.*.xml
 
 
+#Добавлено командой descend-to-Kur
 Assets/Editor/ProjectSnapshot*
 Assets/Docs/project_snapshot*
+
+.vsconfig
