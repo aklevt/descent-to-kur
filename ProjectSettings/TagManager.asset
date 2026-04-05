@@ -41,6 +41,9 @@ TagManager:
   - name: Background
     uniqueID: 3377651365
     locked: 0
+  - name: Highlights
+    uniqueID: 1691466705
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
@@ -49,6 +52,9 @@ TagManager:
     locked: 0
   - name: Entities
     uniqueID: 2963133733
+    locked: 0
+  - name: UI
+    uniqueID: 1268132063
     locked: 0
   m_RenderingLayers:
   - Default
