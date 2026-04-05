@@ -12,19 +12,15 @@ public class TurnManager : MonoBehaviour
 
     private IEnumerator EnemyTurnSequence()
     {
-        foreach (var enemy in allEnemies)
+        var savedEnemiesList = new List<EnemyController>(allEnemies);
+        foreach (var enemy in savedEnemiesList)
         {
-            if (enemy == null) 
+            if (enemy == null)
                 continue;
             yield return enemy.DoTurn();
         }
-        
-        yield return null;
-        SetState(TurnState.PlayerTurn);
-    }
 
-    private void Start()
-    {
+        yield return null;
         SetState(TurnState.PlayerTurn);
     }
 
@@ -48,6 +44,15 @@ public class TurnManager : MonoBehaviour
         }
     }
 
+    public void UnregisterEnemy(EnemyController enemy)
+    {
+        if (allEnemies.Contains(enemy))
+        {
+            allEnemies.Remove(enemy);
+            Debug.Log($"<color=red>[TurnManager]</color> Противник удален. Осталось: {allEnemies.Count}");
+        }
+    }
+
     private void SetState(TurnState newState)
     {
         CurrentState = newState;
@@ -60,8 +65,8 @@ public class TurnManager : MonoBehaviour
             StartCoroutine(EnemyTurnSequence());
         }
     }
-    
-    public void BeginLevel() 
+
+    public void BeginLevel()
     {
         SetState(TurnState.PlayerTurn);
     }
