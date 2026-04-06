@@ -26,7 +26,8 @@ public class EnemyController : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
 
         var bestMove = GetBestMove();
-
+        //Debug.Log(bestMove.HasValue);
+        //Debug.Log(bestMove.Value != logicalCellPos);
         if (bestMove.HasValue && bestMove.Value != logicalCellPos)
         {
             var oldPos = logicalCellPos;
@@ -49,13 +50,13 @@ public class EnemyController : MonoBehaviour
     
     private Vector3Int? GetBestMove()
     {
-        if (PlayerMovement.Instance == null) return null;
+        //if (PlayerMovement.Instance == null) return null;
     
         var possibleMoves = GridManager.Instance.GetWalkableTilesInRange(logicalCellPos, 1, gameObject);
-    
         return possibleMoves
             .OrderBy(pos => Vector3
-                .Distance(pos, PlayerMovement.Instance.CurrentCell))
+                //.Distance(pos, PlayerMovement.Instance.CurrentCell))
+                .Distance(pos, AbilityController.Instance.PlayerPosition))
             .Cast<Vector3Int?>()
             .FirstOrDefault();
     }
@@ -63,6 +64,7 @@ public class EnemyController : MonoBehaviour
     private void MoveSmoothly()
     {
         transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, moveSpeed * Time.deltaTime);
+        //Debug.Log(Vector3.Distance(transform.position, targetWorldPos));
         if (Vector3.Distance(transform.position, targetWorldPos) < 0.01f)
         {
             transform.position = targetWorldPos;
@@ -78,7 +80,7 @@ public class EnemyController : MonoBehaviour
     
     private void Awake()
     {
-        logicalCellPos = GridManager.Instance.WorldToCell(transform.position);
+        logicalCellPos = GridManager.Instance.WorldPointToCell(transform.position);
         GridManager.Instance.RegisterFixedEntity(logicalCellPos, gameObject);
     }
 }

@@ -67,7 +67,6 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    // Заготовка на будущее?
     public void BeginLevel() 
     {
         SetState(TurnState.PlayerTurn);
