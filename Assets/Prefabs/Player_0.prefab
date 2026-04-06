@@ -92,7 +92,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!114 &4898059257836333979
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -105,9 +105,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5565cfab927933244a0850889443c4ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sprites.PlayerMovement
-  obstaclesTilemap: {fileID: 0}
   moveSpeed: 2
-  stepDelay: 0.2
+  moveRange: 1
 --- !u!114 &4236902223299793777
 MonoBehaviour:
   m_ObjectHideFlags: 0
