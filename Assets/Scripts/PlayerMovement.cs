@@ -35,12 +35,6 @@ namespace Sprites
             mainCamera = Camera.main;
         }
 
-        private void OnEnable()
-        {
-            if (TurnManager.Instance != null)
-                TurnManager.Instance.OnStateChanged += HandleTurnChanged;
-        }
-
         private void OnDisable()
         {
             if (TurnManager.Instance != null)
@@ -63,16 +57,15 @@ namespace Sprites
 
         private void Start()
         {
-            var startCell = GridManager.Instance.WorldToCell(transform.position);
-            SetLogicalPosition(startCell);
+            logicalCellPos = GridManager.Instance.WorldToCell(transform.position);
+            GridManager.Instance.RegisterFixedEntity(logicalCellPos, gameObject);
             
             UpdateTargetPosition(logicalCellPos);
             transform.position = targetWorldPos;
-
-            if (isPlayerTurn) UpdateAvailableMoves();
             
             if (TurnManager.Instance != null)
             {
+                TurnManager.Instance.OnStateChanged += HandleTurnChanged;
                 HandleTurnChanged(TurnManager.Instance.CurrentState);
             }
         }
@@ -194,6 +187,7 @@ namespace Sprites
         {
             availableMoves.Clear();
             availableMoves = GridManager.Instance.GetWalkableTilesInRange(logicalCellPos, moveRange, gameObject);
+            Debug.Log($"<color=green>[Player]</color> Обновление ходов. Найдено: {availableMoves.Count}");
             GridHighlighter.Instance.HighlightCells(availableMoves);
         }
     }

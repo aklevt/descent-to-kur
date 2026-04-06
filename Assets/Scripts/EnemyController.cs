@@ -13,10 +13,19 @@ public class EnemyController : MonoBehaviour
 
     private void Start()
     {
-        TurnManager.Instance.RegisterEnemy(this);
+        logicalCellPos = GridManager.Instance.WorldToCell(transform.position);
+        GridManager.Instance.RegisterFixedEntity(logicalCellPos, gameObject);
         
         UpdateTargetPosition(logicalCellPos);
         transform.position = targetWorldPos;
+    }
+    
+    private void OnDisable()
+    {
+        if (TurnManager.Instance != null)
+        {
+            TurnManager.Instance.UnregisterEnemy(this);
+        }
     }
     
     public IEnumerator DoTurn()
@@ -49,12 +58,19 @@ public class EnemyController : MonoBehaviour
     private Vector3Int? GetBestMove()
     {
         if (PlayerMovement.Instance == null) return null;
-    
+        
+        var playerCell = PlayerMovement.Instance.CurrentCell;
         var possibleMoves = GridManager.Instance.GetWalkableTilesInRange(logicalCellPos, 1, gameObject);
+        
+        if (Vector3Int.Distance(logicalCellPos, playerCell) <= 1.1f)
+        {
+            return logicalCellPos; 
+        }
     
         return possibleMoves
             .OrderBy(pos => Vector3
                 .Distance(pos, PlayerMovement.Instance.CurrentCell))
+
             .Cast<Vector3Int?>()
             .FirstOrDefault();
     }
@@ -73,11 +89,5 @@ public class EnemyController : MonoBehaviour
     {
         targetWorldPos = GridManager.Instance.GetCellCenterWorld(cell);
         targetWorldPos.z = transform.position.z;
-    }
-    
-    private void Awake()
-    {
-        logicalCellPos = GridManager.Instance.WorldToCell(transform.position);
-        GridManager.Instance.RegisterFixedEntity(logicalCellPos, gameObject);
     }
 }
