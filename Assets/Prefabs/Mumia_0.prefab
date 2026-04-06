@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6617726875686785051}
   - component: {fileID: 5927671120677486074}
-  - component: {fileID: 2809698832690530192}
   m_Layer: 0
   m_Name: Mumia_0
   m_TagString: Untagged
@@ -78,8 +77,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: -1331833563
-  m_SortingLayer: 2
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: -5621593187482372676, guid: c8e0430e86ea84e4290e948b661302f1, type: 3}
@@ -91,17 +90,4 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 1
---- !u!114 &2809698832690530192
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6597359993218044056}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6a4cd8bcd3083344db4a50b62a5fbdac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 3
+  m_SpriteSortPoint: 0
