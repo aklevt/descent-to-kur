@@ -8,7 +8,7 @@ public class GridManager : MonoBehaviour
 
     [SerializeField] private Tilemap obstaclesTilemap;
     
-    private Dictionary<Vector3Int, GameObject> entitiesOnGrid = new();
+    public Dictionary<Vector3Int, GameObject> entitiesOnGrid = new();
 
     public void MoveEntity(Vector3Int from, Vector3Int to, GameObject entity)
     {
@@ -92,6 +92,23 @@ public class GridManager : MonoBehaviour
             }
         }
         return walkable;
+    }
+
+    public List<Vector3Int> GetBeatableCells(Vector3Int startPos, int range)
+    {
+        var beatable = new List<Vector3Int>();
+
+        Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+
+        foreach (var dir in directions)
+        {
+            var checkingPos = startPos + dir;
+            if (entitiesOnGrid.ContainsKey(checkingPos))
+            {
+                beatable.Add(checkingPos);
+            }
+        }
+        return beatable;
     }
 
     //???

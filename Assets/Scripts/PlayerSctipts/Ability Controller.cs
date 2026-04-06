@@ -67,7 +67,9 @@ public class AbilityController : MonoBehaviour
         AvailableCells.Clear();
         GridHighlighter.Instance.Clear();
         if (SelectedAbility == "Move")
-            UpdateAbilityAvailableCells(GridManager.Instance.GetWalkableTilesInRange);  //, gameObject);
+            UpdateAbilityAvailableCells(GridManager.Instance.GetWalkableTilesInRange);  //, gameObject);]
+        else if (SelectedAbility == "Punch")
+            UpdateAbilityAvailableCells(GridManager.Instance.GetBeatableCells);
     }
 
     private void UpdateAbilityAvailableCells(Func<Vector3Int, int, List<Vector3Int>> AvailableMovesGetter)
@@ -81,7 +83,9 @@ public class AbilityController : MonoBehaviour
         if (SelectedAbility == "Move")
         {
             MoveAction(selectedCell);
-        }    
+        }   
+        else if (SelectedAbility == "Punch")
+            PunchAction(selectedCell);
     }
 
     private void MoveAction(Vector3Int target)
@@ -92,5 +96,11 @@ public class AbilityController : MonoBehaviour
         //UpdateTargetPosition(logicalCellPos);
         //lastStepTime = Time.time;
         UpdateAvailableCells();
+    }
+
+    private void PunchAction(Vector3Int target)
+    {
+        //GridManager.Instance.entitiesOnGrid[target]
+        Debug.Log("Вообразим, что прописал двоечку");
     }
 }
