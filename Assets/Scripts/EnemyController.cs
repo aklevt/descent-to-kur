@@ -52,7 +52,59 @@ public class EnemyController : MonoBehaviour
         
         yield return new WaitForSeconds(0.1f);
 
+        TryAttackPlayer();
+        
+        yield return new WaitForSeconds(0.1f);
+
         Debug.Log("Противник закончил ход");
+    }
+    
+    private void TryAttackPlayer()
+    {
+        if (PlayerMovement.Instance == null) return;
+
+        var playerCell = PlayerMovement.Instance.CurrentCell;
+        
+        Debug.Log("Attack");
+        
+        if (Vector3Int.Distance(logicalCellPos, playerCell) <= 1.1f)
+        {
+            if (PlayerMovement.Instance.TryGetComponent<Health>(out var playerHealth))
+            {
+                StartCoroutine(PunchAnimation(PlayerMovement.Instance.transform.position));
+            
+                Debug.Log($"<color=red>{gameObject.name} атакует игрока</color>");
+                playerHealth.TakeDamage(2);
+            }
+        }
+    }
+
+    private IEnumerator PunchAnimation(Vector3 targetPos)
+    {
+        var startPos = transform.position;
+        var punchPos = Vector3.Lerp(startPos, targetPos, 0.3f);
+    
+        var elapsed = 0f;
+        var duration = 0.15f;
+
+        // Идет вперед
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            transform.position = Vector3.Lerp(startPos, punchPos, elapsed / duration);
+            yield return null;
+        }
+
+        // Возвращается назад
+        elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            transform.position = Vector3.Lerp(punchPos, startPos, elapsed / duration);
+            yield return null;
+        }
+
+        transform.position = startPos;
     }
     
     private Vector3Int? GetBestMove()

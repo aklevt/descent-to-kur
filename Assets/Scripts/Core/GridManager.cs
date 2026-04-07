@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -27,7 +28,7 @@ public class GridManager : MonoBehaviour
     private void Awake()
     {
         if (Instance == null) 
-            Instance = FindFirstObjectByType<GridManager>();
+            Instance = this;
         else 
             Destroy(gameObject);
     }
@@ -59,6 +60,37 @@ public class GridManager : MonoBehaviour
             }
         }
         return walkable;
+    }
+    
+    /// <summary>
+    /// Возвращает объект, находящийся на указанной клетке, если он там есть
+    /// </summary>
+    /// <returns>GameObject сущности или null</returns>
+    public GameObject GetEntityAt(Vector3Int cellPos)
+    {
+        if (entitiesOnGrid.TryGetValue(cellPos, out var entity))
+        {
+            return entity;
+        }
+        return null;
+    }
+    
+    public void UnregisterEntity(Vector3Int pos)
+    {
+        entitiesOnGrid.Remove(pos);
+    }
+    
+    /// <summary>
+    /// Возвращает соседние клетки, в которых нет стен
+    /// /// </summary>
+    public List<Vector3Int> GetAttackableCells(Vector3Int center)
+    {
+        Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+
+        return directions
+            .Select(dir => center + dir)
+            .Where(pos => !obstaclesTilemap.HasTile(pos))
+            .ToList();
     }
 
     public Vector3Int WorldToCell(Vector3 worldPos) => obstaclesTilemap.WorldToCell(worldPos);
