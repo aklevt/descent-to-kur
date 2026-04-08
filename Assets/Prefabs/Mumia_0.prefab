@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6617726875686785051}
   - component: {fileID: 5927671120677486074}
+  - component: {fileID: 1791857300127426153}
   - component: {fileID: 2809698832690530192}
   m_Layer: 0
   m_Name: Mumia_0
@@ -92,6 +93,19 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1791857300127426153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6597359993218044056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8fb831eea6b7454092db4e388c68a24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Health
+  maxHealth: 10
 --- !u!114 &2809698832690530192
 MonoBehaviour:
   m_ObjectHideFlags: 0
