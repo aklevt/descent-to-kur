@@ -9,7 +9,7 @@ public class GridManager : MonoBehaviour
 
     [SerializeField] private Tilemap obstaclesTilemap;
     
-    private Dictionary<Vector3Int, GameObject> entitiesOnGrid = new();
+    private readonly Dictionary<Vector3Int, GameObject> entitiesOnGrid = new();
 
     public void MoveEntity(Vector3Int from, Vector3Int to, GameObject entity)
     {
@@ -68,11 +68,7 @@ public class GridManager : MonoBehaviour
     /// <returns>GameObject сущности или null</returns>
     public GameObject GetEntityAt(Vector3Int cellPos)
     {
-        if (entitiesOnGrid.TryGetValue(cellPos, out var entity))
-        {
-            return entity;
-        }
-        return null;
+        return entitiesOnGrid.GetValueOrDefault(cellPos);
     }
     
     public void UnregisterEntity(Vector3Int pos)
@@ -82,15 +78,36 @@ public class GridManager : MonoBehaviour
     
     /// <summary>
     /// Возвращает соседние клетки, в которых нет стен
+    /// ❗ переписать через BFS ❗
     /// /// </summary>
-    public List<Vector3Int> GetAttackableCells(Vector3Int center)
+    public List<Vector3Int> GetAttackableCellsInRadius(Vector3Int center, int maxRange, int minRange = 1)
     {
-        Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+        var cells = new List<Vector3Int>();
 
-        return directions
-            .Select(dir => center + dir)
-            .Where(pos => !obstaclesTilemap.HasTile(pos))
-            .ToList();
+        for (var x = -maxRange; x <= maxRange; x++)
+        {
+            for (var y = -maxRange; y <= maxRange; y++)
+            {
+                var distance = Mathf.Abs(x) + Mathf.Abs(y);
+
+                if (distance > maxRange || distance < minRange) continue;
+                
+                var cellPos = new Vector3Int(center.x + x, center.y + y, center.z);
+                
+                if (!obstaclesTilemap.HasTile(cellPos))
+                {
+                    cells.Add(cellPos);
+                }
+            }
+        }
+        return cells;
+        
+        // Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+        //
+        // return directions
+        //     .Select(dir => center + dir)
+        //     .Where(pos => !obstaclesTilemap.HasTile(pos))
+        //     .ToList();
     }
 
     public Vector3Int WorldToCell(Vector3 worldPos) => obstaclesTilemap.WorldToCell(worldPos);

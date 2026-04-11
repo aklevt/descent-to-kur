@@ -4,35 +4,46 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
-    [SerializeField] private int maxHealth = 10;
     [SerializeField] private float fadeDuration = 0.5f;
 
     private int currentHealth;
     private SpriteRenderer spriteRenderer;
-    private bool isDead = false;
+    public bool IsDead { get; private set; } = false;
+
+    private BaseEntity entity;
     
     public event Action<GameObject> OnDeath;
 
     private void Awake()
     {
-        currentHealth = maxHealth;
         spriteRenderer = GetComponent<SpriteRenderer>();
+        entity = GetComponent<BaseEntity>();
+    }
+    
+    private void Start()
+    {
+        if (entity != null)
+        {
+            currentHealth = entity.MaxHealth;
+        }
     }
 
     public void TakeDamage(int damage)
     {
-        if (isDead) return;
+        if (IsDead) return;
 
         currentHealth -= damage;
+        Debug.Log($"{gameObject.name} получил урон: {damage}. ХП: {currentHealth}/{entity?.MaxHealth}");
 
-        if (currentHealth <= 0) Die();
+        if (currentHealth <= 0) 
+            Die();
         else StartCoroutine(FlashRed());
     }
 
     private void Die()
     {
-        if (isDead) return;
-        isDead = true;
+        if (IsDead) return;
+        IsDead = true;
         
         OnDeath?.Invoke(gameObject);
     

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Sprites;
@@ -9,17 +10,16 @@ public enum AbilityType
     None,
     Move,
     Attack,
+    RangedAttack,
 }
 
 public class AbilityController : MonoBehaviour
 {
     public static AbilityController Instance { get; private set; }
 
-    [Header("Settings")]
-    [SerializeField] private int playerAttackDamage = 5;
+    [Header("UI Elements")] [SerializeField]
+    private Button moveButton;
 
-    [Header("UI Elements")]
-    [SerializeField] private Button moveButton;
     [SerializeField] private Button attackButton;
 
     private AbilityType selectedAbility = AbilityType.Move;
@@ -28,9 +28,9 @@ public class AbilityController : MonoBehaviour
     /// <summary>
     /// Разрешено ли взаимодействие со способностями в текущем состоянии игры
     /// </summary>
-    private bool IsPlayerTurnActive => 
+    private bool IsPlayerTurnActive =>
         !isDead &&
-        TurnManager.Instance != null && 
+        TurnManager.Instance != null &&
         TurnManager.Instance.CurrentState == TurnState.PlayerTurn &&
         PlayerMovement.Instance != null;
 
@@ -38,7 +38,7 @@ public class AbilityController : MonoBehaviour
     /// Список координат клеток, доступных для текущей выбранной способности
     /// </summary>
     public List<Vector3Int> AvailableCells => availableCells;
-    
+
     private bool isDead = false;
 
     private void Awake()
@@ -64,7 +64,7 @@ public class AbilityController : MonoBehaviour
     private void Update()
     {
         if (!IsPlayerTurnActive) return;
-        
+
         // Автоматическое обновление сетки после завершения движения
         if (ShouldRefreshAbilityGrid())
         {
@@ -122,9 +122,22 @@ public class AbilityController : MonoBehaviour
                 PerformAttack(targetCell);
                 break;
 
+            case AbilityType.RangedAttack:
+                PerformRangedAttack(targetCell);
+                break;
+
             case AbilityType.None:
                 break;
         }
+    }
+
+    private void PerformRangedAttack(Vector3Int targetCell)
+    {
+        var target = GridManager.Instance.GetEntityAt(targetCell);
+        var targetHealth = target.GetComponent<Health>();
+        var damage = PlayerMovement.Instance.AttackDamage;
+        targetHealth.TakeDamage(damage);
+        SelectAbility((int)AbilityType.None);
     }
 
     private void PerformAttack(Vector3Int targetCell)
@@ -133,18 +146,29 @@ public class AbilityController : MonoBehaviour
 
         if (target != null && target != PlayerMovement.Instance.gameObject)
         {
-            Debug.Log($"Атакуем врага {target.name} на клетке {targetCell}");
-            if (target.TryGetComponent<Health>(out var health))
-            {
-                health.TakeDamage(playerAttackDamage);
-            }
+            StartCoroutine(PlayerAttackSequence(target));
         }
         else
         {
             Debug.Log("На клетке нет противника");
+            SelectAbility((int)AbilityType.None);
         }
+    }
 
-        // ClearSelection();
+    private IEnumerator PlayerAttackSequence(GameObject target)
+    {
+        var targetHealth = target.GetComponent<Health>();
+        var damage = PlayerMovement.Instance.AttackDamage;
+
+        yield return StartCoroutine(PlayerMovement.Instance.PunchAnimation(
+            target.transform.position,
+            () =>
+            {
+                if (targetHealth != null)
+                    targetHealth.TakeDamage(damage);
+            }
+        ));
+
         SelectAbility((int)AbilityType.None);
     }
 
@@ -158,9 +182,9 @@ public class AbilityController : MonoBehaviour
     {
         ClearSelection();
         UpdateButtonsState();
-        
+
         if (!IsPlayerTurnActive) return;
-        
+
         var playerCell = PlayerMovement.Instance.CurrentCell;
 
         switch (selectedAbility)
@@ -174,18 +198,30 @@ public class AbilityController : MonoBehaviour
                 PrepareAttackArea(playerCell);
                 RenderSelection(Color.red);
                 break;
+
+            case AbilityType.RangedAttack:
+                PrepareRangeAttackArea(playerCell);
+                RenderSelection(Color.red);
+                break;
         }
     }
-    
+
     /// <summary>
     /// Заполняет список клеток, доступных для атаки
     /// </summary>
     private void PrepareAttackArea(Vector3Int playerCell)
     {
-        var attackable = GridManager.Instance.GetAttackableCells(playerCell);
+        var attackable = GridManager.Instance.GetAttackableCellsInRadius(playerCell, 1);
         availableCells.AddRange(attackable);
     }
-    
+
+    private void PrepareRangeAttackArea(Vector3Int playerCell)
+    {
+        var attackable = GridManager.Instance.GetAttackableCellsInRadius(playerCell, 3, 2);
+
+        availableCells.AddRange(attackable);
+    }
+
     /// <summary>
     /// Заполняет список доступных клеток для перемещения игрока
     /// </summary>
@@ -198,7 +234,7 @@ public class AbilityController : MonoBehaviour
         );
         availableCells.AddRange(walkable);
     }
-    
+
     private void RenderSelection(Color color)
     {
         if (GridHighlighter.Instance != null && availableCells.Count > 0)
@@ -212,7 +248,7 @@ public class AbilityController : MonoBehaviour
         availableCells.Clear();
         GridHighlighter.Instance.Clear();
     }
-    
+
     /// <summary>
     /// Переключает текущую активную способность, вызывается кнопками UI
     /// </summary>
@@ -224,7 +260,7 @@ public class AbilityController : MonoBehaviour
         selectedAbility = newAbility;
         RefreshAbilityOverlay();
     }
-    
+
     /// <summary>
     /// Управляет доступностью кнопок в зависимости от выбранного режима
     /// </summary>
@@ -236,14 +272,14 @@ public class AbilityController : MonoBehaviour
             if (attackButton != null) attackButton.interactable = false;
             return;
         }
-        
+
         if (moveButton != null)
             moveButton.interactable = (selectedAbility != AbilityType.Move);
 
         if (attackButton != null)
             attackButton.interactable = (selectedAbility != AbilityType.Attack);
     }
-    
+
     public void DisableAllOverlaysAfterDeath()
     {
         isDead = true;
@@ -251,7 +287,8 @@ public class AbilityController : MonoBehaviour
         ClearSelection();
         UpdateButtonsState();
     }
-    
+
     public void SetMoveMode() => SelectAbility((int)AbilityType.Move);
     public void SetAttackMode() => SelectAbility((int)AbilityType.Attack);
+    public void SetRangedAttackMode() => SelectAbility((int)AbilityType.RangedAttack);
 }

@@ -8,11 +8,11 @@ public class TurnManager : MonoBehaviour
     [ContextMenu("Ход противника")]
     public void DebugEnemyTurn() => SetState(TurnState.EnemyTurn);
 
-    private List<EnemyController> allEnemies = new();
+    private List<EnemyBase> allEnemies = new();
 
     private IEnumerator EnemyTurnSequence()
     {
-        var savedEnemiesList = new List<EnemyController>(allEnemies);
+        var savedEnemiesList = new List<EnemyBase>(allEnemies);
         foreach (var enemy in savedEnemiesList)
         {
             if (enemy == null)
@@ -24,7 +24,13 @@ public class TurnManager : MonoBehaviour
         SetState(TurnState.PlayerTurn);
     }
 
-    public void RegisterEnemy(EnemyController enemy) => allEnemies.Add(enemy);
+    public void RegisterEnemy(EnemyBase enemy) 
+    {
+        if (!allEnemies.Contains(enemy))
+        {
+            allEnemies.Add(enemy);
+        }
+    }
 
     public static TurnManager Instance { get; private set; }
 
@@ -44,7 +50,7 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    public void UnregisterEnemy(EnemyController enemy)
+    public void UnregisterEnemy(EnemyBase enemy)
     {
         if (allEnemies.Contains(enemy))
         {
