@@ -8,8 +8,7 @@ public abstract class EnemyBase : BaseEntity
     protected override void Start()
     {
         base.Start();
-        if (TurnManager.Instance != null)
-            TurnManager.Instance.RegisterEnemy(this);
+        TurnManager.Instance?.RegisterEnemy(this);
     }
 
     protected virtual void OnDisable()
@@ -55,8 +54,8 @@ public abstract class EnemyBase : BaseEntity
         
         if (Vector3Int.Distance(CurrentCell, playerCell) <= 1.1f)
             return CurrentCell;
-
-        var possibleMoves = GridManager.Instance.GetWalkableTilesInRange(CurrentCell, 1, gameObject);
+        
+        var possibleMoves = GridManager.Instance.GetWalkableTilesInRange(CurrentCell, Stats.MoveRange, gameObject);
     
         return possibleMoves
             .OrderBy(pos => Vector3.Distance(pos, playerCell))

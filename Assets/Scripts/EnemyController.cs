@@ -18,7 +18,7 @@ public class EnemyController : EnemyBase
             {
                 if (playerHealth != null)
                 {
-                    playerHealth.TakeDamage(AttackDamage);
+                    playerHealth.TakeDamage(Stats.AttackDamage);
                 }
             }));
         }

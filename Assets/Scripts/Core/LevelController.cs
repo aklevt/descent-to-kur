@@ -21,7 +21,6 @@ public class LevelController : MonoBehaviour
         foreach (var enemy in enemiesOnScene)
         {
             activeEnemies.Add(enemy);
-            // TurnManager.Instance.RegisterEnemy(enemy);
             
             enemy.GetComponent<Health>().OnDeath += HandleEnemyDeath;
         }

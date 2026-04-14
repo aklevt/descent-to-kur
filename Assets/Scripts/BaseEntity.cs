@@ -7,12 +7,10 @@ public abstract class BaseEntity : MonoBehaviour
 {
     [Header("Stats")] [SerializeField] private EntityStats baseStats;
 
-    [Header("Stat Overrides")] [SerializeField]
-    private int healthOverride;
+    [Header("Live Stats (Edit here if Customized)")] [SerializeField]
+    private EntityRuntimeStats stats = new();
 
-    [SerializeField] private int moveRangeOverride;
-    [SerializeField] private float moveSpeedOverride;
-    [SerializeField] private int attackDamageOverride;
+    public EntityRuntimeStats Stats => stats;
 
     [Header("Components")] [SerializeField]
     protected SpriteRenderer spriteRenderer;
@@ -24,27 +22,20 @@ public abstract class BaseEntity : MonoBehaviour
 
     private Vector3 targetWorldPos;
 
-    public int MaxHealth =>
-        (baseStats != null) ? (healthOverride > 0 ? healthOverride : baseStats.maxHealth) : healthOverride;
-
-    public int MoveRange => (baseStats != null)
-        ? (moveRangeOverride > 0 ? moveRangeOverride : baseStats.moveRange)
-        : moveRangeOverride;
-
-    public float MoveSpeed => (baseStats != null)
-        ? (moveSpeedOverride > 0 ? moveSpeedOverride : baseStats.moveSpeed)
-        : moveSpeedOverride;
-
-    public int AttackDamage => (baseStats != null)
-        ? (attackDamageOverride > 0 ? attackDamageOverride : baseStats.baseAttackDamage)
-        : attackDamageOverride;
-
     protected virtual void Start()
     {
         CurrentCell = GridManager.Instance.WorldToCell(transform.position);
         GridManager.Instance.RegisterFixedEntity(CurrentCell, gameObject);
 
         PlaceOnCell();
+    }
+
+    private void OnValidate()
+    {
+        if (!stats.isCustomized && baseStats != null)
+        {
+            stats.Initialize(baseStats);
+        }
     }
 
     private void Update()
@@ -56,6 +47,15 @@ public abstract class BaseEntity : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
+
+        // Установка статов на свякий случай, пусть будет
+        if (baseStats != null && !stats.isCustomized)
+        {
+            stats.Initialize(baseStats);
+        }
+
+        // Намеренно продублирована логика. Даже если в инспекторе изменить здоровье (isCustomized == true), оно сбросится после респауна
+        stats.Health = stats.MaxHealth;
     }
 
     private void PlaceOnCell()
@@ -86,15 +86,12 @@ public abstract class BaseEntity : MonoBehaviour
     {
         if (!IsMoving) return;
 
-        transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, MoveSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, Stats.MoveSpeed * Time.deltaTime);
 
         if (Vector3.Distance(transform.position, targetWorldPos) < 0.001f)
         {
             transform.position = targetWorldPos;
             IsMoving = false;
-
-            var newCell = GridManager.Instance.WorldToCell(transform.position);
-            SetLogicalPosition(newCell);
 
             OnArrivingToTarget();
         }

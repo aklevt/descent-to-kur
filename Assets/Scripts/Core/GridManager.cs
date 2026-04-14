@@ -47,6 +47,8 @@ public class GridManager : MonoBehaviour
     
     public List<Vector3Int> GetWalkableTilesInRange(Vector3Int startPos, int range, GameObject currentEntity = null)
     {
+        // ❗ Надо переписать через BFS с восстановлением пути ❗
+        
         var walkable = new List<Vector3Int>();
     
         Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
@@ -63,7 +65,7 @@ public class GridManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Возвращает объект, находящийся на указанной клетке, если он там есть
+    /// Возвращает сущность, находящаяся на указанной клетке, если она там есть
     /// </summary>
     /// <returns>GameObject сущности или null</returns>
     public GameObject GetEntityAt(Vector3Int cellPos)

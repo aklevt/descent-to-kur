@@ -134,9 +134,14 @@ public class AbilityController : MonoBehaviour
     private void PerformRangedAttack(Vector3Int targetCell)
     {
         var target = GridManager.Instance.GetEntityAt(targetCell);
-        var targetHealth = target.GetComponent<Health>();
-        var damage = PlayerMovement.Instance.AttackDamage;
-        targetHealth.TakeDamage(damage);
+        if (target == null) return;
+        
+        if (target.TryGetComponent<Health>(out var targetHealth))
+        {
+            var damage = PlayerMovement.Instance.Stats.AttackDamage;
+            targetHealth.TakeDamage(damage);
+        }
+        
         SelectAbility((int)AbilityType.None);
     }
 
@@ -158,7 +163,7 @@ public class AbilityController : MonoBehaviour
     private IEnumerator PlayerAttackSequence(GameObject target)
     {
         var targetHealth = target.GetComponent<Health>();
-        var damage = PlayerMovement.Instance.AttackDamage;
+        var damage = PlayerMovement.Instance.Stats.AttackDamage;
 
         yield return StartCoroutine(PlayerMovement.Instance.PunchAnimation(
             target.transform.position,
@@ -229,7 +234,7 @@ public class AbilityController : MonoBehaviour
     {
         var walkable = GridManager.Instance.GetWalkableTilesInRange(
             playerCell,
-            PlayerMovement.Instance.MoveRange,
+            PlayerMovement.Instance.Stats.MoveRange,
             PlayerMovement.Instance.gameObject
         );
         availableCells.AddRange(walkable);

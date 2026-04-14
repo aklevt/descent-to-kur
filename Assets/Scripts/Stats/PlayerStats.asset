@@ -9,11 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d32786bd5db38a4697e4ec1067eeb49, type: 3}
+  m_Script: {fileID: 11500000, guid: 0f9160e6f132d754ba837181f7ec87c2, type: 3}
   m_Name: PlayerStats
   m_EditorClassIdentifier: Assembly-CSharp::Stats.PlayerStats
-  maxHealth: 10
-  moveRange: 1
+  maxHealth: 20
+  moveRange: 3
   moveSpeed: 3
   baseAttackDamage: 5
   baseRangedAttackDamage: 5

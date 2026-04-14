@@ -6,9 +6,10 @@ public class Health : MonoBehaviour
 {
     [SerializeField] private float fadeDuration = 0.5f;
 
-    private int currentHealth;
     private SpriteRenderer spriteRenderer;
-    public bool IsDead { get; private set; } = false;
+    public bool IsDead => entity != null && entity.Stats.IsDead;
+    
+    private bool isDying = false;
 
     private BaseEntity entity;
     
@@ -19,31 +20,30 @@ public class Health : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         entity = GetComponent<BaseEntity>();
     }
-    
-    private void Start()
-    {
-        if (entity != null)
-        {
-            currentHealth = entity.MaxHealth;
-        }
-    }
 
     public void TakeDamage(int damage)
     {
-        if (IsDead) return;
+        if (isDying || IsDead || !entity) return;
 
-        currentHealth -= damage;
-        Debug.Log($"{gameObject.name} получил урон: {damage}. ХП: {currentHealth}/{entity?.MaxHealth}");
 
-        if (currentHealth <= 0) 
+        entity.Stats.ApplyDamage(damage);
+        
+        Debug.Log($"{gameObject.name} получил урон: {damage}. ХП: {entity.Stats.Health}/{entity.Stats.MaxHealth}");
+
+        if (entity.Stats.IsDead)
+        {
             Die();
-        else StartCoroutine(FlashRed());
+        }
+        else
+        {
+            StartCoroutine(FlashRed());
+        }
     }
 
     private void Die()
     {
-        if (IsDead) return;
-        IsDead = true;
+        if (isDying) return;
+        isDying = true;
         
         OnDeath?.Invoke(gameObject);
     
@@ -57,9 +57,11 @@ public class Health : MonoBehaviour
 
     private IEnumerator FlashRed()
     {
+        if (spriteRenderer == null) yield break;
+        
         spriteRenderer.color = Color.red;
         yield return new WaitForSeconds(0.1f);
-        spriteRenderer.color = Color.white;
+        if (spriteRenderer != null) spriteRenderer.color = Color.white;
     }
 
     private IEnumerator FadeOutAndDestroy()
