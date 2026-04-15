@@ -45,6 +45,7 @@ public class Health : MonoBehaviour
         if (isDying) return;
         isDying = true;
         
+        CameraFollow.Instance?.ShakeMedium();
         OnDeath?.Invoke(gameObject);
     
         var cell = GridManager.Instance.WorldToCell(transform.position);

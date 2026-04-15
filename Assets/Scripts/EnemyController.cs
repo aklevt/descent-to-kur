@@ -13,13 +13,16 @@ public class EnemyController : EnemyBase
         if (Vector3Int.Distance(CurrentCell, playerCell) <= 1.1f)
         {
             player.TryGetComponent<Health>(out var playerHealth);
-
+            
+            
+            
             yield return StartCoroutine(PunchAnimation(player.transform.position, () => 
             {
                 if (playerHealth != null)
                 {
                     playerHealth.TakeDamage(Stats.AttackDamage);
                 }
+                CameraFollow.Instance?.ShakeHeavy();
             }));
         }
     }

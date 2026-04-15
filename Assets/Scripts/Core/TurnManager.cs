@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class TurnManager : MonoBehaviour
 {
@@ -13,12 +14,27 @@ public class TurnManager : MonoBehaviour
     private IEnumerator EnemyTurnSequence()
     {
         var savedEnemiesList = new List<EnemyBase>(allEnemies);
+        var activeEnemies = savedEnemiesList.Where(e => e != null).ToList();
+        
+        if (activeEnemies.Count > 0)
+        {
+            var center = activeEnemies
+                             .Aggregate(Vector3.zero, (sum, e) => sum + e.transform.position)
+                         / activeEnemies.Count;
+        
+            // Камера смещается к центру один раз на весь ход врагов
+            CameraFollow.Instance?.ShiftTowards(center);
+        }
+
+        
         foreach (var enemy in savedEnemiesList)
         {
             if (enemy == null)
                 continue;
             yield return enemy.DoTurn();
         }
+        
+        CameraFollow.Instance?.ResetFocus();
 
         yield return null;
         SetState(TurnState.PlayerTurn);

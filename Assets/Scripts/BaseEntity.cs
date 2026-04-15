@@ -81,21 +81,22 @@ public abstract class BaseEntity : MonoBehaviour
         IsMoving = true;
     }
 
-
     public void MoveSmoothly()
     {
         if (!IsMoving) return;
 
-        transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, Stats.MoveSpeed * Time.deltaTime);
+        var dt = Mathf.Min(Time.deltaTime, 0.03f);
+        transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, Stats.MoveSpeed * dt);
 
         if (Vector3.Distance(transform.position, targetWorldPos) < 0.001f)
         {
             transform.position = targetWorldPos;
             IsMoving = false;
-
+            
             OnArrivingToTarget();
         }
     }
+
 
     public IEnumerator PunchAnimation(Vector3 targetPos, Action onHit = null)
     {

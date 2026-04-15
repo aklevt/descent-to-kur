@@ -164,13 +164,15 @@ public class AbilityController : MonoBehaviour
     {
         var targetHealth = target.GetComponent<Health>();
         var damage = PlayerMovement.Instance.Stats.AttackDamage;
-
+        
         yield return StartCoroutine(PlayerMovement.Instance.PunchAnimation(
             target.transform.position,
             () =>
             {
                 if (targetHealth != null)
                     targetHealth.TakeDamage(damage);
+                
+                CameraFollow.Instance?.ShakeMedium();
             }
         ));
 
