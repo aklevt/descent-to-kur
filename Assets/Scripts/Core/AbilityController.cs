@@ -241,6 +241,46 @@ public class AbilityController : MonoBehaviour
         );
         availableCells.AddRange(walkable);
     }
+    
+    public void HandleCellHover(Vector3Int hoveredCell)
+    {
+        if (!IsPlayerTurnActive) return;
+
+        if (!availableCells.Contains(hoveredCell))
+        {
+            GridHighlighter.Instance.ClearEffect();
+            return;
+        }
+
+        var effectCells = GetEffectCells(hoveredCell);
+        GridHighlighter.Instance.HighlightEffect(effectCells, GetEffectColor());
+    }
+
+    private List<Vector3Int> GetEffectCells(Vector3Int hoveredCell)
+    {
+        switch (selectedAbility)
+        {
+            case AbilityType.Attack:
+                return new List<Vector3Int> { hoveredCell };
+
+            case AbilityType.RangedAttack:
+                return new List<Vector3Int> { hoveredCell };
+
+            default:
+                return new List<Vector3Int>();
+        }
+    }
+
+    private Color GetEffectColor()
+    {
+        return selectedAbility switch
+        {
+            AbilityType.Attack => new Color(1f, 0.2f, 0.2f, 0.9f),
+            AbilityType.RangedAttack => new Color(1f, 0.5f, 0f, 0.9f),
+            _ => Color.white
+        };
+    }
+
 
     private void RenderSelection(Color color)
     {
