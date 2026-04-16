@@ -92,7 +92,7 @@ public abstract class BaseEntity : MonoBehaviour
         {
             transform.position = targetWorldPos;
             IsMoving = false;
-            
+
             OnArrivingToTarget();
         }
     }
@@ -101,37 +101,97 @@ public abstract class BaseEntity : MonoBehaviour
     public IEnumerator PunchAnimation(Vector3 targetPos, Action onHit = null)
     {
         var startPos = transform.position;
-        var punchPos = Vector3.Lerp(startPos, targetPos, 0.3f);
         var duration = 0.15f;
         var elapsed = 0f;
 
-        FlipToTarget(targetPos);
+        var isVertical = IsVerticalAttack(startPos, targetPos);
+        var preAttackPos = startPos;
 
+        if (isVertical)
+        {
+            var facingRight = !spriteRenderer.flipX;
+
+            var diagOffset = GetDiagonalOffset(startPos, targetPos, facingRight);
+            preAttackPos = startPos + diagOffset;
+
+            UpdateSpriteFlip(diagOffset.x);
+
+            elapsed = 0f;
+            while (elapsed < duration * 0.8f)
+            {
+                elapsed += Time.deltaTime;
+                transform.position = Vector3.Lerp(startPos, preAttackPos, elapsed / (duration * 0.8f));
+                yield return null;
+            }
+
+            transform.position = preAttackPos;
+            var dirToTarget = targetPos.x - preAttackPos.x;
+            UpdateSpriteFlip(dirToTarget);
+        }
+        else
+        {
+            FlipToTarget(targetPos);
+        }
+
+        // выпад
+        var punchPos = Vector3.Lerp(preAttackPos, targetPos, 0.35f);
+        elapsed = 0f;
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            transform.position = Vector3.Lerp(startPos, punchPos, elapsed / duration);
+            transform.position = Vector3.Lerp(preAttackPos, punchPos, elapsed / duration);
             yield return null;
         }
 
         transform.position = punchPos;
 
         onHit?.Invoke();
-
         yield return new WaitForSeconds(0.05f);
 
+        // возврат
         elapsed = 0f;
-        while (elapsed < duration)
+        while (elapsed < duration * 1.5f)
         {
             elapsed += Time.deltaTime;
-            transform.position = Vector3.Lerp(punchPos, startPos, elapsed / duration);
+            transform.position = Vector3.Lerp(punchPos, startPos, elapsed / (duration * 1.5f));
             yield return null;
         }
 
         transform.position = startPos;
     }
 
-    private void UpdateSpriteFlip(float horizontalDirection)
+    private Vector3 GetDiagonalOffset(Vector3 attackerPos, Vector3 targetPos, bool facingRight)
+    {
+        var targetCell = GridManager.Instance.WorldToCell(targetPos);
+
+        var leftCell = targetCell + Vector3Int.left;
+        var rightCell = targetCell + Vector3Int.right;
+
+        var leftFree = GridManager.Instance.IsCellWalkable(leftCell);
+        var rightFree = GridManager.Instance.IsCellWalkable(rightCell);
+
+        float sideX;
+
+        if (leftFree && rightFree)
+            sideX = facingRight ? 0.5f : -0.5f;
+        else if (rightFree)
+            sideX = 0.5f;
+        else if (leftFree)
+            sideX = -0.5f;
+        else
+            sideX = 0f;
+
+        var verticalOffset = (targetPos.y - attackerPos.y) * 0.5f;
+        return new Vector3(sideX, verticalOffset, 0);
+    }
+
+    private bool IsVerticalAttack(Vector3 from, Vector3 to)
+    {
+        var diff = to - from;
+        return Mathf.Abs(diff.y) > Mathf.Abs(diff.x);
+    }
+
+    protected void UpdateSpriteFlip(float horizontalDirection)
     {
         if (horizontalDirection != 0)
             spriteRenderer.flipX = horizontalDirection < 0;
