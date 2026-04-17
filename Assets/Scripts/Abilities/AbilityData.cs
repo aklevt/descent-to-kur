@@ -11,6 +11,11 @@ namespace Abilities
     public abstract class AbilityData : ScriptableObject
     {
         public string abilityName;
+        
+        [Header("Cost")]
+        public int energyCost = 0;
+        
+        [Header("Colors")]
         public Color highlightColor = Color.white;
         public Color effectColor = new Color(1f, 0.2f, 0.2f, 0.9f);
 
@@ -63,6 +68,15 @@ namespace Abilities
         {
             var cells = GetTargetCells(actor);
             return cells.Count > 0 ? cells[0] : null;
+        }
+        
+        /// <summary>
+        /// Проверяет, можно ли выполнить способность на этой клетке (переопределяется для обычной атаки)
+        /// Если вернет false, клик на клетку будет проигнорирован
+        /// </summary>
+        public virtual bool IsValidTarget(Vector3Int targetCell, BaseEntity caster)
+        {
+            return true;
         }
     }
 }

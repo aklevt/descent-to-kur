@@ -5,16 +5,19 @@ using Abilities;
 using Stats;
 using UnityEngine;
 
+/// <summary>
+/// Базовый класс для всех персонажей (игрок, враги)
+/// Наследуемые классы отвечают за все, что связано с сущностью: позиция на сетке, движение, анимация и список способностей
+/// </summary>
 public abstract class BaseEntity : MonoBehaviour
 {
-    [Header("Abilities")]
-    [SerializeField] private List<AbilityData> abilities = new();
-    
+    [Header("Abilities")] [SerializeField] private List<AbilityData> abilities = new();
+
     public IReadOnlyList<AbilityData> Abilities => abilities;
-    
+
     [Header("Stats")] [SerializeField] private EntityStats baseStats;
 
-    [Header("Live Stats (Edit here if Customized)")] [SerializeField]
+    [Header("Live Stats")] [SerializeField]
     private EntityRuntimeStats stats = new();
 
     public EntityRuntimeStats Stats => stats;
@@ -71,12 +74,6 @@ public abstract class BaseEntity : MonoBehaviour
         transform.position = targetWorldPos;
     }
 
-    private void SetLogicalPosition(Vector3Int newCell)
-    {
-        GridManager.Instance.MoveEntity(CurrentCell, newCell, gameObject);
-        CurrentCell = newCell;
-    }
-
     public void MoveToCell(Vector3Int targetCell)
     {
         FlipToTarget(targetCell);
@@ -99,12 +96,14 @@ public abstract class BaseEntity : MonoBehaviour
         {
             transform.position = targetWorldPos;
             IsMoving = false;
-            
+
             OnArrivingToTarget();
         }
     }
 
-
+    /// <summary>
+    /// Простейшая анимация удара с возможностью вызова действия в сам момент удара
+    /// </summary>
     public IEnumerator PunchAnimation(Vector3 targetPos, Action onHit = null)
     {
         var startPos = transform.position;
@@ -113,7 +112,8 @@ public abstract class BaseEntity : MonoBehaviour
         var elapsed = 0f;
 
         FlipToTarget(targetPos);
-
+        
+        // Удар вперед
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
@@ -126,7 +126,8 @@ public abstract class BaseEntity : MonoBehaviour
         onHit?.Invoke();
 
         yield return new WaitForSeconds(0.05f);
-
+        
+        // Возврат назад
         elapsed = 0f;
         while (elapsed < duration)
         {
@@ -154,16 +155,6 @@ public abstract class BaseEntity : MonoBehaviour
     {
         targetWorldPos = GridManager.Instance.GetCellCenterWorld(cell);
         targetWorldPos.z = transform.position.z;
-    }
-    
-    /// <summary>
-    /// Выполнить способность по индексу
-    /// </summary>
-    public IEnumerator UseAbility(int index, Vector3Int targetCell)
-    {
-        if (index < 0 || index >= abilities.Count) yield break;
-        if (!abilities[index].CanUse(this)) yield break;
-        yield return StartCoroutine(abilities[index].Execute(this, targetCell));
     }
 
     protected virtual void OnArrivingToTarget()

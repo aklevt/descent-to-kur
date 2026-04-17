@@ -27,11 +27,18 @@ namespace Abilities
             return available.Contains(playerCell.Value) ? playerCell : null;
         }
         
+        /// <summary>
+        /// Требует наличие цели на клетке
+        /// </summary>
+        public override bool IsValidTarget(Vector3Int targetCell, BaseEntity caster)
+        {
+            var target = GridManager.Instance.GetEntityAt(targetCell);
+            return target != null;
+        }
+        
         public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)
         {
             var target = GridManager.Instance.GetEntityAt(targetCell);
-            if (target == null) yield break;
-
             target.GetComponent<Health>()?.TakeDamage(actor.Stats.AttackDamage);
             CameraFollow.Instance?.ShakeMedium();
 

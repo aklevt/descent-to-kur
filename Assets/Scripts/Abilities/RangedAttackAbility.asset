@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1aef66e57e2544f3b98921e0aeb03f13, type: 3}
   m_Name: RangedAttackAbility
   m_EditorClassIdentifier: GameScripts::Abilities.RangedAttackAbilityData
-  abilityName: 
-  highlightColor: {r: 1, g: 1, b: 1, a: 1}
+  abilityName: "\u0414\u0430\u043B\u044C\u043D\u044F\u044F"
+  energyCost: 4
+  highlightColor: {r: 1, g: 0.5733018, b: 0.4009434, a: 1}
   effectColor: {r: 1, g: 0.2, b: 0.2, a: 0.9}
   minRange: 2
   maxRange: 3

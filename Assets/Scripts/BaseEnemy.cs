@@ -3,6 +3,10 @@ using System.Linq;
 using Sprites;
 using UnityEngine;
 
+/// <summary>
+/// Базовый класс для всех врагов
+/// Конкретные враги переопределяют ExecuteAction для своей логики
+/// </summary>
 public abstract class EnemyBase : BaseEntity
 {
     protected override void Start()
@@ -16,7 +20,10 @@ public abstract class EnemyBase : BaseEntity
         if (TurnManager.Instance != null)
             TurnManager.Instance.UnregisterEnemy(this);
     }
-
+    
+    /// <summary>
+    /// Выполнить полный ход врага: движение и действие
+    /// </summary>
     public IEnumerator DoTurn()
     {
         if (TryGetComponent<Health>(out var h) && h.IsDead) yield break;
@@ -45,7 +52,10 @@ public abstract class EnemyBase : BaseEntity
         yield return new WaitForSeconds(0.1f);
         Debug.Log($"{gameObject.name} закончил ход");
     }
-
+    
+    /// <summary>
+    /// Вычисляет лучший ход в сторону игрока
+    /// </summary>
     protected virtual Vector3Int? GetBestMove()
     {
         if (PlayerMovement.Instance == null) return null;
@@ -64,7 +74,10 @@ public abstract class EnemyBase : BaseEntity
     }
 
     /// <summary>
-    /// Попытаться использовать способность по индексу
+    /// Попытается использовать способность по индексу, если:
+    /// 1. Индекс верный 
+    /// 2. Способность можно использовать
+    /// 3. Есть доступная цель
     /// </summary>
     protected IEnumerator TryUseAbility(int abilityIndex)
     {

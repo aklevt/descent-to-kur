@@ -23,12 +23,19 @@ namespace Abilities
             var available = GetTargetCells(actor);
             return available.Contains(playerCell.Value) ? playerCell : null;
         }
+        
+        /// <summary>
+        /// Атаковать ближней можем только если на клетке есть враг
+        /// </summary>
+        public override bool IsValidTarget(Vector3Int targetCell, BaseEntity caster)
+        {
+            var target = GridManager.Instance.GetEntityAt(targetCell);
+            return target != null && target != caster.gameObject;
+        }
 
         public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)
         {
             var target = GridManager.Instance.GetEntityAt(targetCell);
-            if (target == null || target == actor.gameObject) yield break;
-
             var targetHealth = target.GetComponent<Health>();
 
             yield return actor.StartCoroutine(actor.PunchAnimation(

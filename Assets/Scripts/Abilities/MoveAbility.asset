@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d8e856251634d0f8f4888193d60eda4, type: 3}
   m_Name: MoveAbility
   m_EditorClassIdentifier: GameScripts::Abilities.MoveAbilityData
-  abilityName: 
+  abilityName: "\u0425\u043E\u0434"
+  energyCost: 1
   highlightColor: {r: 1, g: 1, b: 1, a: 1}
-  effectColor: {r: 1, g: 0.2, b: 0.2, a: 0.9}
+  effectColor: {r: 0.4828231, g: 0.6603774, b: 0.65856355, a: 1}

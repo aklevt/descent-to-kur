@@ -10,8 +10,7 @@ namespace Core
     {
         public static AbilityController Instance { get; private set; }
 
-        [Header("UI Buttons (optional for now)")]
-        [SerializeField] private List<Button> abilityButtons = new();
+        [SerializeField] private AbilityBar abilityBar;
 
         private IReadOnlyList<AbilityData> PlayerAbilities =>
             PlayerMovement.Instance?.Abilities;
@@ -39,8 +38,6 @@ namespace Core
 
         private void Start()
         {
-            BindButtons();
-            
             if (TurnManager.Instance != null)
                 TurnManager.Instance.OnStateChanged += HandleTurnChanged;
         }
@@ -49,16 +46,6 @@ namespace Core
         {
             if (TurnManager.Instance != null)
                 TurnManager.Instance.OnStateChanged -= HandleTurnChanged;
-        }
-
-        private void BindButtons()
-        {
-            for (var i = 0; i < abilityButtons.Count; i++)
-            {
-                var index = i;
-                if (abilityButtons[i] != null)
-                    abilityButtons[i].onClick.AddListener(() => SelectAbilityByIndex(index));
-            }
         }
 
         private void Update()
@@ -76,7 +63,11 @@ namespace Core
 
         private void HandleTurnChanged(TurnState newState)
         {
-            if (newState != TurnState.PlayerTurn) return;
+            if (newState != TurnState.PlayerTurn)
+            {
+                ClearSelection();
+                return;
+            }
 
             var abilities = PlayerAbilities;
             if (abilities != null && abilities.Count > 0)
@@ -84,23 +75,27 @@ namespace Core
             else
             {
                 ClearSelection();
-                UpdateButtonsState();
             }
         }
 
         public void SelectAbilityByIndex(int index)
         {
             var abilities = PlayerAbilities;
-            if (abilities == null || index >= abilities.Count) return;
+            if (abilities == null || index >= abilities.Count)
+            {
+                return;
+            }
+
+            abilityBar?.OnAbilitySelected(index);
             SelectAbility(abilities[index]);
         }
+
 
         private void SelectAbility(AbilityData ability)
         {
             if (selectedAbility == ability) return;
             selectedAbility = ability;
             RefreshAbilityOverlay();
-            UpdateButtonsState();
         }
 
         public void HandleCellClick(Vector3Int clickedCell)
@@ -109,6 +104,9 @@ namespace Core
             if (PlayerMovement.Instance.IsMoving) return;
             if (selectedAbility == null) return;
             if (!availableCells.Contains(clickedCell)) return;
+
+            if (!selectedAbility.IsValidTarget(clickedCell, PlayerMovement.Instance))
+                return;
 
             StartCoroutine(ExecuteSelectedAbility(clickedCell));
         }
@@ -139,7 +137,6 @@ namespace Core
         private void RefreshAbilityOverlay()
         {
             ClearSelection();
-            UpdateButtonsState();
 
             if (!IsPlayerTurnActive || selectedAbility == null) return;
 
@@ -153,28 +150,11 @@ namespace Core
             GridHighlighter.Instance.Clear();
         }
 
-        private void UpdateButtonsState()
-        {
-            var abilities = PlayerAbilities;
-
-            for (var i = 0; i < abilityButtons.Count; i++)
-            {
-                if (abilityButtons[i] == null) continue;
-
-                var hasAbility = abilities != null && i < abilities.Count;
-                var isSelected = hasAbility && abilities[i] == selectedAbility;
-
-                abilityButtons[i].gameObject.SetActive(hasAbility);
-                abilityButtons[i].interactable = IsPlayerTurnActive && !isSelected;
-            }
-        }
-
         public void DisableAllOverlaysAfterDeath()
         {
             isDead = true;
             selectedAbility = null;
             ClearSelection();
-            UpdateButtonsState();
         }
     }
 }
