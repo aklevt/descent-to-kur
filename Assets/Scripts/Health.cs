@@ -32,6 +32,7 @@ public class Health : MonoBehaviour
 
         if (entity.Stats.IsDead)
         {
+            StartCoroutine(FlashRed());
             Die();
         }
         else

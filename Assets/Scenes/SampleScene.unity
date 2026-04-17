@@ -2733,8 +2733,24 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 7c30066f7a295724da5fbc75b53bd3fa, type: 2}
     - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
+      propertyPath: stats.Health
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
       propertyPath: healthOverride
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
+      propertyPath: stats.MaxHealth
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
+      propertyPath: stats.MoveRange
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
+      propertyPath: stats.MoveSpeed
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
       propertyPath: moveRangeOverride
@@ -2743,6 +2759,10 @@ PrefabInstance:
     - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
       propertyPath: moveSpeedOverride
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
+      propertyPath: stats.AttackDamage
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
       propertyPath: attackDamageOverride
@@ -2973,7 +2993,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
       propertyPath: stats.MoveRange
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
       propertyPath: stats.MoveSpeed
@@ -3208,8 +3228,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1149c08ce8f0054ba448a3be46603c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AbilityController
-  moveButton: {fileID: 0}
-  attackButton: {fileID: 0}
+  moveAbility: {fileID: 11400000, guid: b7a4310a3bc932a4392dc1f8b9471e83, type: 2}
+  simpleAttackAbility: {fileID: 11400000, guid: eccfb25f92df17f4695c1d1dc604246f, type: 2}
+  rangedAttackAbility: {fileID: 11400000, guid: 685b90008ca75fb4b95548e95d58d3e9, type: 2}
+  moveButton: {fileID: 158222330}
+  simpleAttackButton: {fileID: 123025392}
+  rangedAttackButton: {fileID: 14414165}
+  abilities:
+  - {fileID: 11400000, guid: b7a4310a3bc932a4392dc1f8b9471e83, type: 2}
+  - {fileID: 11400000, guid: eccfb25f92df17f4695c1d1dc604246f, type: 2}
+  - {fileID: 11400000, guid: 685b90008ca75fb4b95548e95d58d3e9, type: 2}
+  abilityButtons:
+  - {fileID: 158222330}
+  - {fileID: 123025392}
+  - {fileID: 14414165}
 --- !u!114 &1246193169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6433,6 +6465,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.Health
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
       propertyPath: healthOverride
       value: 0
       objectReference: {fileID: 0}
@@ -6440,6 +6476,18 @@ PrefabInstance:
       propertyPath: spriteRenderer
       value: 
       objectReference: {fileID: 2045205838}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.MaxHealth
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.MoveRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.MoveSpeed
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
       propertyPath: obstaclesTilemap
       value: 
@@ -6451,6 +6499,10 @@ PrefabInstance:
     - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
       propertyPath: moveSpeedOverride
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.AttackDamage
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
       propertyPath: attackDamageOverride
