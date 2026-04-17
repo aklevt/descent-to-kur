@@ -1,10 +1,17 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using Abilities;
 using Stats;
 using UnityEngine;
 
 public abstract class BaseEntity : MonoBehaviour
 {
+    [Header("Abilities")]
+    [SerializeField] private List<AbilityData> abilities = new();
+    
+    public IReadOnlyList<AbilityData> Abilities => abilities;
+    
     [Header("Stats")] [SerializeField] private EntityStats baseStats;
 
     [Header("Live Stats (Edit here if Customized)")] [SerializeField]
@@ -147,6 +154,16 @@ public abstract class BaseEntity : MonoBehaviour
     {
         targetWorldPos = GridManager.Instance.GetCellCenterWorld(cell);
         targetWorldPos.z = transform.position.z;
+    }
+    
+    /// <summary>
+    /// Выполнить способность по индексу
+    /// </summary>
+    public IEnumerator UseAbility(int index, Vector3Int targetCell)
+    {
+        if (index < 0 || index >= abilities.Count) yield break;
+        if (!abilities[index].CanUse(this)) yield break;
+        yield return StartCoroutine(abilities[index].Execute(this, targetCell));
     }
 
     protected virtual void OnArrivingToTarget()

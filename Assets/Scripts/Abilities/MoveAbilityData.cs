@@ -16,10 +16,10 @@ namespace Abilities
             );
         }
 
-        public override IEnumerator Execute(BaseEntity caster, Vector3Int targetCell)
+        public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)
         {
-            caster.MoveToCell(targetCell);
-            while (caster.IsMoving) yield return null;
+            actor.MoveToCell(targetCell);
+            while (actor.IsMoving) yield return null;
         }
     }
 }

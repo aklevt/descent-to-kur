@@ -63,8 +63,27 @@ public abstract class EnemyBase : BaseEntity
             .FirstOrDefault();
     }
 
-    // Этот метод реализуют конкретные противники
+    /// <summary>
+    /// Попытаться использовать способность по индексу
+    /// </summary>
+    protected IEnumerator TryUseAbility(int abilityIndex)
+    {
+        if (abilityIndex >= Abilities.Count) yield break;
+
+        var ability = Abilities[abilityIndex];
+        if (!ability.CanUse(this)) yield break;
+
+        var target = ability.ChooseTarget(this);
+        if (!target.HasValue) yield break;
+
+        yield return StartCoroutine(ability.Execute(this, target.Value));
+    }
+
+    /// <summary>
+    /// Реализуют конкретные враги для своего хода
+    /// </summary>
     protected abstract IEnumerator ExecuteAction();
+
 
     
 }

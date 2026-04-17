@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3001576699828800167}
   - component: {fileID: 1122430972742747490}
   - component: {fileID: 4898059257836333979}
+  - component: {fileID: 9028990903933944739}
   - component: {fileID: 4236902223299793777}
   m_Layer: 0
   m_Name: Player_0
@@ -105,8 +106,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5565cfab927933244a0850889443c4ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sprites.PlayerMovement
-  moveSpeed: 2
-  moveRange: 1
+  abilities:
+  - {fileID: 11400000, guid: b7a4310a3bc932a4392dc1f8b9471e83, type: 2}
+  - {fileID: 11400000, guid: eccfb25f92df17f4695c1d1dc604246f, type: 2}
+  - {fileID: 11400000, guid: 685b90008ca75fb4b95548e95d58d3e9, type: 2}
+  baseStats: {fileID: 11400000, guid: 43b02efb37ef8ac41aedc492ac640db1, type: 2}
+  stats:
+    isCustomized: 0
+    Health: 20
+    MaxHealth: 20
+    MoveRange: 3
+    MoveSpeed: 3
+    AttackDamage: 5
+  spriteRenderer: {fileID: 1122430972742747490}
+  animator: {fileID: 0}
+--- !u!114 &9028990903933944739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 39971611221549213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8fb831eea6b7454092db4e388c68a24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Health
+  fadeDuration: 0.5
 --- !u!114 &4236902223299793777
 MonoBehaviour:
   m_ObjectHideFlags: 0
