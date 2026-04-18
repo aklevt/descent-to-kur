@@ -2347,7 +2347,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 278576056}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Slot_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2363,7 +2363,7 @@ Transform:
   m_GameObject: {fileID: 278576055}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 15, y: -378.2, z: -11587.07}
+  m_LocalPosition: {x: 15, y: -378.2, z: 1587.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2382,7 +2382,7 @@ GameObject:
   - component: {fileID: 327315320}
   - component: {fileID: 327315322}
   - component: {fileID: 327315321}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: SelectedFrame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4964,7 +4964,7 @@ GameObject:
   - component: {fileID: 1764812554}
   - component: {fileID: 1764812556}
   - component: {fileID: 1764812555}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: SelectedFrame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5037,7 +5037,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1794797086}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Slot_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5053,7 +5053,7 @@ Transform:
   m_GameObject: {fileID: 1794797085}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 237.86, y: -378.2, z: -11587.07}
+  m_LocalPosition: {x: 237.86, y: -378.2, z: 11587.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
