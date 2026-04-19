@@ -78,8 +78,14 @@ public class TurnManager : MonoBehaviour
     private void SetState(TurnState newState)
     {
         CurrentState = newState;
-        Debug.Log($"<color=yellow>[TurnManager]</color> Ход сменился на: <b>{newState}</b>");
 
+        if (newState == TurnState.PlayerTurn && PlayerMovement.Instance != null)
+        {
+            PlayerMovement.Instance.Stats.RestoreEnergy(PlayerMovement.Instance.Stats.MaxEnergy);
+        }
+
+        Debug.Log($"<color=yellow>[TurnManager]</color> Ход сменился на: <b>{newState}</b>");
+        
         OnStateChanged?.Invoke(newState);
 
         if (newState == TurnState.EnemyTurn)

@@ -7,12 +7,12 @@ namespace Abilities
     [CreateAssetMenu(fileName = "SimpleAttackAbility", menuName = "Abilities/SimpleAttack")]
     public class SimpleAttackAbilityData : AbilityData
     {
-        public override List<Vector3Int> GetTargetCellsFrom(Vector3Int origin, BaseEntity caster)
+        public override List<Vector3Int> GetTargetCellsFrom(Vector3Int origin, BaseEntity actor)
         {
             return GridManager.Instance.GetAttackableCellsInRadius(origin, 1);
         }
 
-        public override List<Vector3Int> GetEffectCells(Vector3Int hoveredCell, BaseEntity caster)
+        public override List<Vector3Int> GetEffectCells(Vector3Int hoveredCell, BaseEntity actor)
             => new List<Vector3Int> { hoveredCell };
         
         public override Vector3Int? ChooseTarget(BaseEntity actor)
@@ -25,12 +25,12 @@ namespace Abilities
         }
         
         /// <summary>
-        /// Атаковать ближней можем только если на клетке есть враг
+        /// Требует наличие цели на клетке, так как это не aoe-атака
         /// </summary>
-        public override bool IsValidTarget(Vector3Int targetCell, BaseEntity caster)
+        public override bool IsValidTarget(Vector3Int targetCell, BaseEntity actor)
         {
             var target = GridManager.Instance.GetEntityAt(targetCell);
-            return target != null && target != caster.gameObject;
+            return target != null && target != actor.gameObject;
         }
 
         public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)

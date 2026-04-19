@@ -105,7 +105,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8fb831eea6b7454092db4e388c68a24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHealth: 10
+  fadeDuration: 0.5
 --- !u!114 &2809698832690530192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -118,4 +118,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a4cd8bcd3083344db4a50b62a5fbdac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 3
+  abilities:
+  - {fileID: 11400000, guid: eccfb25f92df17f4695c1d1dc604246f, type: 2}
+  baseStats: {fileID: 11400000, guid: 7c30066f7a295724da5fbc75b53bd3fa, type: 2}
+  stats:
+    isCustomized: 1
+    Health: 15
+    MaxHealth: 10
+    Energy: 0
+    MaxEnergy: 0
+    MoveRange: 2
+    MoveSpeed: 3
+    AttackDamage: 5
+  spriteRenderer: {fileID: 0}
+  animator: {fileID: 0}

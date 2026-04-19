@@ -12,6 +12,8 @@ namespace Core
 
         [SerializeField] private AbilityBar abilityBar;
 
+        [SerializeField] private GameObject energyWarningPopup;
+
         private IReadOnlyList<AbilityData> PlayerAbilities =>
             PlayerMovement.Instance?.Abilities;
 
@@ -82,8 +84,13 @@ namespace Core
         {
             var abilities = PlayerAbilities;
             if (abilities == null || index >= abilities.Count)
-            {
                 return;
+
+            var targetAbility = abilities[index];
+
+            if (!targetAbility.CanUse(PlayerMovement.Instance))
+            {
+                ShowEnergyWarning();
             }
 
             abilityBar?.OnAbilitySelected(index);
@@ -103,6 +110,13 @@ namespace Core
             if (!IsPlayerTurnActive || isExecuting) return;
             if (PlayerMovement.Instance.IsMoving) return;
             if (selectedAbility == null) return;
+
+            if (!selectedAbility.CanUse(PlayerMovement.Instance))
+            {
+                ShowEnergyWarning();
+                return;
+            }
+
             if (!availableCells.Contains(clickedCell)) return;
 
             if (!selectedAbility.IsValidTarget(clickedCell, PlayerMovement.Instance))
@@ -111,13 +125,37 @@ namespace Core
             StartCoroutine(ExecuteSelectedAbility(clickedCell));
         }
 
+        private void ShowEnergyWarning()
+        {
+            if (energyWarningPopup == null)
+                return;
+
+            StopCoroutine(nameof(EnergyWarningRoutine));
+            StartCoroutine(nameof(EnergyWarningRoutine));
+        }
+
+        private IEnumerator EnergyWarningRoutine()
+        {
+            energyWarningPopup.SetActive(true);
+            yield return new WaitForSeconds(1.0f);
+            energyWarningPopup.SetActive(false);
+        }
+
         private IEnumerator ExecuteSelectedAbility(Vector3Int targetCell)
         {
             isExecuting = true;
             var ability = selectedAbility;
+
+            if ((ability is not MoveAbilityData) && PlayerMovement.Instance != null)
+            {
+                PlayerMovement.Instance.Stats.SpendEnergy(ability.energyCost);
+            }
+
             ClearSelection();
             yield return ability.Execute(PlayerMovement.Instance, targetCell);
+
             isExecuting = false;
+            RefreshAbilityOverlay();
         }
 
         public void HandleCellHover(Vector3Int hoveredCell)

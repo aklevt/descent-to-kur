@@ -57,12 +57,19 @@ namespace Abilities
         /// </summary>
         /// <param name="user">Сущность, для которой надо вызвать проверку</param>
         /// <returns>True, если можно использовать способность</returns>
-        public virtual bool CanUse(BaseEntity user) => true;
+        public virtual bool CanUse(BaseEntity user) 
+        {
+            // Пусть враги не тратят энергию
+            if (user is EnemyBase) 
+                return true;
+    
+            return user.Stats.HasEnergyForAction(energyCost);
+        }
         
         /// <summary>
-        /// Выбор цели через AI
+        /// Выбор цели через AI. Используется врагами, чтобы принять решение, в кого направить способность
         /// </summary>
-        /// <param name="actor">Враг или союзник (??)</param>
+        /// <param name="actor">Сущность, которая пытается использовать эту способность</param>
         /// <returns>Координата цели или null</returns>
         public virtual Vector3Int? ChooseTarget(BaseEntity actor)
         {
@@ -74,7 +81,10 @@ namespace Abilities
         /// Проверяет, можно ли выполнить способность на этой клетке (переопределяется для обычной атаки)
         /// Если вернет false, клик на клетку будет проигнорирован
         /// </summary>
-        public virtual bool IsValidTarget(Vector3Int targetCell, BaseEntity caster)
+        /// /// <param name="targetCell">Координаты клетки, которую мы проверяем.</param>
+        /// <param name="actor">Тот, кто пытается использовать способность.</param>
+        /// <returns>True, если клетка подходит (например, там враг). False, если клик на клетку должен быть проигнорирован</returns>
+        public virtual bool IsValidTarget(Vector3Int targetCell, BaseEntity actor)
         {
             return true;
         }
