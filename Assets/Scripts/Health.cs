@@ -46,10 +46,14 @@ public class Health : MonoBehaviour
         if (isDying) return;
         isDying = true;
         
+        // ????
         CameraFollow.Instance?.ShakeMedium();
         OnDeath?.Invoke(gameObject);
-    
-        var cell = GridManager.Instance.WorldToCell(transform.position);
+
+        // bug 
+        //var cell = GridManager.Instance.WorldToCell(transform.position);
+        //GridManager.Instance.UnregisterEntity(cell);
+        var cell = entity.CurrentCell;
         GridManager.Instance.UnregisterEntity(cell);
 
         if (TryGetComponent<Collider2D>(out var col)) col.enabled = false;

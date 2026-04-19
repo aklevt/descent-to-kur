@@ -12,9 +12,6 @@ namespace Abilities
             return GridManager.Instance.GetAttackableCellsInRadius(origin, 1);
         }
 
-        public override List<Vector3Int> GetEffectCells(Vector3Int hoveredCell, BaseEntity caster)
-            => new List<Vector3Int> { hoveredCell };
-        
         public override Vector3Int? ChooseTarget(BaseEntity actor)
         {
             var playerCell = PlayerMovement.Instance?.CurrentCell;
