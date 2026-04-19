@@ -37,6 +37,12 @@ public class TurnManager : MonoBehaviour
         CameraFollow.Instance?.ResetFocus();
 
         yield return null;
+        
+        if (PlayerMovement.Instance.Stats.Health <= 0)
+        {
+            yield break;
+        }
+        
         SetState(TurnState.PlayerTurn);
     }
 
