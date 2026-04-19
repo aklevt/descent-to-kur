@@ -9375,6 +9375,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.isCustomized
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
       propertyPath: abilities.Array.size
       value: 4
       objectReference: {fileID: 0}

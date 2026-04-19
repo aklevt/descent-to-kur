@@ -7,6 +7,8 @@ namespace Abilities
     [CreateAssetMenu(fileName = "PowerfulPunchAbility", menuName = "Abilities/PowerfulPunch")]
     public class PowerfulPunchAD : AbilityData
     {
+        private int freezePower = 3;
+
         public override List<Vector3Int> GetTargetCellsFrom(Vector3Int origin, BaseEntity caster)
         {
             return GridManager.Instance.GetAttackableCellsInRadius(origin, 1);
@@ -73,21 +75,23 @@ namespace Abilities
                 if (target != null)
                 {
                     var targetHealth = target.GetComponent<Health>();
-                    KnobackEnemy(knobackVector, target.GetComponent<BaseEntity>());
+                    var entity = target.GetComponent<BaseEntity>();
+                    KnobackEnemy(knobackVector, entity);
+                    entity.Freeze(freezePower);
                     targetHealth?.TakeDamage(actor.Stats.AttackDamage);
                     yield return null;
                 }
             }
         }
 
-        private void KnobackEnemy(Vector3Int direction, BaseEntity target)
+        private void KnobackEnemy(Vector3Int direction, BaseEntity entity)
         {
-            var canKnoback = GridManager.Instance.IsCellWalkable(target.CurrentCell + direction);
-            var canFarKnoback = GridManager.Instance.IsCellWalkable(target.CurrentCell + 2 * direction);
+            var canKnoback = GridManager.Instance.IsCellWalkable(entity.CurrentCell + direction);
+            var canFarKnoback = GridManager.Instance.IsCellWalkable(entity.CurrentCell + 2 * direction);
             if (canKnoback && canFarKnoback)
-                target.MoveToCell(target.CurrentCell + 2 * direction);
+                entity.MoveToCell(entity.CurrentCell + 2 * direction);
             else if (canKnoback)
-                target.MoveToCell(target.CurrentCell + direction);
+                entity.MoveToCell(entity.CurrentCell + direction);
 
         }
     }

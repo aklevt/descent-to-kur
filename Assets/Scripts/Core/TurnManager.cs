@@ -14,7 +14,9 @@ public class TurnManager : MonoBehaviour
     private IEnumerator EnemyTurnSequence()
     {
         var savedEnemiesList = new List<EnemyBase>(allEnemies);
-        var activeEnemies = savedEnemiesList.Where(e => e != null).ToList();
+        var activeEnemies = savedEnemiesList
+            .Where(e => e != null)
+            .ToList();
         
         if (activeEnemies.Count > 0)
         {
@@ -31,6 +33,11 @@ public class TurnManager : MonoBehaviour
         {
             if (enemy == null)
                 continue;
+            if (enemy.IsFreeze)
+            {
+                enemy.Unfreeze();
+                continue;
+            }
             yield return enemy.DoTurn();
         }
         
