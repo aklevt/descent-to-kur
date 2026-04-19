@@ -16,8 +16,8 @@ namespace Abilities
         public int energyCost = 0;
         
         [Header("Colors")]
-        public Color highlightColor = Color.white;
-        public Color effectColor = new Color(1f, 0.2f, 0.2f, 0.9f);
+        public Color highlightColor = Color.white;  //  Color.black;
+        public Color effectColor = new Color(1f, 0.2f, 0.2f, 0.9f); //new Color(0f, 0f, 0f, 0.9f);
 
         /// <summary>
         /// Вычисляет доступные для выбора клетки по текущему положению исполнителя
@@ -35,6 +35,8 @@ namespace Abilities
         /// <returns>Список координат доступных клеток</returns>
         public abstract List<Vector3Int> GetTargetCellsFrom(Vector3Int position, BaseEntity actor);
 
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // Что есть "непосредственного воздействия способности"?
         /// <summary>
         /// Определяет область непосредственного воздействия способности
         /// </summary>
