@@ -102,6 +102,17 @@ public abstract class BaseEntity : MonoBehaviour
     }
 
     /// <summary>
+    /// Наложение эффекта оглушения
+    /// </summary>
+    public void Freeze(int power) 
+    {
+        stats.Freeze = Math.Max(stats.Freeze, power);
+    }
+
+    public bool IsFreeze => stats.Freeze > 0;
+    public void Unfreeze() => stats.Freeze--;
+
+    /// <summary>
     /// Простейшая анимация удара с возможностью вызова действия в сам момент удара
     /// </summary>
     public IEnumerator PunchAnimation(Vector3 targetPos, Action onHit = null)

@@ -6,6 +6,7 @@ public class EntityRuntimeStats
 {
     public bool isCustomized;
 
+    public int Freeze;
     public int Health;
     public int MaxHealth;
     public int Energy;

@@ -21,9 +21,6 @@ namespace Abilities
                 actor.gameObject
             );
         }
-        
-        public override List<Vector3Int> GetEffectCells(Vector3Int hoveredCell, BaseEntity actor)
-            => new List<Vector3Int> { hoveredCell };
 
         public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)
         {

@@ -16,8 +16,8 @@ namespace Abilities
         public int energyCost = 0;
         
         [Header("Colors")]
-        public Color highlightColor = Color.white;
-        public Color effectColor = new Color(1f, 0.2f, 0.2f, 0.9f);
+        public Color highlightColor = Color.white;  //  Color.black;
+        public Color effectColor = new Color(1f, 0.2f, 0.2f, 0.9f); //new Color(0f, 0f, 0f, 0.9f);
 
         /// <summary>
         /// Вычисляет доступные для выбора клетки по текущему положению исполнителя
@@ -42,7 +42,7 @@ namespace Abilities
         /// <param name="actor">Сущность, применяющая способность</param>
         /// <returns>Список клеток, которые будут подсвечены как "зона поражения"</returns>
         public virtual List<Vector3Int> GetEffectCells(Vector3Int hoveredCell, BaseEntity actor)
-            => new();
+            => new() { hoveredCell };
 
         /// <summary>
         /// Исполнение логики способности (анимации, нанесение урона, перемещение)
@@ -67,7 +67,11 @@ namespace Abilities
         }
         
         /// <summary>
-        /// Выбор цели через AI. Используется врагами, чтобы принять решение, в кого направить способность
+        /// Выбор цели через AI
+		/// Если у врага будет несколько целей или игрок может быть на недостижимом расстоянии, способность может оценить, на какую клетку эффективно ее применять
+		/// На случай, если логика усложнится. Условно враг может опросить свои способности (опять же, если у него их несколько) и принять финальное решение
+		/// Пока что способность у каждого одна, а цель единственная - игрок, и до него всегда можно добраться
+		/// Возможно, стоит перенести эту логику в базовый класс либо в контроллер противника
         /// </summary>
         /// <param name="actor">Сущность, которая пытается использовать эту способность</param>
         /// <returns>Координата цели или null</returns>
@@ -81,10 +85,10 @@ namespace Abilities
         /// Проверяет, можно ли выполнить способность на этой клетке (переопределяется для обычной атаки)
         /// Если вернет false, клик на клетку будет проигнорирован
         /// </summary>
-        /// /// <param name="targetCell">Координаты клетки, которую мы проверяем.</param>
+        /// <param name="targetCell">Координаты клетки, которую мы проверяем.</param>
         /// <param name="actor">Тот, кто пытается использовать способность.</param>
         /// <returns>True, если клетка подходит (например, там враг). False, если клик на клетку должен быть проигнорирован</returns>
-        public virtual bool IsValidTarget(Vector3Int targetCell, BaseEntity actor)
+        public virtual bool IsValidTarget(Vector3Int targetCell, BaseEntity caster)
         {
             return true;
         }

@@ -48,8 +48,8 @@ public class Health : MonoBehaviour
         
         CameraFollow.Instance?.ShakeMedium();
         OnDeath?.Invoke(gameObject);
-    
-        var cell = GridManager.Instance.WorldToCell(transform.position);
+
+        var cell = entity.CurrentCell;
         GridManager.Instance.UnregisterEntity(cell);
 
         if (TryGetComponent<Collider2D>(out var col)) col.enabled = false;
