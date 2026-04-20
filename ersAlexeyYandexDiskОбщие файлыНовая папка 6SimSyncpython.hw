@@ -1,0 +1,210 @@
+[1mdiff --git a/Assets/Scripts/CameraFollow.cs b/Assets/Scripts/CameraFollow.cs[m
+[1mindex 01572b4..5a824b3 100644[m
+[1m--- a/Assets/Scripts/CameraFollow.cs[m
+[1m+++ b/Assets/Scripts/CameraFollow.cs[m
+[36m@@ -1,12 +1,29 @@[m
+[31m-using System;[m
+[32m+[m[32musing System.Collections;[m
+ using UnityEngine;[m
+ [m
+ public class CameraFollow : MonoBehaviour[m
+ {[m
+[32m+[m[32m    public static CameraFollow Instance { get; private set; }[m
+[32m+[m[41m    [m
+     [SerializeField] private Transform playerTarget;[m
+     [SerializeField] private Vector3 offset = new Vector3(0, 0, -10);[m
+     [m
+[32m+[m[32m    [Header("Follow Settings")][m
+[32m+[m[32m    [SerializeField] private float followSpeed = 8f;[m
+[32m+[m[41m    [m
+[32m+[m[32m    [Header("Shake Settings")][m
+[32m+[m[32m    [SerializeField] private float defaultShakeDuration = 0.15f;[m
+[32m+[m[32m    [SerializeField] private float defaultShakeIntensity = 0.1f;[m
+[32m+[m[41m    [m
+     private Transform currentTarget;[m
+[32m+[m[32m    private Vector3 shakeOffset;[m
+[32m+[m[32m    private bool isShaking;[m
+[32m+[m
+[32m+[m[32m    private void Awake()[m
+[32m+[m[32m    {[m
+[32m+[m[32m        if (Instance == null) Instance = this;[m
+[32m+[m[32m        else Destroy(gameObject);[m
+[32m+[m[32m    }[m
+ [m
+     private void Start()[m
+     {[m
+[36m@@ -16,16 +33,80 @@[m [mpublic class CameraFollow : MonoBehaviour[m
+     private void LateUpdate()[m
+     {[m
+         if (currentTarget == null) return;[m
+[31m-        transform.position = currentTarget.position + offset;[m
+[32m+[m
+[32m+[m[32m        var targetPos = currentTarget.position + offset + focusOffset + shakeOffset;[m
+[32m+[m[41m    [m
+[32m+[m[32m        // MoveTowards вместо Lerp — стабильная скорость[m
+[32m+[m[32m        transform.position = Vector3.MoveTowards(transform.position, targetPos, followSpeed * Time.deltaTime);[m
+[32m+[m[32m    }[m
+[32m+[m[41m    [m
+[32m+[m[32m    // Лёгкий шейк — получение урона обычным врагом[m
+[32m+[m[32m    public void ShakeLight() =>[m[41m [m
+[32m+[m[32m        StartCoroutine(ShakeRoutine(defaultShakeIntensity * 0.5f, defaultShakeDuration));[m
+[32m+[m[41m    [m
+[32m+[m[32m    // Средний шейк — удар игрока, смерть врага[m
+[32m+[m[32m    public void ShakeMedium() =>[m[41m [m
+[32m+[m[32m        StartCoroutine(ShakeRoutine(defaultShakeIntensity, defaultShakeDuration));[m
+[32m+[m[41m    [m
+[32m+[m[32m    // Тяжёлый шейк — голем, босс, сильные способности[m
+[32m+[m[32m    public void ShakeHeavy() =>[m[41m [m
+[32m+[m[32m        StartCoroutine(ShakeRoutine(defaultShakeIntensity * 2f, defaultShakeDuration * 1.5f));[m
+[32m+[m
+[32m+[m[32m    private IEnumerator ShakeRoutine(float intensity, float duration)[m
+[32m+[m[32m    {[m
+[32m+[m[32m        isShaking = true;[m
+[32m+[m[32m        var elapsed = 0f;[m
+[32m+[m
+[32m+[m[32m        while (elapsed < duration)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            elapsed += Time.deltaTime;[m
+[32m+[m[41m            [m
+[32m+[m[32m            // Затухающий шейк[m
+[32m+[m[32m            var currentIntensity = Mathf.Lerp(intensity, 0f, elapsed / duration);[m
+[32m+[m[32m            shakeOffset = Random.insideUnitSphere * currentIntensity;[m
+[32m+[m[32m            shakeOffset.z = 0;[m
+[32m+[m[41m            [m
+[32m+[m[32m            yield return null;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        shakeOffset = Vector3.zero;[m
+[32m+[m[32m        isShaking = false;[m
+     }[m
+     [m
+[31m-    public void SetTarget(Transform newTarget)[m
+[32m+[m[32m    private Vector3 focusOffset = Vector3.zero;[m
+[32m+[m[32m    private Coroutine focusCoroutine;[m
+[32m+[m
+[32m+[m[32m    // Временно смотрим на врага, потом возвращаемся[m
+[32m+[m[32m    public void ShiftTowards(Vector3 worldPos, float strength = 0.3f)[m
+     {[m
+[31m-        currentTarget = newTarget;[m
+[32m+[m[32m        if (focusCoroutine != null) StopCoroutine(focusCoroutine);[m
+[32m+[m[41m    [m
+[32m+[m[32m        var direction = worldPos - playerTarget.position;[m
+[32m+[m[41m    [m
+[32m+[m[32m        // Смещаем не больше чем на strength от игрока[m
+[32m+[m[32m        // strength 0.3 = 30% пути до врага, не долетаем до него[m
+[32m+[m[32m        focusOffset = direction * strength;[m
+     }[m
+     [m
+[31m-    public void ResetToPlayer()[m
+[32m+[m[32m    public void ResetFocus()[m
+     {[m
+[31m-        currentTarget = playerTarget;[m
+[32m+[m[32m        if (focusCoroutine != null) StopCoroutine(focusCoroutine);[m
+[32m+[m[32m        focusCoroutine = StartCoroutine(SmoothResetFocus());[m
+     }[m
+[32m+[m
+[32m+[m[32m    private IEnumerator SmoothResetFocus()[m
+[32m+[m[32m    {[m
+[32m+[m[32m        while (focusOffset.magnitude > 0.01f)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            focusOffset = Vector3.Lerp(focusOffset, Vector3.zero, 8f * Time.deltaTime);[m
+[32m+[m[32m            yield return null;[m
+[32m+[m[32m        }[m
+[32m+[m[32m        focusOffset = Vector3.zero;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m
+[32m+[m[41m    [m
+[32m+[m[32m    public void SetTarget(Transform newTarget) => currentTarget = newTarget;[m
+[32m+[m[41m    [m
+[32m+[m[32m    public void ResetToPlayer() => currentTarget = playerTarget;[m
+ }[m
+\ No newline at end of file[m
+[1mdiff --git a/Assets/Scripts/Core/AbilityController.cs b/Assets/Scripts/Core/AbilityController.cs[m
+[1mindex 839b274..fc4d04d 100644[m
+[1m--- a/Assets/Scripts/Core/AbilityController.cs[m
+[1m+++ b/Assets/Scripts/Core/AbilityController.cs[m
+[36m@@ -164,7 +164,7 @@[m [mpublic class AbilityController : MonoBehaviour[m
+     {[m
+         var targetHealth = target.GetComponent<Health>();[m
+         var damage = PlayerMovement.Instance.Stats.AttackDamage;[m
+[31m-[m
+[32m+[m[41m        [m
+         yield return StartCoroutine(PlayerMovement.Instance.PunchAnimation([m
+             target.transform.position,[m
+             () =>[m
+[1mdiff --git a/Assets/Scripts/Core/TurnManager.cs b/Assets/Scripts/Core/TurnManager.cs[m
+[1mindex 8ea2500..b2e424c 100644[m
+[1m--- a/Assets/Scripts/Core/TurnManager.cs[m
+[1m+++ b/Assets/Scripts/Core/TurnManager.cs[m
+[36m@@ -2,6 +2,7 @@[m [musing UnityEngine;[m
+ using System;[m
+ using System.Collections;[m
+ using System.Collections.Generic;[m
+[32m+[m[32musing System.Linq;[m
+ [m
+ public class TurnManager : MonoBehaviour[m
+ {[m
+[36m@@ -13,12 +14,27 @@[m [mpublic class TurnManager : MonoBehaviour[m
+     private IEnumerator EnemyTurnSequence()[m
+     {[m
+         var savedEnemiesList = new List<EnemyBase>(allEnemies);[m
+[32m+[m[32m        var activeEnemies = savedEnemiesList.Where(e => e != null).ToList();[m
+[32m+[m[41m        [m
+[32m+[m[32m        if (activeEnemies.Count > 0)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            var center = activeEnemies[m
+[32m+[m[32m                             .Aggregate(Vector3.zero, (sum, e) => sum + e.transform.position)[m
+[32m+[m[32m                         / activeEnemies.Count;[m
+[32m+[m[41m        [m
+[32m+[m[32m            // Камера смещается к центру один раз на весь ход врагов[m
+[32m+[m[32m            CameraFollow.Instance?.ShiftTowards(center, 0.25f);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[41m        [m
+         foreach (var enemy in savedEnemiesList)[m
+         {[m
+             if (enemy == null)[m
+                 continue;[m
+             yield return enemy.DoTurn();[m
+         }[m
+[32m+[m[41m        [m
+[32m+[m[32m        CameraFollow.Instance?.ResetFocus();[m
+ [m
+         yield return null;[m
+         SetState(TurnState.PlayerTurn);[m
+[1mdiff --git a/Assets/Scripts/EnemyController.cs b/Assets/Scripts/EnemyController.cs[m
+[1mindex 6c304b4..5bb7f50 100644[m
+[1m--- a/Assets/Scripts/EnemyController.cs[m
+[1m+++ b/Assets/Scripts/EnemyController.cs[m
+[36m@@ -13,7 +13,9 @@[m [mpublic class EnemyController : EnemyBase[m
+         if (Vector3Int.Distance(CurrentCell, playerCell) <= 1.1f)[m
+         {[m
+             player.TryGetComponent<Health>(out var playerHealth);[m
+[31m-[m
+[32m+[m[41m            [m
+[32m+[m[32m            CameraFollow.Instance?.ShakeHeavy();[m
+[32m+[m[41m            [m
+             yield return StartCoroutine(PunchAnimation(player.transform.position, () => [m
+             {[m
+                 if (playerHealth != null)[m
+[1mdiff --git a/Assets/Scripts/Health.cs b/Assets/Scripts/Health.cs[m
+[1mindex 0f62309..cb761c4 100644[m
+[1m--- a/Assets/Scripts/Health.cs[m
+[1m+++ b/Assets/Scripts/Health.cs[m
+[36m@@ -37,6 +37,7 @@[m [mpublic class Health : MonoBehaviour[m
+         else[m
+         {[m
+             StartCoroutine(FlashRed());[m
+[32m+[m[32m            CameraFollow.Instance?.ShakeLight();[m
+         }[m
+     }[m
+ [m
+[36m@@ -45,6 +46,7 @@[m [mpublic class Health : MonoBehaviour[m
+         if (isDying) return;[m
+         isDying = true;[m
+         [m
+[32m+[m[32m        CameraFollow.Instance?.ShakeMedium();[m
+         OnDeath?.Invoke(gameObject);[m
+     [m
+         var cell = GridManager.Instance.WorldToCell(transform.position);[m
