@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using Core;
 using Sprites;
 using UnityEngine;
 using UnityEngine.SceneManagement; // Для перезагрузки сцены
 
 public class LevelController : MonoBehaviour 
 {
-    private readonly List<EnemyController> activeEnemies = new();
+    private readonly List<EnemyBase> activeEnemies = new();
     private bool isGameOver;
 
     private IEnumerator Start() 
@@ -17,11 +18,10 @@ public class LevelController : MonoBehaviour
         var playerHealth = PlayerMovement.Instance.GetComponent<Health>();
         playerHealth.OnDeath += HandlePlayerDeath;
 
-        var enemiesOnScene = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
+        var enemiesOnScene = FindObjectsByType<EnemyBase>(FindObjectsSortMode.None);
         foreach (var enemy in enemiesOnScene)
         {
             activeEnemies.Add(enemy);
-            TurnManager.Instance.RegisterEnemy(enemy);
             
             enemy.GetComponent<Health>().OnDeath += HandleEnemyDeath;
         }
@@ -31,7 +31,7 @@ public class LevelController : MonoBehaviour
 
     private void HandleEnemyDeath(GameObject enemyObject)
     {
-        var enemy = enemyObject.GetComponent<EnemyController>();
+        var enemy = enemyObject.GetComponent<EnemyBase>();
         if (activeEnemies.Contains(enemy))
         {
             activeEnemies.Remove(enemy);

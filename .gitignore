@@ -189,3 +189,4 @@ http-client.private.env.json
 Assets/Editor/ProjectSnapshot*
 Assets/Docs/project_snapshot*
 .idea/.idea.descent-to-kur/.idea/
+.vsconfig
