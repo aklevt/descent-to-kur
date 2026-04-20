@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PlayerStats
   m_EditorClassIdentifier: Assembly-CSharp::Stats.PlayerStats
   maxHealth: 20
-  maxEnergy: 5
+  maxEnergy: 10
   moveRange: 3
   moveSpeed: 3
   baseAttackDamage: 5
