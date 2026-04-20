@@ -9,7 +9,7 @@ public class GridManager : MonoBehaviour
 
     [SerializeField] private Tilemap obstaclesTilemap;
     
-    private Dictionary<Vector3Int, GameObject> entitiesOnGrid = new();
+    private readonly Dictionary<Vector3Int, GameObject> entitiesOnGrid = new();
 
     public void MoveEntity(Vector3Int from, Vector3Int to, GameObject entity)
     {
@@ -47,32 +47,37 @@ public class GridManager : MonoBehaviour
     
     public List<Vector3Int> GetWalkableTilesInRange(Vector3Int startPos, int range, GameObject currentEntity = null)
     {
-        var walkable = new List<Vector3Int>();
-    
-        Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+        var result = new HashSet<Vector3Int>();
+        var queue = new Queue<(Vector3Int pos, int steps)>();
+        queue.Enqueue((startPos, 0));
 
-        foreach (var dir in directions)
+        var directions = new[] { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+
+        while (queue.Count > 0)
         {
-            var checkingPos = startPos + dir;
-            if (IsCellWalkable(checkingPos, currentEntity))
+            var (pos, steps) = queue.Dequeue();
+            if (steps >= range) 
+                continue;
+
+            foreach (var dir in directions)
             {
-                walkable.Add(checkingPos);
+                var next = pos + dir;
+                if (result.Contains(next) || !IsCellWalkable(next, currentEntity)) 
+                    continue;
+                result.Add(next);
+                queue.Enqueue((next, steps + 1));
             }
         }
-        return walkable;
+        return result.ToList();
     }
     
     /// <summary>
-    /// Возвращает объект, находящийся на указанной клетке, если он там есть
+    /// Возвращает сущность, находящаяся на указанной клетке, если она там есть
     /// </summary>
     /// <returns>GameObject сущности или null</returns>
     public GameObject GetEntityAt(Vector3Int cellPos)
     {
-        if (entitiesOnGrid.TryGetValue(cellPos, out var entity))
-        {
-            return entity;
-        }
-        return null;
+        return entitiesOnGrid.GetValueOrDefault(cellPos);
     }
     
     public void UnregisterEntity(Vector3Int pos)
@@ -82,15 +87,36 @@ public class GridManager : MonoBehaviour
     
     /// <summary>
     /// Возвращает соседние клетки, в которых нет стен
+    /// ❗ переписать через BFS ❗
     /// /// </summary>
-    public List<Vector3Int> GetAttackableCells(Vector3Int center)
+    public List<Vector3Int> GetAttackableCellsInRadius(Vector3Int center, int maxRange, int minRange = 1)
     {
-        Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+        var cells = new List<Vector3Int>();
 
-        return directions
-            .Select(dir => center + dir)
-            .Where(pos => !obstaclesTilemap.HasTile(pos))
-            .ToList();
+        for (var x = -maxRange; x <= maxRange; x++)
+        {
+            for (var y = -maxRange; y <= maxRange; y++)
+            {
+                var distance = Mathf.Abs(x) + Mathf.Abs(y);
+
+                if (distance > maxRange || distance < minRange) continue;
+                
+                var cellPos = new Vector3Int(center.x + x, center.y + y, center.z);
+                
+                if (!obstaclesTilemap.HasTile(cellPos))
+                {
+                    cells.Add(cellPos);
+                }
+            }
+        }
+        return cells;
+        
+        // Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+        //
+        // return directions
+        //     .Select(dir => center + dir)
+        //     .Where(pos => !obstaclesTilemap.HasTile(pos))
+        //     .ToList();
     }
 
     public Vector3Int WorldToCell(Vector3 worldPos) => obstaclesTilemap.WorldToCell(worldPos);

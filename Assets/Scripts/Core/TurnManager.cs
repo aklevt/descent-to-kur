@@ -2,29 +2,64 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class TurnManager : MonoBehaviour
 {
     [ContextMenu("Ход противника")]
     public void DebugEnemyTurn() => SetState(TurnState.EnemyTurn);
 
-    private List<EnemyController> allEnemies = new();
+    private List<EnemyBase> allEnemies = new();
 
     private IEnumerator EnemyTurnSequence()
     {
-        var savedEnemiesList = new List<EnemyController>(allEnemies);
+        var savedEnemiesList = new List<EnemyBase>(allEnemies);
+        var activeEnemies = savedEnemiesList
+            .Where(e => e != null)
+            .ToList();
+        
+        if (activeEnemies.Count > 0)
+        {
+            var center = activeEnemies
+                             .Aggregate(Vector3.zero, (sum, e) => sum + e.transform.position)
+                         / activeEnemies.Count;
+        
+            // Камера смещается к центру один раз на весь ход врагов
+            CameraFollow.Instance?.ShiftTowards(center);
+        }
+
+        
         foreach (var enemy in savedEnemiesList)
         {
             if (enemy == null)
                 continue;
+            if (enemy.IsFreeze)
+            {
+                enemy.Unfreeze();
+                continue;
+            }
             yield return enemy.DoTurn();
         }
+        
+        CameraFollow.Instance?.ResetFocus();
 
         yield return null;
+        
+        if (PlayerMovement.Instance.Stats.Health <= 0)
+        {
+            yield break;
+        }
+        
         SetState(TurnState.PlayerTurn);
     }
 
-    public void RegisterEnemy(EnemyController enemy) => allEnemies.Add(enemy);
+    public void RegisterEnemy(EnemyBase enemy) 
+    {
+        if (!allEnemies.Contains(enemy))
+        {
+            allEnemies.Add(enemy);
+        }
+    }
 
     public static TurnManager Instance { get; private set; }
 
@@ -44,7 +79,7 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    public void UnregisterEnemy(EnemyController enemy)
+    public void UnregisterEnemy(EnemyBase enemy)
     {
         if (allEnemies.Contains(enemy))
         {
@@ -56,8 +91,14 @@ public class TurnManager : MonoBehaviour
     private void SetState(TurnState newState)
     {
         CurrentState = newState;
-        Debug.Log($"<color=yellow>[TurnManager]</color> Ход сменился на: <b>{newState}</b>");
 
+        if (newState == TurnState.PlayerTurn && PlayerMovement.Instance != null)
+        {
+            PlayerMovement.Instance.Stats.RestoreEnergy(PlayerMovement.Instance.Stats.MaxEnergy);
+        }
+
+        Debug.Log($"<color=yellow>[TurnManager]</color> Ход сменился на: <b>{newState}</b>");
+        
         OnStateChanged?.Invoke(newState);
 
         if (newState == TurnState.EnemyTurn)
