@@ -15,9 +15,20 @@ public class GridHighlighter : MonoBehaviour
     {
         Instance = this;
     }
+    
+    public void UpdateTilemaps(Tilemap selection, Tilemap effect)
+    {
+        if (selectionTilemap != null) selectionTilemap.ClearAllTiles();
+        if (effectTilemap != null) effectTilemap.ClearAllTiles();
+
+        selectionTilemap = selection;
+        effectTilemap = effect;
+    }
 
     public void HighlightCells(List<Vector3Int> cells, Color? color = null)
     {
+        if (selectionTilemap == null) return;
+        
         selectionTilemap.ClearAllTiles();
         var baseColor = color ?? highlightColor;
         var finalColor = new Color(baseColor.r, baseColor.g, baseColor.b, 0.8f);
@@ -29,6 +40,8 @@ public class GridHighlighter : MonoBehaviour
     
     public void HighlightEffect(List<Vector3Int> cells, Color? color = null)
     {
+        if (effectTilemap == null) return;
+        
         effectTilemap.ClearAllTiles();
         var baseColor = color ?? highlightColor;
         var finalColor = new Color(baseColor.r, baseColor.g, baseColor.b, 0.8f);
@@ -38,12 +51,15 @@ public class GridHighlighter : MonoBehaviour
         }
     }
     
-    public void ClearEffect() => effectTilemap.ClearAllTiles();
+    public void ClearEffect() => effectTilemap?.ClearAllTiles();
 
     public void Clear()
     {
-        selectionTilemap.ClearAllTiles();
-        effectTilemap.ClearAllTiles();
+        if (selectionTilemap != null)
+            selectionTilemap.ClearAllTiles();
+        
+        if (effectTilemap != null)
+            effectTilemap.ClearAllTiles();
     }
 
     private void SetTile(Tilemap tilemap, Vector3Int cell, Color color)

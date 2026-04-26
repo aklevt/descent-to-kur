@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Linq;
-using Sprites;
 using UnityEngine;
 
 /// <summary>
@@ -12,7 +11,12 @@ public abstract class EnemyBase : BaseEntity
     protected override void Start()
     {
         base.Start();
-        TurnManager.Instance?.RegisterEnemy(this);
+        InitializeOnGrid();
+    
+        if (TurnManager.Instance != null)
+        {
+            TurnManager.Instance.RegisterEnemy(this);
+        }
     }
 
     protected virtual void OnDisable()
@@ -20,13 +24,22 @@ public abstract class EnemyBase : BaseEntity
         if (TurnManager.Instance != null)
             TurnManager.Instance.UnregisterEnemy(this);
     }
-    
+
     /// <summary>
     /// Выполнить полный ход врага: движение и действие
     /// </summary>
     public IEnumerator DoTurn()
     {
         if (TryGetComponent<Health>(out var h) && h.IsDead) yield break;
+        
+        var canAct = OnTurnStart();
+    
+        if (!canAct)
+        {
+            yield return new WaitForSeconds(0.5f);
+            yield break;
+        }
+
         
         Debug.Log($"{gameObject.name} готовится к ходу...");
         yield return new WaitForSeconds(0.1f);
@@ -42,31 +55,31 @@ public abstract class EnemyBase : BaseEntity
                 yield return null;
             }
         }
-        
+
         if (TryGetComponent<Health>(out var health) && health.IsDead) yield break;
-        
+
         yield return new WaitForSeconds(0.1f);
 
         yield return ExecuteAction();
-        
+
         yield return new WaitForSeconds(0.1f);
         Debug.Log($"{gameObject.name} закончил ход");
     }
-    
+
     /// <summary>
     /// Вычисляет лучший ход в сторону игрока
     /// </summary>
     protected virtual Vector3Int? GetBestMove()
     {
         if (PlayerMovement.Instance == null) return null;
-        
+
         var playerCell = PlayerMovement.Instance.CurrentCell;
-        
+
         if (Vector3Int.Distance(CurrentCell, playerCell) <= 1.1f)
             return CurrentCell;
-        
+
         var possibleMoves = GridManager.Instance.GetWalkableTilesInRange(CurrentCell, Stats.MoveRange, gameObject);
-    
+
         return possibleMoves
             .OrderBy(pos => Vector3.Distance(pos, playerCell))
             .Cast<Vector3Int?>()
@@ -96,7 +109,4 @@ public abstract class EnemyBase : BaseEntity
     /// Реализуют конкретные враги для своего хода
     /// </summary>
     protected abstract IEnumerator ExecuteAction();
-
-
-    
 }

@@ -16,3 +16,4 @@ MonoBehaviour:
   energyCost: 10
   highlightColor: {r: 0.6862745, g: 0, b: 0, a: 1}
   effectColor: {r: 1, g: 0.2, b: 0.2, a: 0.9}
+  freezePower: 1

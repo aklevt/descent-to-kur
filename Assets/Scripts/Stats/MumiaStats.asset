@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f9160e6f132d754ba837181f7ec87c2, type: 3}
   m_Name: MumiaStats
   m_EditorClassIdentifier: GameScripts::Stats.EntityStats
-  maxHealth: 15
+  maxHealth: 1
   maxEnergy: 3
   moveRange: 2
   moveSpeed: 3

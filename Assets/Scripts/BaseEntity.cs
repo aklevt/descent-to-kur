@@ -34,10 +34,61 @@ public abstract class BaseEntity : MonoBehaviour
 
     protected virtual void Start()
     {
-        CurrentCell = GridManager.Instance.WorldToCell(transform.position);
-        GridManager.Instance.RegisterFixedEntity(CurrentCell, gameObject);
+    }
 
+    public void InitializeOnGrid()
+    {
+        stats.Health = stats.MaxHealth;
+        stats.Freeze = 0; 
+        UpdateVisualStatus();
+
+        CurrentCell = GridManager.Instance.WorldToCell(transform.position);
         PlaceOnCell();
+        IsMoving = false;
+
+        GridManager.Instance.RegisterFixedEntity(CurrentCell, gameObject);
+    }
+
+
+    public bool OnTurnStart()
+    {
+        if (stats.Freeze > 0)
+        {
+            Debug.Log($"<color=cyan>{name}</color> пропускает ход. Осталось: {stats.Freeze}");
+            return false;
+        }
+    
+        return true;
+    }
+
+    public void OnRoundEnd()
+    {
+        var wasFreezed = stats.Freeze > 0;
+    
+        if (stats.Freeze > 0)
+        {
+            stats.Freeze--;
+        
+            if (stats.Freeze == 0)
+            {
+                Debug.Log($"<color=cyan>{name}</color> разморозился");
+            }
+        }
+    }
+
+    public void Freeze(int turns)
+    {
+        stats.Freeze = Mathf.Max(stats.Freeze, turns);
+        UpdateVisualStatus();
+        Debug.Log($"<color=cyan>{name}</color> заморожен на {stats.Freeze} ходов!");
+    }
+
+    public bool IsFreeze => stats.Freeze > 0;
+
+    public void UpdateVisualStatus()
+    {
+        if (spriteRenderer == null) return;
+        spriteRenderer.color = IsFreeze ? new Color(0.5f, 0.7f, 1f) : Color.white;
     }
 
     private void OnValidate()
@@ -74,6 +125,21 @@ public abstract class BaseEntity : MonoBehaviour
         transform.position = targetWorldPos;
     }
 
+    /// <summary>
+    /// Выполняет мгновенный телепорт сущности в указанную клетку сетки
+    /// Пере-регистрирует сущность в <see cref="GridManager"/>, сбрасывает состояние движения
+    /// </summary>
+    /// <param name="targetCell">Координаты целевой клетки на сетке</param>
+    public void TeleportToCell(Vector3Int targetCell)
+    {
+        GridManager.Instance.UnregisterEntity(CurrentCell);
+        CurrentCell = targetCell;
+        IsMoving = false;
+
+        PlaceOnCell();
+        GridManager.Instance.RegisterFixedEntity(CurrentCell, gameObject);
+    }
+
     public void MoveToCell(Vector3Int targetCell)
     {
         FlipToTarget(targetCell);
@@ -102,17 +168,6 @@ public abstract class BaseEntity : MonoBehaviour
     }
 
     /// <summary>
-    /// Наложение эффекта оглушения
-    /// </summary>
-    public void Freeze(int power) 
-    {
-        stats.Freeze = Math.Max(stats.Freeze, power);
-    }
-
-    public bool IsFreeze => stats.Freeze > 0;
-    public void Unfreeze() => stats.Freeze--;
-
-    /// <summary>
     /// Простейшая анимация удара с возможностью вызова действия в сам момент удара
     /// </summary>
     public IEnumerator PunchAnimation(Vector3 targetPos, Action onHit = null)
@@ -123,7 +178,7 @@ public abstract class BaseEntity : MonoBehaviour
         var elapsed = 0f;
 
         FlipToTarget(targetPos);
-        
+
         // Удар вперед
         while (elapsed < duration)
         {
@@ -137,7 +192,7 @@ public abstract class BaseEntity : MonoBehaviour
         onHit?.Invoke();
 
         yield return new WaitForSeconds(0.05f);
-        
+
         // Возврат назад
         elapsed = 0f;
         while (elapsed < duration)

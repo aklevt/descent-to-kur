@@ -118,8 +118,24 @@ public class GridManager : MonoBehaviour
         //     .Where(pos => !obstaclesTilemap.HasTile(pos))
         //     .ToList();
     }
+    
+    /// <summary>
+    /// Обновляет ссылку на тайлмап препятствий и очищает данные о сущностях на сетке (для перехода в новую комнату)
+    /// </summary>
+    /// <param name="newMap">Тайлпам стен из префаба новой комнаты</param>
+    public void UpdateObstacles(Tilemap newMap)
+    {
+        obstaclesTilemap = newMap;
+        entitiesOnGrid.Clear();
+    }
 
-    public Vector3Int WorldToCell(Vector3 worldPos) => obstaclesTilemap.WorldToCell(worldPos);
+    public Vector3Int WorldToCell(Vector3 worldPos) 
+    {
+        if (obstaclesTilemap == null) 
+            return Vector3Int.zero;
+        
+        return obstaclesTilemap.WorldToCell(worldPos);
+    }
 
     public Vector3 GetCellCenterWorld(Vector3Int cellPos) => obstaclesTilemap.GetCellCenterWorld(cellPos);
 }

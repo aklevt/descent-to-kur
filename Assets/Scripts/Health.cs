@@ -63,7 +63,10 @@ public class Health : MonoBehaviour
         
         spriteRenderer.color = Color.red;
         yield return new WaitForSeconds(0.1f);
-        if (spriteRenderer != null) spriteRenderer.color = Color.white;
+        if (entity != null)
+        {
+            entity.UpdateVisualStatus();
+        }
     }
 
     private IEnumerator FadeOutAndDestroy()

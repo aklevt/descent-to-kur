@@ -10,13 +10,19 @@ public class TurnUI : MonoBehaviour
     private void Start()
     {
         if (TurnManager.Instance != null)
+        {
             TurnManager.Instance.OnStateChanged += ShowTurnMessage;
+            TurnManager.Instance.OnAllEnemiesFrozen += ShowAllFrozenMessage;
+        }
     }
 
     private void OnDestroy()
     {
         if (TurnManager.Instance != null)
+        {
             TurnManager.Instance.OnStateChanged -= ShowTurnMessage;
+            TurnManager.Instance.OnAllEnemiesFrozen += ShowAllFrozenMessage;
+        }
     }
 
     private void ShowTurnMessage(TurnState state)
@@ -26,6 +32,12 @@ public class TurnUI : MonoBehaviour
         var color = state == TurnState.PlayerTurn ? Color.goldenRod : Color.white;
         
         StartCoroutine(DisplayRoutine(message, color));
+    }
+    
+    private void ShowAllFrozenMessage()
+    {
+        StopAllCoroutines();
+        StartCoroutine(DisplayRoutine("Все враги заморожены", new Color(0.3f, 0.9f, 1f)));
     }
 
     private IEnumerator DisplayRoutine(string text, Color color)
