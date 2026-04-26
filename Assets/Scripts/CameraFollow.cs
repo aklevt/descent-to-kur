@@ -8,20 +8,25 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private Transform playerTarget;
     [SerializeField] private Vector3 offset = new Vector3(0, 0, -10);
 
-    [Header("Shake Settings")] [SerializeField]
-    private float defaultShakeDuration = 0.15f;
-
+    [Header("Shake Settings")]
+    [SerializeField] private float defaultShakeDuration = 0.15f;
     [SerializeField] private float defaultShakeIntensity = 0.1f;
 
-    [Header("Follow Settings")] [SerializeField]
-    private bool smoothFollow = true;
-
+    [Header("Follow Settings")]
+    [SerializeField] private bool smoothFollow = true;
     [SerializeField] private float followSpeed = 8f;
 
     private Vector3 focusOffset;
-
     private Transform currentTarget;
     private Vector3 shakeOffset;
+    
+    private bool isDetached;
+    private Vector3 freeLookTarget;
+    private Vector2 dragStartMousePos;
+    private Vector3 dragStartFreeLookTarget;
+    
+    private Camera mainCamera;
+    private bool isPlayerTurn;
 
     private void Awake()
     {
@@ -32,12 +37,43 @@ public class CameraFollow : MonoBehaviour
     private void Start()
     {
         ResetToPlayer();
+        mainCamera = Camera.main;
+        
+        if (TurnManager.Instance != null)
+            TurnManager.Instance.OnStateChanged += OnTurnStateChanged;
+    }
+    
+    private void OnDestroy()
+    {
+        if (TurnManager.Instance != null)
+            TurnManager.Instance.OnStateChanged -= OnTurnStateChanged;
+    }
+    
+    private void OnTurnStateChanged(TurnState state)
+    {
+        isPlayerTurn = (state == TurnState.PlayerTurn);
+        if (!isPlayerTurn)
+        {
+            ResetToPlayer();
+        }
     }
 
     private void LateUpdate()
     {
-        if (currentTarget == null) return;
-        var targetPos = currentTarget.position + offset + focusOffset;
+        if (currentTarget == null)
+            return;
+        
+        Vector3 targetPos;
+
+        if (isDetached)
+        {
+            targetPos = freeLookTarget + offset;
+        }
+        else
+        {
+            targetPos = currentTarget.position + offset + focusOffset;
+        }
+
         if (smoothFollow)
             transform.position = Vector3.Lerp(transform.position, targetPos, followSpeed * Time.deltaTime);
         else
@@ -45,25 +81,51 @@ public class CameraFollow : MonoBehaviour
 
         transform.position += shakeOffset;
     }
-
-    public void SetTarget(Transform newTarget)
+    
+    public void ResetFocus() 
     {
-        currentTarget = newTarget;
+        isDetached = false;
+        focusOffset = Vector3.zero;
     }
 
-    public void ResetToPlayer()
+    public void StartDrag(Vector2 mousePos)
     {
-        currentTarget = playerTarget;
+        dragStartMousePos = mousePos;
+        
+        if (!isDetached)
+        {
+            isDetached = true;
+            freeLookTarget = currentTarget.position + focusOffset;
+        }
+        dragStartFreeLookTarget = freeLookTarget;
+    }
+
+    public void UpdateDrag(Vector2 currentMousePos)
+    {
+        var mouseDelta = currentMousePos - dragStartMousePos;
+        var worldDelta = mainCamera.ScreenToWorldPoint(new Vector3(mouseDelta.x, mouseDelta.y, 0)) 
+                         - mainCamera.ScreenToWorldPoint(Vector3.zero);
+        
+        freeLookTarget = dragStartFreeLookTarget - worldDelta;
+    }
+
+    public void EndDrag()
+    {
+    }
+
+
+    public void ResetToPlayer() 
+    {
+        if (playerTarget != null)
+        {
+            currentTarget = playerTarget;
+            ResetFocus();
+        }
     }
 
     public void ShiftTowards(Vector3 worldPos, float strength = 0.25f)
     {
         focusOffset = (worldPos - playerTarget.position) * strength;
-    }
-
-    public void ResetFocus()
-    {
-        focusOffset = Vector3.zero;
     }
 
     public void ShakeLight() => StartCoroutine(ShakeRoutine(defaultShakeIntensity * 0.5f, defaultShakeDuration));

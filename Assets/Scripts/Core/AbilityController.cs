@@ -68,6 +68,7 @@ namespace Core
             if (newState != TurnState.PlayerTurn)
             {
                 ClearSelection();
+                abilityBar?.DeselectAllSlots();
                 return;
             }
 
@@ -82,6 +83,8 @@ namespace Core
 
         public void SelectAbilityByIndex(int index)
         {
+            if (LevelController.Instance != null && !LevelController.Instance.IsLevelLoaded) return;
+            
             var abilities = PlayerAbilities;
             if (abilities == null || index >= abilities.Count)
                 return;
@@ -95,6 +98,7 @@ namespace Core
 
             abilityBar?.OnAbilitySelected(index);
             SelectAbility(abilities[index]);
+            RefreshAbilityOverlay();
         }
 
 
@@ -108,6 +112,13 @@ namespace Core
         public void HandleCellClick(Vector3Int clickedCell)
         {
             if (!IsPlayerTurnActive || isExecuting) return;
+            
+            if (PlayerMovement.Instance.IsFreeze)
+            {
+                Debug.Log("Игрок заморожен, пропуск хода");
+                return;
+            }
+            
             if (PlayerMovement.Instance.IsMoving) return;
             if (selectedAbility == null) return;
 

@@ -65,5 +65,11 @@ namespace Core
             for (var i = 0; i < slots.Count; i++)
                 slots[i].SetSelected(i == index);
         }
+        
+        public void DeselectAllSlots()
+        {
+            foreach (var slot in slots)
+                slot.SetSelected(false);
+        }
     }
 }
