@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Entities;
 using UnityEngine;
 
 namespace Abilities
@@ -37,12 +38,14 @@ namespace Abilities
         {
             var target = GridManager.Instance.GetEntityAt(targetCell);
             var targetHealth = target.GetComponent<Health>();
+            
+            var damage = GetCalculatedDamage(actor);
 
             yield return actor.StartCoroutine(actor.PunchAnimation(
                 target.transform.position,
                 () =>
                 {
-                    targetHealth?.TakeDamage(actor.Stats.AttackDamage);
+                    targetHealth?.TakeDamage(damage);
                     CameraFollow.Instance?.ShakeMedium();
                 }
             ));

@@ -13,14 +13,20 @@ namespace Stats
 		/// <summary>
         /// Базовая сила атаки ближнего боя 
         /// Итоговый урон способности будет рассчитываться как: 
-        /// (baseAttackDamage * abilityMultiplier) + abilityLinearModifier
+        /// (baseAttackDamage * abilityMultiplier) + abilityLinearModifier, возможно без abilityMultiplier
         /// </summary>
         public int baseAttackDamage = 5;
 		
 		/// <summary>
-        /// Базовая сила дистанционной атаки
+        /// Базовая сила дистанционной атаки, сейчас не нужна
         /// Возможно, будет использоваться для способностей дальней атаки
         /// </summary>
-        public int baseRangedAttackDamage = 5;
+        public int rangedAttackDamage = 5;
+		
+        [Tooltip("На какой дистанции враг предпочитает атаковать")]
+        public int preferredAttackRange = 1;
+        
+        [Tooltip("Минимальная дистанция до игрока. 0 = не убегать")]
+        public int minimumRange = 0;
     }
 }

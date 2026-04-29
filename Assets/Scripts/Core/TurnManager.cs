@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Entities;
 
 public class TurnManager : MonoBehaviour
 {
@@ -10,9 +11,6 @@ public class TurnManager : MonoBehaviour
     public void DebugEnemyTurn() => SetState(TurnState.EnemyTurn);
 
     private List<EnemyBase> allEnemies = new();
-    
-    public event Action OnAllEnemiesFrozen;
-
     private IEnumerator EnemyTurnSequence()
     {
         var savedEnemiesList = new List<EnemyBase>(allEnemies);
@@ -24,8 +22,8 @@ public class TurnManager : MonoBehaviour
         
         if (allFrozen)
         {
-            OnAllEnemiesFrozen?.Invoke();
-        
+            Debug.Log("<color=cyan>[TurnManager]</color> Все враги заморожены");
+            
             yield return new WaitForSeconds(1.0f);
             yield return ProcessEndOfRound();
         
@@ -47,9 +45,10 @@ public class TurnManager : MonoBehaviour
             // Камера смещается к центру один раз на весь ход врагов
             CameraFollow.Instance?.ShiftTowards(center);
         }
+        
+        var sortedEnemies = GetEnemiesSortedByDistance(activeEnemies);
 
-
-        foreach (var enemy in savedEnemiesList)
+        foreach (var enemy in sortedEnemies)
         {
             if (enemy == null) continue;
             yield return enemy.DoTurn();
@@ -68,6 +67,25 @@ public class TurnManager : MonoBehaviour
         SetState(TurnState.PlayerTurn);
 
         CameraFollow.Instance?.ResetFocus();
+    }
+    
+    /// <summary>
+    /// Сортирует врагов по расстоянию до игрока (ближайшие первые)
+    /// </summary>
+    private List<EnemyBase> GetEnemiesSortedByDistance(List<EnemyBase> enemies)
+    {
+        if (PlayerMovement.Instance == null)
+            return enemies;
+
+        var playerCell = PlayerMovement.Instance.CurrentCell;
+
+        return enemies
+            .Where(e => e != null)
+            .OrderBy(e => GridManager.Instance.GetPathDistance(
+                e.CurrentCell, 
+                playerCell, 
+                e.gameObject))
+            .ToList();
     }
 
     /// <summary>

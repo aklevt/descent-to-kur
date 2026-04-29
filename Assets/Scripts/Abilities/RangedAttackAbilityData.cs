@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Entities;
 using UnityEngine;
 
 namespace Abilities
@@ -39,7 +40,8 @@ namespace Abilities
         public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)
         {
             var target = GridManager.Instance.GetEntityAt(targetCell);
-            target.GetComponent<Health>()?.TakeDamage(actor.Stats.AttackDamage);
+            var damage = GetCalculatedDamage(actor);
+            target.GetComponent<Health>()?.TakeDamage(damage);
             CameraFollow.Instance?.ShakeMedium();
 
             yield return null;

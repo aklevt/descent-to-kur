@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Entities;
 using UnityEngine;
 
 namespace Abilities
@@ -11,13 +12,25 @@ namespace Abilities
     public abstract class AbilityData : ScriptableObject
     {
         public string abilityName;
-        
-        [Header("Cost")]
-        public int energyCost = 0;
-        
-        [Header("Colors")]
-        public Color highlightColor = Color.white;  //  Color.black;
+
+        [Header("Cost")] public int energyCost = 0;
+
+        [Header("Damage Settings")] 
+        [Tooltip("Сколько урона добавляется к базовой атаке (может быть отрицательным)")]
+        public int bonusDamage = 0;
+        public bool overrideBaseDamage = false;
+
+        [Header("Colors")] public Color highlightColor = Color.white; //  Color.black;
         public Color effectColor = new Color(1f, 0.2f, 0.2f, 0.9f); //new Color(0f, 0f, 0f, 0.9f);
+
+        /// <summary>
+        /// Рассчитывает итоговый урон на основе статов атакующего
+        /// </summary>
+        public virtual int GetCalculatedDamage(BaseEntity actor)
+        {
+            if (overrideBaseDamage) return bonusDamage;
+            return Mathf.Max(0, actor.Stats.AttackDamage + bonusDamage);
+        }
 
         /// <summary>
         /// Вычисляет доступные для выбора клетки по текущему положению исполнителя
@@ -57,21 +70,21 @@ namespace Abilities
         /// </summary>
         /// <param name="user">Сущность, для которой надо вызвать проверку</param>
         /// <returns>True, если можно использовать способность</returns>
-        public virtual bool CanUse(BaseEntity user) 
+        public virtual bool CanUse(BaseEntity user)
         {
             // Пусть враги не тратят энергию
-            if (user is EnemyBase) 
+            if (user is EnemyBase)
                 return true;
-    
+
             return user.Stats.HasEnergyForAction(energyCost);
         }
-        
+
         /// <summary>
         /// Выбор цели через AI
-		/// Если у врага будет несколько целей или игрок может быть на недостижимом расстоянии, способность может оценить, на какую клетку эффективно ее применять
-		/// На случай, если логика усложнится. Условно враг может опросить свои способности (опять же, если у него их несколько) и принять финальное решение
-		/// Пока что способность у каждого одна, а цель единственная - игрок, и до него всегда можно добраться
-		/// Возможно, стоит перенести эту логику в базовый класс либо в контроллер противника
+        /// Если у врага будет несколько целей или игрок может быть на недостижимом расстоянии, способность может оценить, на какую клетку эффективно ее применять
+        /// На случай, если логика усложнится. Условно враг может опросить свои способности (опять же, если у него их несколько) и принять финальное решение
+        /// Пока что способность у каждого одна, а цель единственная - игрок, и до него всегда можно добраться
+        /// Возможно, стоит перенести эту логику в базовый класс либо в контроллер противника
         /// </summary>
         /// <param name="actor">Сущность, которая пытается использовать эту способность</param>
         /// <returns>Координата цели или null</returns>
@@ -80,7 +93,7 @@ namespace Abilities
             var cells = GetTargetCells(actor);
             return cells.Count > 0 ? cells[0] : null;
         }
-        
+
         /// <summary>
         /// Проверяет, можно ли выполнить способность на этой клетке (переопределяется для обычной атаки)
         /// Если вернет false, клик на клетку будет проигнорирован

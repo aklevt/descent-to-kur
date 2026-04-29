@@ -4210,7 +4210,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AbilityController
   abilityBar: {fileID: 1246193170}
-  energyWarningPopup: {fileID: 1972010244}
 --- !u!114 &1246193169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6708,6 +6707,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.AttackDamage
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.isCustomized
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6735,7 +6742,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2051396582940455051, guid: a3c6d1502590c5f488d25d0efa7f189b, type: 3}
       propertyPath: orthographic size
-      value: 4.1875
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 2051396582940455051, guid: a3c6d1502590c5f488d25d0efa7f189b, type: 3}
       propertyPath: m_NormalizedViewPortRect.x
@@ -6743,15 +6750,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2051396582940455051, guid: a3c6d1502590c5f488d25d0efa7f189b, type: 3}
       propertyPath: m_NormalizedViewPortRect.y
-      value: 0.0019455253
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2051396582940455051, guid: a3c6d1502590c5f488d25d0efa7f189b, type: 3}
       propertyPath: m_NormalizedViewPortRect.width
-      value: 0.99890476
+      value: 0.9989506
       objectReference: {fileID: 0}
     - target: {fileID: 2051396582940455051, guid: a3c6d1502590c5f488d25d0efa7f189b, type: 3}
       propertyPath: m_NormalizedViewPortRect.height
-      value: 0.99610895
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3868316391582394452, guid: a3c6d1502590c5f488d25d0efa7f189b, type: 3}
       propertyPath: m_CameraType

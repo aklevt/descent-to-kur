@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Entities;
 using UnityEngine;
 
 namespace Abilities
@@ -71,7 +72,7 @@ namespace Abilities
         public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)
         {
             CameraFollow.Instance?.ShakeMedium();
-            var knobackVector = targetCell - actor.CurrentCell;
+            var knockbackVector = targetCell - actor.CurrentCell;
             var targets = GetEffectCells(targetCell, actor);
 
             foreach (var cell in targets)
@@ -83,9 +84,11 @@ namespace Abilities
                     var health = targetObj.GetComponent<Health>();
 
                     entity.Freeze(freezePower);
-
-                    health?.TakeDamage(actor.Stats.AttackDamage);
-                    KnobackEnemy(knobackVector, entity);
+                    
+                    var damage = GetCalculatedDamage(actor);
+                    
+                    health?.TakeDamage(damage);
+                    KnobackEnemy(knockbackVector, entity);
                 }
             }
 

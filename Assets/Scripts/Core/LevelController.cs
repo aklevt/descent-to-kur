@@ -1,190 +1,217 @@
 using System.Collections;
 using System.Collections.Generic;
+using Entities;
+using UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Core
 {
+    /// <summary>
+    /// Управляет списком комнат и переходами между ними
+    /// </summary>
     public class LevelController : MonoBehaviour
     {
         public static LevelController Instance { get; private set; }
-        public bool IsLevelLoaded { get; private set; } = false;
 
-        [Header("Level Settings")] [SerializeField]
-        private List<GameObject> roomPrefabs;
+        [Header("Level Progression")]
+        [SerializeField] private List<GameObject> roomPrefabs;
 
+        [Header("Player")]
         [SerializeField] private PlayerMovement player;
 
         private int currentRoomIndex = 0;
-        private GameObject currentRoomInstance;
-
-        private readonly List<EnemyBase> activeEnemies = new();
+        private RoomController currentRoom;
         private bool isGameOver;
+
+        public bool IsLevelLoaded => currentRoom != null;
 
         private void Awake()
         {
-            Instance = this;
+            if (Instance == null)
+                Instance = this;
+            else
+                Destroy(gameObject);
         }
 
         private void Start()
         {
-            Debug.Log("Инициализация первого уровня");
-            var playerHealth = player.GetComponent<Health>();
-            playerHealth.OnDeath += HandlePlayerDeath;
+            if (player != null)
+            {
+                var playerHealth = player.GetComponent<Health>();
+                if (playerHealth != null)
+                {
+                    playerHealth.OnDeath += HandlePlayerDeath;
+                }
+            }
 
             if (roomPrefabs != null && roomPrefabs.Count > 0)
             {
-                LoadRoom(roomPrefabs[currentRoomIndex]);
+                LoadRoomByIndex(currentRoomIndex);
+            }
+            else
+            {
+                Debug.LogError("[LevelController] Нет комнат для загрузки");
             }
         }
 
-        public void LoadRoom(GameObject roomPrefab)
+        /// <summary>
+        /// Загрузить комнату по индексу
+        /// </summary>
+        private void LoadRoomByIndex(int index)
         {
-            if (roomPrefab == null) return;
+            if (index >= roomPrefabs.Count)
+            {
+                Debug.Log("<color=cyan>[LevelController]</color> Все комнаты пройдены!");
+                return;
+            }
 
-            if (GridHighlighter.Instance != null)
-                GridHighlighter.Instance.Clear();
+            UnloadCurrentRoom();
 
-            if (player != null)
-                GridManager.Instance.UnregisterEntity(player.CurrentCell);
-
-            if (currentRoomInstance != null)
-                Destroy(currentRoomInstance);
-
-            IsLevelLoaded = false;
             isGameOver = false;
-            activeEnemies.Clear();
+
+            var roomInstance = Instantiate(roomPrefabs[index], Vector3.zero, Quaternion.identity);
+            currentRoom = roomInstance.GetComponent<RoomController>();
+
+            if (currentRoom == null)
+            {
+                Debug.LogError($"[LevelController] Префаб комнаты {roomPrefabs[index].name} не содержит RoomController");
+                return;
+            }
+
+            currentRoom.OnRoomCleared += HandleRoomCleared;
+
+            currentRoom.Initialize();
+
+            SpawnPlayer();
+
             TurnManager.Instance.ResetEnemies();
-
-            currentRoomInstance = Instantiate(roomPrefab, Vector3.zero, Quaternion.identity);
-            var data = currentRoomInstance.GetComponent<RoomData>();
-
-            GridManager.Instance.UpdateObstacles(data.obstacleTilemap);
-
-            if (GridHighlighter.Instance != null)
-            {
-                GridHighlighter.Instance.UpdateTilemaps(data.selectionTilemap, data.effectTilemap);
-            }
-
-            if (player != null && data.playerSpawnPoint != null)
-            {
-                var spawnCell = GridManager.Instance.WorldToCell(data.playerSpawnPoint.position);
-                player.TeleportToCell(spawnCell);
-
-                CameraFollow.Instance?.ResetFocus();
-            }
-
-            var enemiesInRoom = data.GetEnemiesInRoom();
-            foreach (var enemy in enemiesInRoom)
-            {
-                activeEnemies.Add(enemy);
-                enemy.GetComponent<Health>().OnDeath += HandleEnemyDeath;
-            }
-
-            IsLevelLoaded = true;
             TurnManager.Instance.BeginLevel();
 
             if (AbilityController.Instance != null)
+            {
+                AbilityController.Instance.UnblockInput();
                 AbilityController.Instance.SelectAbilityByIndex(0);
-        }
-
-        private void HandleEnemyDeath(GameObject enemyObject)
-        {
-            var enemy = enemyObject.GetComponent<EnemyBase>();
-            if (activeEnemies.Contains(enemy))
-            {
-                activeEnemies.Remove(enemy);
             }
 
-            if (activeEnemies.Count == 0 && !isGameOver)
-            {
-                WinGame();
-            }
+            Debug.Log($"<color=green>[LevelController]</color> Комната {index + 1}/{roomPrefabs.Count} загружена");
         }
 
-        private void HandlePlayerDeath(GameObject playerObj)
+        /// <summary>
+        /// Выгрузить текущую комнату
+        /// </summary>
+        private void UnloadCurrentRoom()
         {
-            if (!isGameOver)
+            if (currentRoom != null)
             {
-                LoseGame();
+                currentRoom.OnRoomCleared -= HandleRoomCleared;
+                currentRoom.Cleanup();
+                Destroy(currentRoom.gameObject);
+                currentRoom = null;
             }
         }
 
-        private void WinGame()
+        /// <summary>
+        /// Спаун игрока в текущей комнате
+        /// </summary>
+        private void SpawnPlayer()
         {
+            if (player == null || currentRoom == null) return;
+
+            GridManager.Instance.UnregisterEntity(player.CurrentCell);
+
+            var spawnCell = currentRoom.GetPlayerSpawnCell();
+            player.TeleportToCell(spawnCell);
+
+            CameraFollow.Instance?.ResetFocus();
+        }
+
+        /// <summary>
+        /// Обработка выполнения целей комнаты
+        /// </summary>
+        private void HandleRoomCleared()
+        {
+            if (isGameOver) return;
             isGameOver = true;
-            Debug.Log("<color=green>ПОБЕДА</color>");
-            OnRoomCleared();
+            
+            AbilityController.Instance?.BlockInput();
+            
+            Debug.Log("<color=green>[LevelController]</color> Комната пройдена!");
+            StartCoroutine(TransitionToNextRoom());
         }
 
-        private void OnRoomCleared()
-        {
-            Debug.Log("Цель уровня выполнена, переход к следующей комнате");
-
-            StartCoroutine(ShowVictoryAndLoadNext());
-        }
-
-        private IEnumerator ShowVictoryAndLoadNext()
+        /// <summary>
+        /// Переход к следующей комнате
+        /// </summary>
+        private IEnumerator TransitionToNextRoom()
         {
             yield return new WaitForSeconds(1.5f);
 
-            if (TransitionScreenManager.Instance != null)
+            if (TransitionScreenManager.Instance != null && currentRoom != null)
             {
-                yield return TransitionScreenManager.Instance.ShowVictoryScreen(
-                    title: "Комната пройдена"
-                );
+                yield return TransitionScreenManager.Instance.ShowVictoryScreen(currentRoom.VictoryMessage);
             }
 
             currentRoomIndex++;
 
             if (currentRoomIndex < roomPrefabs.Count)
             {
-                yield return TransitionScreenManager.Instance.FadeToBlack(() =>
+                if (TransitionScreenManager.Instance != null)
                 {
-                    LoadRoom(roomPrefabs[currentRoomIndex]);
-                });
+                    yield return TransitionScreenManager.Instance.FadeToBlack(() =>
+                    {
+                        LoadRoomByIndex(currentRoomIndex);
+                    });
 
-                yield return TransitionScreenManager.Instance.FadeFromBlack();
+                    yield return TransitionScreenManager.Instance.FadeFromBlack();
+                }
+                else
+                {
+                    LoadRoomByIndex(currentRoomIndex);
+                }
             }
             else
             {
-                Debug.Log("<color=cyan>Все комнаты пройдены</color>");
+                Debug.Log("<color=cyan>[LevelController]</color> ВСЕ УРОВНИ ПРОЙДЕНЫ!");
+                // TODO: показать финальный экран
             }
         }
 
-        private void LoseGame()
+        /// <summary>
+        /// Обработка смерти игрока
+        /// </summary>
+        private void HandlePlayerDeath(GameObject playerObj)
         {
+            if (isGameOver) return;
+
             isGameOver = true;
-            Debug.Log("<color=red>ПОРАЖЕНИЕ</color>");
-            AbilityController.Instance.DisableAllOverlaysAfterDeath();
+            Debug.Log("<color=red>[LevelController]</color> Игрок погиб");
+
+            if (AbilityController.Instance != null)
+            {
+                AbilityController.Instance.DisableAllOverlaysAfterDeath();
+            }
+
             TurnManager.Instance.StopAllCoroutines();
 
-            if (CameraFollow.Instance != null)
-            {
-                CameraFollow.Instance.ResetToPlayer();
-            }
+            CameraFollow.Instance?.ResetToPlayer();
 
             StartCoroutine(ShowDefeatAndRestart());
         }
 
+        /// <summary>
+        /// Показать экран поражения и перезапустить сцену
+        /// </summary>
         private IEnumerator ShowDefeatAndRestart()
         {
             yield return new WaitForSeconds(1.5f);
 
             if (TransitionScreenManager.Instance != null)
             {
-                yield return TransitionScreenManager.Instance.ShowDefeatScreen(
-                    title: "ПОРАЖЕНИЕ!"
-                );
+                yield return TransitionScreenManager.Instance.ShowDefeatScreen("ПОРАЖЕНИЕ!");
             }
 
-            UnityEngine.SceneManagement.SceneManager.LoadScene(
-                UnityEngine.SceneManagement.SceneManager.GetActiveScene().name
-            );
-        }
-
-        private void RestartLevel()
-        {
+            // Перезагрузить сцену
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }

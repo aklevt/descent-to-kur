@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using Abilities;
+using Entities;
+using UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,9 +13,7 @@ namespace Core
         public static AbilityController Instance { get; private set; }
 
         [SerializeField] private AbilityBar abilityBar;
-
-        [SerializeField] private GameObject energyWarningPopup;
-
+        
         private IReadOnlyList<AbilityData> PlayerAbilities =>
             PlayerMovement.Instance?.Abilities;
 
@@ -21,9 +21,11 @@ namespace Core
         private AbilityData selectedAbility;
         private bool isExecuting;
         private bool isDead;
+        private bool isInputBlocked;
 
         private bool IsPlayerTurnActive =>
             !isDead &&
+            !isInputBlocked &&
             TurnManager.Instance != null &&
             TurnManager.Instance.CurrentState == TurnState.PlayerTurn &&
             PlayerMovement.Instance != null;
@@ -57,6 +59,15 @@ namespace Core
             if (ShouldRefreshAbilityGrid())
                 RefreshAbilityOverlay();
         }
+        
+        /// <summary>
+        /// Разблокировать ввод (при загрузке новой комнаты)
+        /// </summary>
+        public void UnblockInput()
+        {
+            isInputBlocked = false;
+            isDead = false;
+        }
 
         private bool ShouldRefreshAbilityGrid() =>
             !PlayerMovement.Instance.IsMoving &&
@@ -80,6 +91,13 @@ namespace Core
                 ClearSelection();
             }
         }
+        
+        public void BlockInput()
+        {
+            isInputBlocked = true;
+            ClearSelection();
+            abilityBar?.DeselectAllSlots();
+        }
 
         public void SelectAbilityByIndex(int index)
         {
@@ -93,7 +111,7 @@ namespace Core
 
             if (!targetAbility.CanUse(PlayerMovement.Instance))
             {
-                ShowEnergyWarning();
+                UI.UIController.Instance?.ShowEnergyWarning();
             }
 
             abilityBar?.OnAbilitySelected(index);
@@ -124,7 +142,7 @@ namespace Core
 
             if (!selectedAbility.CanUse(PlayerMovement.Instance))
             {
-                ShowEnergyWarning();
+                UI.UIController.Instance?.ShowEnergyWarning();
                 return;
             }
 
@@ -135,23 +153,7 @@ namespace Core
 
             StartCoroutine(ExecuteSelectedAbility(clickedCell));
         }
-
-        private void ShowEnergyWarning()
-        {
-            if (energyWarningPopup == null)
-                return;
-
-            StopCoroutine(nameof(EnergyWarningRoutine));
-            StartCoroutine(nameof(EnergyWarningRoutine));
-        }
-
-        private IEnumerator EnergyWarningRoutine()
-        {
-            energyWarningPopup.SetActive(true);
-            yield return new WaitForSeconds(1.0f);
-            energyWarningPopup.SetActive(false);
-        }
-
+        
         private IEnumerator ExecuteSelectedAbility(Vector3Int targetCell)
         {
             isExecuting = true;

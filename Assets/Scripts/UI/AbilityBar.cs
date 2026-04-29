@@ -1,10 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Entities;
 using UnityEngine;
-using UnityEngine.UI;
-using Abilities;
 
-namespace Core
+namespace UI
 {
     /// <summary>
     /// Управляет отображением кнопок способностей игрока
