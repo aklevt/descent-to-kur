@@ -1,10 +1,10 @@
-using System.Collections.Generic;
+using Abilities;
+using Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Abilities;
-using TMPro;
 
-namespace Core
+namespace UI
 {
     [System.Serializable]
     public class AbilityButtonSlot

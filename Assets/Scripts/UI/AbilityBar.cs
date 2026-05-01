@@ -1,10 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Entities;
 using UnityEngine;
-using UnityEngine.UI;
-using Abilities;
 
-namespace Core
+namespace UI
 {
     /// <summary>
     /// Управляет отображением кнопок способностей игрока
@@ -64,6 +63,12 @@ namespace Core
         {
             for (var i = 0; i < slots.Count; i++)
                 slots[i].SetSelected(i == index);
+        }
+        
+        public void DeselectAllSlots()
+        {
+            foreach (var slot in slots)
+                slot.SetSelected(false);
         }
     }
 }

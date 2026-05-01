@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Sprites
+namespace UI
 {
     public class EndTurnButton : MonoBehaviour
     {
@@ -18,7 +18,7 @@ namespace Sprites
             }
         }
 
-        private void OnDisable()
+        private void OnDestroy()
         {
             if (TurnManager.Instance != null)
             {

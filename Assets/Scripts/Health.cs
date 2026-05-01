@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Entities;
 using UnityEngine;
 
 public class Health : MonoBehaviour
@@ -47,10 +48,16 @@ public class Health : MonoBehaviour
         isDying = true;
         
         CameraFollow.Instance?.ShakeMedium();
+        
+        if (entity != null)
+        {
+            GridManager.Instance.UnregisterEntity(entity.CurrentCell);
+        }
+        
         OnDeath?.Invoke(gameObject);
 
-        var cell = entity.CurrentCell;
-        GridManager.Instance.UnregisterEntity(cell);
+        // var cell = entity.CurrentCell;
+        // GridManager.Instance.UnregisterEntity(cell);
 
         if (TryGetComponent<Collider2D>(out var col)) col.enabled = false;
 
@@ -63,7 +70,10 @@ public class Health : MonoBehaviour
         
         spriteRenderer.color = Color.red;
         yield return new WaitForSeconds(0.1f);
-        if (spriteRenderer != null) spriteRenderer.color = Color.white;
+        if (entity != null)
+        {
+            entity.UpdateVisualStatus();
+        }
     }
 
     private IEnumerator FadeOutAndDestroy()
@@ -80,6 +90,11 @@ public class Health : MonoBehaviour
 
             yield return null;
         }
+        
+        // if (entity != null)
+        // {
+        //     GridManager.Instance.UnregisterEntity(entity.CurrentCell);
+        // }
 
         Destroy(gameObject);
     }

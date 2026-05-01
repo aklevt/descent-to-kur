@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Entities;
 using UnityEngine;
 
 namespace Abilities
@@ -7,6 +8,7 @@ namespace Abilities
     [CreateAssetMenu(fileName = "PowerfulPunchAbility", menuName = "Abilities/PowerfulPunch")]
     public class PowerfulPunchAD : AbilityData
     {
+        [Header("Freeze Effect")] [SerializeField]
         private int freezePower = 3;
 
         public override List<Vector3Int> GetTargetCellsFrom(Vector3Int origin, BaseEntity caster)
@@ -43,6 +45,7 @@ namespace Abilities
             {
                 return effectCells;
             }
+
             for (var j = 2; j > 0; j--)
             {
                 for (var i = -1; i <= 1; i++)
@@ -50,8 +53,8 @@ namespace Abilities
                     effectCells.Add(actor.CurrentCell + j * rayVector + i * deltaVector);
                 }
             }
+
             return effectCells;
-            
         }
 
         public override bool IsValidTarget(Vector3Int targetCell, BaseEntity caster)
@@ -62,26 +65,34 @@ namespace Abilities
                 if (target != null)
                     return true;
             }
+
             return false;
         }
 
         public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)
         {
             CameraFollow.Instance?.ShakeMedium();
-            var knobackVector = targetCell - actor.CurrentCell;
-            foreach (var cell in GetEffectCells(targetCell, actor))
+            var knockbackVector = targetCell - actor.CurrentCell;
+            var targets = GetEffectCells(targetCell, actor);
+
+            foreach (var cell in targets)
             {
-                var target = GridManager.Instance.GetEntityAt(cell);
-                if (target != null)
+                var targetObj = GridManager.Instance.GetEntityAt(cell);
+                if (targetObj != null)
                 {
-                    var targetHealth = target.GetComponent<Health>();
-                    var entity = target.GetComponent<BaseEntity>();
-                    KnobackEnemy(knobackVector, entity);
+                    var entity = targetObj.GetComponent<BaseEntity>();
+                    var health = targetObj.GetComponent<Health>();
+
                     entity.Freeze(freezePower);
-                    targetHealth?.TakeDamage(actor.Stats.AttackDamage);
-                    yield return null;
+                    
+                    var damage = GetCalculatedDamage(actor);
+                    
+                    health?.TakeDamage(damage);
+                    KnobackEnemy(knockbackVector, entity);
                 }
             }
+
+            yield return new WaitForSeconds(0.1f);
         }
 
         private void KnobackEnemy(Vector3Int direction, BaseEntity entity)
@@ -92,7 +103,6 @@ namespace Abilities
                 entity.MoveToCell(entity.CurrentCell + 2 * direction);
             else if (canKnoback)
                 entity.MoveToCell(entity.CurrentCell + direction);
-
         }
     }
 }
