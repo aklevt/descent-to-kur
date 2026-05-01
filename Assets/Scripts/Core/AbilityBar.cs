@@ -20,8 +20,8 @@ namespace Core
             RefreshSlots();
 
             // Выбрать первую способность при старте (ход)
-            if (slots.Count > 0 && PlayerMovement.Instance?.Abilities != null &&
-                PlayerMovement.Instance.Abilities.Count > 0)
+            if (slots.Count > 0 && Player.Instance?.Abilities != null &&
+                Player.Instance.Abilities.Count > 0)
             {
                 OnAbilitySelected(0);
             }
@@ -45,7 +45,7 @@ namespace Core
 
         private void RefreshSlots()
         {
-            var abilities = PlayerMovement.Instance?.Abilities;
+            var abilities = Player.Instance?.Abilities;
 
             for (var i = 0; i < slots.Count; i++)
             {

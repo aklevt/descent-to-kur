@@ -11345,11 +11345,51 @@ PrefabInstance:
       propertyPath: stats.isCustomized
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 39971611221549213, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3543739399265217086}
   m_SourcePrefab: {fileID: 100100000, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+--- !u!212 &3543739399265217084 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 1122430972742747490, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+  m_PrefabInstance: {fileID: 3543739399265217083}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &3543739399265217085 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 39971611221549213, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+  m_PrefabInstance: {fileID: 3543739399265217083}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3543739399265217086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3543739399265217085}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ca4ad108e27f9f4fbd84f7fad4380a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GameScripts::Player
+  abilities:
+  - {fileID: 11400000, guid: b7a4310a3bc932a4392dc1f8b9471e83, type: 2}
+  - {fileID: 11400000, guid: eccfb25f92df17f4695c1d1dc604246f, type: 2}
+  - {fileID: 11400000, guid: 685b90008ca75fb4b95548e95d58d3e9, type: 2}
+  - {fileID: 11400000, guid: 1285b512ed81e7a49a31013897bf5ca7, type: 2}
+  isCustomized: 0
+  MaxHealth: 100
+  AnimationSpeed: 4
+  Freeze: 0
+  Health: 100
+  spriteRenderer: {fileID: 3543739399265217084}
+  animator: {fileID: 0}
+  Energy: 15
+  MaxEnergy: 15
 --- !u!1001 &4007892049966704846
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -7,18 +7,19 @@ public class Health : MonoBehaviour
     [SerializeField] private float fadeDuration = 0.5f;
 
     private SpriteRenderer spriteRenderer;
-    public bool IsDead => entity != null && entity.Stats.IsDead;
-    
+    //public bool IsDead => entity != null && entity.Stats.IsDead;
+    public bool IsDead => entity != null && entity.Health <= 0;
+
     private bool isDying = false;
 
-    private BaseEntity entity;
+    private Entity entity;
     
     public event Action<GameObject> OnDeath;
 
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        entity = GetComponent<BaseEntity>();
+        entity = GetComponent<Entity>();
     }
 
     public void TakeDamage(int damage)
@@ -26,11 +27,12 @@ public class Health : MonoBehaviour
         if (isDying || IsDead || !entity) return;
 
 
-        entity.Stats.ApplyDamage(damage);
+        entity.Health = Mathf.Max(0, entity.Health - damage);
         
-        Debug.Log($"{gameObject.name} получил урон: {damage}. ХП: {entity.Stats.Health}/{entity.Stats.MaxHealth}");
+        Debug.Log($"{gameObject.name} получил урон: {damage}. ХП: {entity.Health}/{entity.MaxHealth}");
 
-        if (entity.Stats.IsDead)
+        //if (entity.Stats.IsDead)
+        if (IsDead)
         {
             StartCoroutine(FlashRed());
             Die();

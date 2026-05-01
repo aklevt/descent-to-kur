@@ -7,8 +7,10 @@ using UnityEngine;
 /// Базовый класс для всех врагов
 /// Конкретные враги переопределяют ExecuteAction для своей логики
 /// </summary>
-public abstract class EnemyBase : BaseEntity
+public abstract class BaseEnemy : Entity
 {
+    public int MoveRange;
+
     protected override void Start()
     {
         base.Start();
@@ -58,14 +60,15 @@ public abstract class EnemyBase : BaseEntity
     /// </summary>
     protected virtual Vector3Int? GetBestMove()
     {
-        if (PlayerMovement.Instance == null) return null;
+        if (Player.Instance == null) return null;
         
-        var playerCell = PlayerMovement.Instance.CurrentCell;
+        var playerCell = Player.Instance.CurrentCell;
         
         if (Vector3Int.Distance(CurrentCell, playerCell) <= 1.1f)
             return CurrentCell;
         
-        var possibleMoves = GridManager.Instance.GetWalkableTilesInRange(CurrentCell, Stats.MoveRange, gameObject);
+        // hard line (не обращайте внимания на этот комментарий)
+        var possibleMoves = GridManager.Instance.GetWalkableTilesInRange(CurrentCell, MoveRange, gameObject);
     
         return possibleMoves
             .OrderBy(pos => Vector3.Distance(pos, playerCell))
@@ -95,8 +98,8 @@ public abstract class EnemyBase : BaseEntity
     /// <summary>
     /// Реализуют конкретные враги для своего хода
     /// </summary>
-    protected abstract IEnumerator ExecuteAction();
-
-
-    
+    protected IEnumerator ExecuteAction()
+    {
+        yield return TryUseAbility(0);
+    }
 }
