@@ -7,12 +7,13 @@ namespace Abilities
     [CreateAssetMenu(fileName = "RangedAttackAbility", menuName = "Abilities/RangedAttack")]
     public class RangedAttackAbilityData : AbilityData
     {
-        public int minRange = 2;
-        public int maxRange = 3;
+        public int MinRange = 3;
+        public int MaxRange = 5;
+        public int Damage = 10;
 
         public override List<Vector3Int> GetTargetCellsFrom(Vector3Int origin, BaseEntity actor)
         {
-            return GridManager.Instance.GetAttackableCellsInRadius(origin, maxRange, minRange);
+            return GridManager.Instance.GetAttackableCellsInRadius(origin, MaxRange, MinRange);
         }
 
         public override List<Vector3Int> GetEffectCells(Vector3Int hoveredCell, BaseEntity actor)
@@ -39,7 +40,7 @@ namespace Abilities
         public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)
         {
             var target = GridManager.Instance.GetEntityAt(targetCell);
-            target.GetComponent<Health>()?.TakeDamage(actor.Stats.AttackDamage);
+            target.GetComponent<Health>()?.TakeDamage(Damage);
             CameraFollow.Instance?.ShakeMedium();
 
             yield return null;

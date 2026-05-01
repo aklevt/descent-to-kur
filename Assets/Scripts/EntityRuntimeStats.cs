@@ -5,15 +5,13 @@ using UnityEngine;
 public class EntityRuntimeStats
 {
     public bool isCustomized;
-
+    
     public int Freeze;
     public int Health;
     public int MaxHealth;
     public int Energy;
     public int MaxEnergy;
-    public int MoveRange;
-    public float MoveSpeed;
-    public int AttackDamage;
+    public float AnimationSpeed;
 
     public EntityRuntimeStats()
     {
@@ -22,15 +20,11 @@ public class EntityRuntimeStats
     public void Initialize(EntityStats so)
     {
         if (so == null) return;
-        MaxHealth = so.maxHealth;
+        MaxHealth = so.MaxHealth;
         Health = MaxHealth;
-        
-        MaxEnergy = so.maxEnergy; 
+        MaxEnergy = so.MaxEnergy; 
         Energy = MaxEnergy;
-        
-        MoveRange = so.moveRange;
-        MoveSpeed = so.moveSpeed;
-        AttackDamage = so.baseAttackDamage;
+        AnimationSpeed = so.AnimationSpeed;
     }
 
     public bool IsDead => Health <= 0;

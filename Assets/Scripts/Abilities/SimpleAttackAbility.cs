@@ -7,6 +7,8 @@ namespace Abilities
     [CreateAssetMenu(fileName = "SimpleAttackAbility", menuName = "Abilities/SimpleAttack")]
     public class SimpleAttackAbilityData : AbilityData
     {
+        public int Damage = 10;
+
         public override List<Vector3Int> GetTargetCellsFrom(Vector3Int origin, BaseEntity actor)
         {
             return GridManager.Instance.GetAttackableCellsInRadius(origin, 1);
@@ -42,7 +44,7 @@ namespace Abilities
                 target.transform.position,
                 () =>
                 {
-                    targetHealth?.TakeDamage(actor.Stats.AttackDamage);
+                    targetHealth?.TakeDamage(Damage);
                     CameraFollow.Instance?.ShakeMedium();
                 }
             ));

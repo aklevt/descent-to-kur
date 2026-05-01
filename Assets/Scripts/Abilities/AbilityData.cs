@@ -12,12 +12,12 @@ namespace Abilities
     {
         public string abilityName;
         
-        [Header("Cost")]
-        public int energyCost = 0;
-        
         [Header("Colors")]
         public Color highlightColor = Color.white;  //  Color.black;
         public Color effectColor = new Color(1f, 0.2f, 0.2f, 0.9f); //new Color(0f, 0f, 0f, 0.9f);
+
+        [Header("Stats")]
+        public int energyCost = 0;
 
         /// <summary>
         /// Вычисляет доступные для выбора клетки по текущему положению исполнителя

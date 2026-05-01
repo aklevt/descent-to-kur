@@ -15,8 +15,8 @@ public class PlayerMovement : BaseEntity
     }
 
 
-    public void ExecuteMove(Vector3Int targetCell)
+    /*public void ExecuteMove(Vector3Int targetCell)
     {
         MoveToCell(targetCell);
-    }
+    }*/
 }

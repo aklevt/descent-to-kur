@@ -7,11 +7,13 @@ namespace Abilities
     [CreateAssetMenu(fileName = "MoveAbility", menuName = "Abilities/Move")]
     public class MoveAbilityData : AbilityData
     {
+        public int moveRange = 4;
+
         public override List<Vector3Int> GetTargetCellsFrom(Vector3Int position, BaseEntity actor)
         {
             var maxAvailableDistance = (actor is EnemyBase) 
-                ? actor.Stats.MoveRange 
-                : Mathf.Min(actor.Stats.MoveRange, actor.Stats.Energy);
+                ? moveRange
+                : Mathf.Min(moveRange, actor.Stats.Energy);
 
             if (maxAvailableDistance <= 0) return new List<Vector3Int>();
             
