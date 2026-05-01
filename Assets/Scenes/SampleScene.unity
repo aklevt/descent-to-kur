@@ -11309,6 +11309,42 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: baseStats
+      value: 
+      objectReference: {fileID: 11400000, guid: 43b02efb37ef8ac41aedc492ac640db1, type: 2}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.Energy
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.Health
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.MaxEnergy
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.MaxHealth
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.MoveRange
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.MoveSpeed
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.AttackDamage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+      propertyPath: stats.isCustomized
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -11418,6 +11454,38 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
+      propertyPath: baseStats
+      value: 
+      objectReference: {fileID: 11400000, guid: 7c30066f7a295724da5fbc75b53bd3fa, type: 2}
+    - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
+      propertyPath: stats.Energy
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
+      propertyPath: stats.Health
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
+      propertyPath: stats.MaxEnergy
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
+      propertyPath: stats.MaxHealth
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
+      propertyPath: stats.MoveRange
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
+      propertyPath: stats.MoveSpeed
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2809698832690530192, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
+      propertyPath: stats.isCustomized
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4148541867445294079, guid: 0cba811be4e8af342acbcb83d3c531ed, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0

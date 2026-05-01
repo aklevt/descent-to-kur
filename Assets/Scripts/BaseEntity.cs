@@ -90,7 +90,7 @@ public abstract class BaseEntity : MonoBehaviour
         if (!IsMoving) return;
 
         var dt = Mathf.Min(Time.deltaTime, 0.03f);
-        transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, Stats.MoveSpeed * dt);
+        transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, Stats.AnimationSpeed * dt);
 
         if (Vector3.Distance(transform.position, targetWorldPos) < 0.001f)
         {
@@ -100,17 +100,6 @@ public abstract class BaseEntity : MonoBehaviour
             OnArrivingToTarget();
         }
     }
-
-    /// <summary>
-    /// Наложение эффекта оглушения
-    /// </summary>
-    public void Freeze(int power) 
-    {
-        stats.Freeze = Math.Max(stats.Freeze, power);
-    }
-
-    public bool IsFreeze => stats.Freeze > 0;
-    public void Unfreeze() => stats.Freeze--;
 
     /// <summary>
     /// Простейшая анимация удара с возможностью вызова действия в сам момент удара

@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 
 namespace Abilities
@@ -7,7 +9,8 @@ namespace Abilities
     [CreateAssetMenu(fileName = "PowerfulPunchAbility", menuName = "Abilities/PowerfulPunch")]
     public class PowerfulPunchAD : AbilityData
     {
-        private int freezePower = 3;
+        public int FreezePower = 3;
+        public int Damage = 20;
 
         public override List<Vector3Int> GetTargetCellsFrom(Vector3Int origin, BaseEntity caster)
         {
@@ -77,8 +80,8 @@ namespace Abilities
                     var targetHealth = target.GetComponent<Health>();
                     var entity = target.GetComponent<BaseEntity>();
                     KnobackEnemy(knobackVector, entity);
-                    entity.Freeze(freezePower);
-                    targetHealth?.TakeDamage(actor.Stats.AttackDamage);
+                    entity.Stats.Freeze = Math.Max(entity.Stats.Freeze, FreezePower);
+                    targetHealth?.TakeDamage(Damage);
                     yield return null;
                 }
             }

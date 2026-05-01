@@ -33,9 +33,9 @@ public class TurnManager : MonoBehaviour
         {
             if (enemy == null)
                 continue;
-            if (enemy.IsFreeze)
+            if (enemy.Stats.Freeze > 0)
             {
-                enemy.Unfreeze();
+                enemy.Stats.Freeze--;
                 continue;
             }
             yield return enemy.DoTurn();
