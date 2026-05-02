@@ -118,10 +118,21 @@ namespace Core
         {
             if (player == null || currentRoom == null) return;
 
-            GridManager.Instance.UnregisterEntity(player.CurrentCell);
+            if (player.CurrentCell != Vector3Int.zero)
+            {
+                GridManager.Instance.UnregisterEntity(player.CurrentCell);
+            }
 
-            var spawnCell = currentRoom.GetPlayerSpawnCell();
-            player.TeleportToCell(spawnCell);
+            if (currentRoom.playerSpawnPoint != null)
+            {
+                player.transform.position = currentRoom.playerSpawnPoint.position;
+            }
+            else
+            {
+                Debug.LogError("[LevelController] playerSpawnPoint не назначен");
+            }
+
+            player.InitializeOnGrid();
 
             CameraFollow.Instance?.ResetFocus();
         }

@@ -13,11 +13,5 @@ namespace Entities
             else
                 Destroy(gameObject);
         }
-
-        protected override void Start()
-        {
-            base.Start();
-            InitializeOnGrid();
-        }
     }
 }
