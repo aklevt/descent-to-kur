@@ -1,6 +1,8 @@
-﻿using Sprites;
+﻿using Abilities;
+using Sprites;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -10,8 +12,11 @@ using UnityEngine;
 /// </summary>
 public abstract class BaseEnemy : Entity
 {
-    [NonSerialized]
-    public int MoveRange;
+    [Header("Move ability")] [SerializeField]
+    private Move moveAbility;
+    //public IReadOnlyList<Ability> Abilities => abilities;
+    [Header("Ability")] [SerializeField]
+    private Ability action;
 
     protected override void Start()
     {
@@ -30,11 +35,12 @@ public abstract class BaseEnemy : Entity
     /// </summary>
     public IEnumerator DoTurn()
     {
+        //Подготовка
         if (TryGetComponent<Health>(out var h) && h.IsDead) yield break;
-        
         Debug.Log($"{gameObject.name} готовится к ходу...");
         yield return new WaitForSeconds(0.1f);
 
+        //Движение
         var bestMove = GetBestMove();
 
         if (bestMove.HasValue && bestMove.Value != CurrentCell)
@@ -97,11 +103,24 @@ public abstract class BaseEnemy : Entity
         yield return StartCoroutine(ability.Execute(this, target.Value));
     }
 
-    /// <summary>
-    /// Реализуют конкретные враги для своего хода
-    /// </summary>
-    protected IEnumerator ExecuteAction()
+    protected IEnumerator TryUseAbility(int abilityIndex)
     {
-        yield return TryUseAbility(0);
+        if (abilityIndex >= Abilities.Count) yield break;
+
+        var ability = Abilities[abilityIndex];
+        if (!ability.CanUse(this)) yield break;
+
+        var target = ability.ChooseTarget(this);
+        if (!target.HasValue) yield break;
+
+        yield return StartCoroutine(ability.Execute(this, target.Value));
     }
+
+    ///// <summary>
+    ///// Реализуют конкретные враги для своего хода
+    ///// </summary>
+    //protected IEnumerator ExecuteAction()
+    //{
+    //    yield return TryUseAbility(0);
+    //}
 }

@@ -146,7 +146,7 @@ namespace Core
             isExecuting = true;
             var ability = selectedAbility;
 
-            if ((ability is not Move) && Player.Instance != null)
+            if ((ability is not Abilities.PlayerMove) && Player.Instance != null)
             {
                 //PlayerMovement.Instance.Stats.SpendEnergy(ability.energyCost);
                 Player.Instance.SpendEnergy(ability.energyCost);

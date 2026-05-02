@@ -12,10 +12,6 @@ using static UnityEngine.EventSystems.EventTrigger;
 /// </summary>
 public abstract class Entity : MonoBehaviour
 {
-    [Header("Abilities")] [SerializeField] 
-    private List<Ability> abilities = new();
-    public IReadOnlyList<Ability> Abilities => abilities;
-
     //[Header("Stats")] [SerializeField] private EntityStats baseStats;
     //[Header("Live Stats")] [SerializeField]
     //private EntityRuntimeStats stats = new();

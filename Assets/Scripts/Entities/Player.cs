@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Abilities;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
 
@@ -10,6 +12,10 @@ public class Player : Entity
     public int Energy;
     [NonSerialized]
     public int MaxEnergy;
+
+    [Header("Abilities")] [SerializeField]
+    private List<Ability> abilities = new();
+    public IReadOnlyList<Ability> Abilities => abilities;
 
     public override void Initialize()
     {
