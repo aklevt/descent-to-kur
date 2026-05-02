@@ -2596,6 +2596,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3823373843484550341, guid: d1a3423eabc19b94faf0ea9cd918e1c1, type: 3}
+      propertyPath: m_Name
+      value: TransitionScreenManager
+      objectReference: {fileID: 0}
     - target: {fileID: 3981473526753618368, guid: d1a3423eabc19b94faf0ea9cd918e1c1, type: 3}
       propertyPath: m_Type
       value: 1
@@ -4155,7 +4159,7 @@ MonoBehaviour:
   roomPrefabs:
   - {fileID: 1108904379850795440, guid: 61036dab59b280943bb7975d566dbf55, type: 3}
   - {fileID: 1108904379850795440, guid: 61036dab59b280943bb7975d566dbf55, type: 3}
-  player: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+  player: {fileID: 2045205834}
 --- !u!114 &1246193165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6370,6 +6374,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3001576699828800167, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
   m_PrefabInstance: {fileID: 3543739399265217083}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2045205834 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
+  m_PrefabInstance: {fileID: 3543739399265217083}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5565cfab927933244a0850889443c4ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Sprites.PlayerMovement
 --- !u!1 &2089451901
 GameObject:
   m_ObjectHideFlags: 0
@@ -6658,7 +6673,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3001576699828800167, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -16.49
+      value: -15.55
       objectReference: {fileID: 0}
     - target: {fileID: 3001576699828800167, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
       propertyPath: m_LocalPosition.y

@@ -118,10 +118,8 @@ namespace Core
         {
             if (player == null || currentRoom == null) return;
 
-            if (player.CurrentCell != Vector3Int.zero)
-            {
-                GridManager.Instance.UnregisterEntity(player.CurrentCell);
-            }
+            GridManager.Instance.UnregisterEntity(player.CurrentCell);
+            
 
             if (currentRoom.playerSpawnPoint != null)
             {

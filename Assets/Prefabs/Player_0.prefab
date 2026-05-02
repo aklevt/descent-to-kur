@@ -115,13 +115,15 @@ MonoBehaviour:
   stats:
     isCustomized: 0
     Freeze: 0
-    Health: 20
-    MaxHealth: 20
+    Health: 10
+    MaxHealth: 10
     Energy: 10
     MaxEnergy: 10
     MoveRange: 3
     MoveSpeed: 3
     AttackDamage: 5
+    PreferredAttackRange: 1
+    MinimumRange: 0
   spriteRenderer: {fileID: 1122430972742747490}
   animator: {fileID: 0}
 --- !u!114 &9028990903933944739
