@@ -1,4 +1,4 @@
-using System.Collections;
+п»їusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
@@ -12,7 +12,7 @@ namespace Abilities
 
         public override List<Vector3Int> GetTargetCellsFrom(Vector3Int position, Entity actor)
         {
-            // Грамотно переписать
+            // Р“СЂР°РјРѕС‚РЅРѕ РїРµСЂРµРїРёСЃР°С‚СЊ
             //var maxAvailableDistance = (actor is BaseEnemy) 
             //    ? moveRange
             //    : Mathf.Min(moveRange, actor.Energy);
