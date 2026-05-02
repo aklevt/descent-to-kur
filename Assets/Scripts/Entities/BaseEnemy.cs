@@ -1,6 +1,7 @@
+﻿using Sprites;
+using System;
 using System.Collections;
 using System.Linq;
-using Sprites;
 using UnityEngine;
 
 /// <summary>
@@ -9,6 +10,7 @@ using UnityEngine;
 /// </summary>
 public abstract class BaseEnemy : Entity
 {
+    [NonSerialized]
     public int MoveRange;
 
     protected override void Start()

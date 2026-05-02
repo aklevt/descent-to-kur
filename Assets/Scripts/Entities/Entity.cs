@@ -1,4 +1,4 @@
-using Abilities;
+﻿using Abilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,12 +19,14 @@ public abstract class Entity : MonoBehaviour
     //[Header("Stats")] [SerializeField] private EntityStats baseStats;
     //[Header("Live Stats")] [SerializeField]
     //private EntityRuntimeStats stats = new();
-    [Header("Abilities")] [SerializeField]
-    public bool isCustomized;
+    //Header("Stats")] [SerializeField]
+    [NonSerialized]
     public int MaxHealth;
+    [NonSerialized]
     public float AnimationSpeed;
-
+    [NonSerialized]
     public int Freeze;
+    [NonSerialized]
     public int Health;
 
     //public EntityRuntimeStats Stats => stats;
@@ -58,14 +60,15 @@ public abstract class Entity : MonoBehaviour
         AnimationSpeed = so.AnimationSpeed;
     }*/
 
-    private void OnValidate()
+    /*private void OnValidate()
     {
+
         if (!isCustomized) //&& baseStats != null)
         {
             Initialize();
             //stats.Initialize(baseStats);
         }
-    }
+    }*/
 
     private void Update()
     {
@@ -76,13 +79,13 @@ public abstract class Entity : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
-
+        Initialize();
         // Установка статов на свякий случай, пусть будет
-        if (!isCustomized) //(baseStats != null && !stats.isCustomized)
-        {
-            Initialize();
-            //stats.Initialize(baseStats);
-        }
+        //if (!isCustomized) //(baseStats != null && !stats.isCustomized)
+        //{
+        //    Initialize();
+        //    //stats.Initialize(baseStats);
+        //}
 
         // Намеренно продублирована логика. Даже если в инспекторе изменить здоровье (isCustomized == true), оно сбросится после респауна
         //stats.Health = stats.MaxHealth;

@@ -1,3 +1,4 @@
+﻿using System;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
 
@@ -5,7 +6,9 @@ public class Player : Entity
 {
     public static Player Instance { get; private set; }
 
+    [NonSerialized]
     public int Energy;
+    [NonSerialized]
     public int MaxEnergy;
 
     public override void Initialize()
@@ -28,6 +31,7 @@ public class Player : Entity
             Destroy(gameObject);
     }
 
+    // грамотно переработать взаимодействие с публичными и приватными полями
     public void SpendEnergy(int amount) => Instance.Energy = Mathf.Max(0, Instance.Energy - amount);
     /*public void ExecuteMove(Vector3Int targetCell)
     {
