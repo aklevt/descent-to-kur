@@ -1,19 +1,20 @@
-using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class TurnManager : MonoBehaviour
 {
     [ContextMenu("Ход противника")]
     public void DebugEnemyTurn() => SetState(TurnState.EnemyTurn);
 
-    private List<EnemyBase> allEnemies = new();
+    private List<BaseEnemy> allEnemies = new();
 
     private IEnumerator EnemyTurnSequence()
     {
-        var savedEnemiesList = new List<EnemyBase>(allEnemies);
+        var savedEnemiesList = new List<BaseEnemy>(allEnemies);
         var activeEnemies = savedEnemiesList
             .Where(e => e != null)
             .ToList();
@@ -33,9 +34,9 @@ public class TurnManager : MonoBehaviour
         {
             if (enemy == null)
                 continue;
-            if (enemy.Stats.Freeze > 0)
+            if (enemy.Freeze > 0)
             {
-                enemy.Stats.Freeze--;
+                enemy.Freeze--;
                 continue;
             }
             yield return enemy.DoTurn();
@@ -45,7 +46,7 @@ public class TurnManager : MonoBehaviour
 
         yield return null;
         
-        if (PlayerMovement.Instance.Stats.Health <= 0)
+        if (Player.Instance.Health <= 0)
         {
             yield break;
         }
@@ -53,7 +54,7 @@ public class TurnManager : MonoBehaviour
         SetState(TurnState.PlayerTurn);
     }
 
-    public void RegisterEnemy(EnemyBase enemy) 
+    public void RegisterEnemy(BaseEnemy enemy) 
     {
         if (!allEnemies.Contains(enemy))
         {
@@ -79,7 +80,7 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    public void UnregisterEnemy(EnemyBase enemy)
+    public void UnregisterEnemy(BaseEnemy enemy)
     {
         if (allEnemies.Contains(enemy))
         {
@@ -91,10 +92,11 @@ public class TurnManager : MonoBehaviour
     private void SetState(TurnState newState)
     {
         CurrentState = newState;
-
-        if (newState == TurnState.PlayerTurn && PlayerMovement.Instance != null)
+        var player = Player.Instance;
+        if (newState == TurnState.PlayerTurn && player != null)
         {
-            PlayerMovement.Instance.Stats.RestoreEnergy(PlayerMovement.Instance.Stats.MaxEnergy);
+            player.Energy = player.MaxEnergy;
+            //Mathf.Min(player.Stats.MaxEnergy, Energy + amount);  //Stats.RestoreEnergy(PlayerMovement.Instance.Stats.MaxEnergy);
         }
 
         Debug.Log($"<color=yellow>[TurnManager]</color> Ход сменился на: <b>{newState}</b>");

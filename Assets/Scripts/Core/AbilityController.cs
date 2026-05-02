@@ -15,7 +15,7 @@ namespace Core
         [SerializeField] private GameObject energyWarningPopup;
 
         private IReadOnlyList<AbilityData> PlayerAbilities =>
-            PlayerMovement.Instance?.Abilities;
+            Player.Instance?.Abilities;
 
         private List<Vector3Int> availableCells = new();
         private AbilityData selectedAbility;
@@ -26,7 +26,7 @@ namespace Core
             !isDead &&
             TurnManager.Instance != null &&
             TurnManager.Instance.CurrentState == TurnState.PlayerTurn &&
-            PlayerMovement.Instance != null;
+            Player.Instance != null;
 
         public List<Vector3Int> AvailableCells => availableCells;
 
@@ -59,7 +59,7 @@ namespace Core
         }
 
         private bool ShouldRefreshAbilityGrid() =>
-            !PlayerMovement.Instance.IsMoving &&
+            !Player.Instance.IsMoving &&
             selectedAbility != null &&
             availableCells.Count == 0;
 
@@ -88,7 +88,7 @@ namespace Core
 
             var targetAbility = abilities[index];
 
-            if (!targetAbility.CanUse(PlayerMovement.Instance))
+            if (!targetAbility.CanUse(Player.Instance))
             {
                 ShowEnergyWarning();
             }
@@ -108,10 +108,10 @@ namespace Core
         public void HandleCellClick(Vector3Int clickedCell)
         {
             if (!IsPlayerTurnActive || isExecuting) return;
-            if (PlayerMovement.Instance.IsMoving) return;
+            if (Player.Instance.IsMoving) return;
             if (selectedAbility == null) return;
 
-            if (!selectedAbility.CanUse(PlayerMovement.Instance))
+            if (!selectedAbility.CanUse(Player.Instance))
             {
                 ShowEnergyWarning();
                 return;
@@ -119,7 +119,7 @@ namespace Core
 
             if (!availableCells.Contains(clickedCell)) return;
 
-            if (!selectedAbility.IsValidTarget(clickedCell, PlayerMovement.Instance))
+            if (!selectedAbility.IsValidTarget(clickedCell, Player.Instance))
                 return;
 
             StartCoroutine(ExecuteSelectedAbility(clickedCell));
@@ -146,13 +146,14 @@ namespace Core
             isExecuting = true;
             var ability = selectedAbility;
 
-            if ((ability is not MoveAbilityData) && PlayerMovement.Instance != null)
+            if ((ability is not MoveAbilityData) && Player.Instance != null)
             {
-                PlayerMovement.Instance.Stats.SpendEnergy(ability.energyCost);
+                //PlayerMovement.Instance.Stats.SpendEnergy(ability.energyCost);
+                Player.Instance.SpendEnergy(ability.energyCost);
             }
 
             ClearSelection();
-            yield return ability.Execute(PlayerMovement.Instance, targetCell);
+            yield return ability.Execute(Player.Instance, targetCell);
 
             isExecuting = false;
             RefreshAbilityOverlay();
@@ -168,7 +169,7 @@ namespace Core
                 return;
             }
 
-            var effectCells = selectedAbility.GetEffectCells(hoveredCell, PlayerMovement.Instance);
+            var effectCells = selectedAbility.GetEffectCells(hoveredCell, Player.Instance);
             GridHighlighter.Instance.HighlightEffect(effectCells, selectedAbility.effectColor);
         }
 
@@ -178,7 +179,7 @@ namespace Core
 
             if (!IsPlayerTurnActive || selectedAbility == null) return;
 
-            availableCells = selectedAbility.GetTargetCells(PlayerMovement.Instance);
+            availableCells = selectedAbility.GetTargetCells(Player.Instance);
             GridHighlighter.Instance.HighlightCells(availableCells, selectedAbility.highlightColor);
         }
 

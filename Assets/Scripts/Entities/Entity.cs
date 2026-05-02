@@ -1,26 +1,33 @@
+using Abilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Abilities;
-using Stats;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 /// <summary>
 /// Базовый класс для всех персонажей (игрок, враги)
 /// Наследуемые классы отвечают за все, что связано с сущностью: позиция на сетке, движение, анимация и список способностей
 /// </summary>
-public abstract class BaseEntity : MonoBehaviour
+public abstract class Entity : MonoBehaviour
 {
-    [Header("Abilities")] [SerializeField] private List<AbilityData> abilities = new();
-
+    [Header("Abilities")] [SerializeField] 
+    private List<AbilityData> abilities = new();
     public IReadOnlyList<AbilityData> Abilities => abilities;
 
-    [Header("Stats")] [SerializeField] private EntityStats baseStats;
+    //[Header("Stats")] [SerializeField] private EntityStats baseStats;
+    //[Header("Live Stats")] [SerializeField]
+    //private EntityRuntimeStats stats = new();
+    [Header("Abilities")] [SerializeField]
+    public bool isCustomized;
+    public int MaxHealth;
+    public float AnimationSpeed;
 
-    [Header("Live Stats")] [SerializeField]
-    private EntityRuntimeStats stats = new();
+    public int Freeze;
+    public int Health;
 
-    public EntityRuntimeStats Stats => stats;
+    //public EntityRuntimeStats Stats => stats;
 
     [Header("Components")] [SerializeField]
     protected SpriteRenderer spriteRenderer;
@@ -40,11 +47,23 @@ public abstract class BaseEntity : MonoBehaviour
         PlaceOnCell();
     }
 
+    public virtual void Initialize() { }
+    /*public void Initialize(EntityStats so)
+    {
+        if (so == null) return;
+        MaxHealth = so.MaxHealth;
+        Health = MaxHealth;
+        MaxEnergy = so.MaxEnergy;
+        Energy = MaxEnergy;
+        AnimationSpeed = so.AnimationSpeed;
+    }*/
+
     private void OnValidate()
     {
-        if (!stats.isCustomized && baseStats != null)
+        if (!isCustomized) //&& baseStats != null)
         {
-            stats.Initialize(baseStats);
+            Initialize();
+            //stats.Initialize(baseStats);
         }
     }
 
@@ -59,13 +78,15 @@ public abstract class BaseEntity : MonoBehaviour
         animator = GetComponent<Animator>();
 
         // Установка статов на свякий случай, пусть будет
-        if (baseStats != null && !stats.isCustomized)
+        if (!isCustomized) //(baseStats != null && !stats.isCustomized)
         {
-            stats.Initialize(baseStats);
+            Initialize();
+            //stats.Initialize(baseStats);
         }
 
         // Намеренно продублирована логика. Даже если в инспекторе изменить здоровье (isCustomized == true), оно сбросится после респауна
-        stats.Health = stats.MaxHealth;
+        //stats.Health = stats.MaxHealth;
+        Health = MaxHealth;
     }
 
     private void PlaceOnCell()
@@ -90,7 +111,7 @@ public abstract class BaseEntity : MonoBehaviour
         if (!IsMoving) return;
 
         var dt = Mathf.Min(Time.deltaTime, 0.03f);
-        transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, Stats.AnimationSpeed * dt);
+        transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, AnimationSpeed * dt);
 
         if (Vector3.Distance(transform.position, targetWorldPos) < 0.001f)
         {
@@ -160,4 +181,20 @@ public abstract class BaseEntity : MonoBehaviour
     protected virtual void OnArrivingToTarget()
     {
     }
+
+    /*public bool IsDead => Health <= 0;
+
+    public bool HasEnergyForAction(int cost) => Energy >= cost;
+    public void SpendEnergy(int amount) => Energy = Mathf.Max(0, Energy - amount);
+    public void RestoreEnergy(int amount) => Energy = Mathf.Min(MaxEnergy, Energy + amount);
+
+    public void ApplyDamage(int amount)
+    {
+        Health = Mathf.Max(0, Health - amount);
+    }
+
+    public void ApplyHeal(int amount)
+    {
+        Health = Mathf.Min(MaxHealth, Health + amount);
+    }*/
 }

@@ -24,7 +24,7 @@ namespace Abilities
         /// </summary>
         /// <param name="actor">Сущность, использующая способность</param>
         /// <returns>Список координат клеток, на которые можно нажать для активации способности</returns>
-        public List<Vector3Int> GetTargetCells(BaseEntity actor)
+        public List<Vector3Int> GetTargetCells(Entity actor)
             => GetTargetCellsFrom(actor.CurrentCell, actor);
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Abilities
         /// /// <param name="position">Точка отсчета</param>
         /// <param name="actor">Сущность, применяющая способность (учитывает её stats)</param>
         /// <returns>Список координат доступных клеток</returns>
-        public abstract List<Vector3Int> GetTargetCellsFrom(Vector3Int position, BaseEntity actor);
+        public abstract List<Vector3Int> GetTargetCellsFrom(Vector3Int position, Entity actor);
 
         /// <summary>
         /// Определяет область непосредственного воздействия способности
@@ -41,7 +41,7 @@ namespace Abilities
         /// <param name="hoveredCell">Клетка, над которой находится курсор</param>
         /// <param name="actor">Сущность, применяющая способность</param>
         /// <returns>Список клеток, которые будут подсвечены как "зона поражения"</returns>
-        public virtual List<Vector3Int> GetEffectCells(Vector3Int hoveredCell, BaseEntity actor)
+        public virtual List<Vector3Int> GetEffectCells(Vector3Int hoveredCell, Entity actor)
             => new() { hoveredCell };
 
         /// <summary>
@@ -50,20 +50,22 @@ namespace Abilities
         /// <param name="actor">Сущность, применяющая способность</param>
         /// <param name="targetCell">Выбранная целевая клетка</param>
         /// <returns></returns>
-        public abstract IEnumerator Execute(BaseEntity actor, Vector3Int targetCell);
+        public abstract IEnumerator Execute(Entity actor, Vector3Int targetCell);
 
         /// <summary>
         /// Проверка условий активации способности (наличие энергии, кулдаун, состояние actor).
         /// </summary>
         /// <param name="user">Сущность, для которой надо вызвать проверку</param>
         /// <returns>True, если можно использовать способность</returns>
-        public virtual bool CanUse(BaseEntity user) 
+        public virtual bool CanUse(Entity user) 
         {
             // Пусть враги не тратят энергию
-            if (user is EnemyBase) 
+            if (user is BaseEnemy) 
                 return true;
-    
-            return user.Stats.HasEnergyForAction(energyCost);
+
+            var player = (Player)user;
+            //return user.Stats.HasEnergyForAction(energyCost);
+            return player.Energy >= energyCost;
         }
         
         /// <summary>
@@ -75,7 +77,7 @@ namespace Abilities
         /// </summary>
         /// <param name="actor">Сущность, которая пытается использовать эту способность</param>
         /// <returns>Координата цели или null</returns>
-        public virtual Vector3Int? ChooseTarget(BaseEntity actor)
+        public virtual Vector3Int? ChooseTarget(Entity actor)
         {
             var cells = GetTargetCells(actor);
             return cells.Count > 0 ? cells[0] : null;
@@ -88,7 +90,7 @@ namespace Abilities
         /// <param name="targetCell">Координаты клетки, которую мы проверяем.</param>
         /// <param name="actor">Тот, кто пытается использовать способность.</param>
         /// <returns>True, если клетка подходит (например, там враг). False, если клик на клетку должен быть проигнорирован</returns>
-        public virtual bool IsValidTarget(Vector3Int targetCell, BaseEntity caster)
+        public virtual bool IsValidTarget(Vector3Int targetCell, Entity caster)
         {
             return true;
         }

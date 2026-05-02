@@ -11,23 +11,23 @@ public class PlayerHUD : MonoBehaviour
 
     private void Update()
     {
-        if (PlayerMovement.Instance == null) return;
+        if (Player.Instance == null) return;
 
-        var stats = PlayerMovement.Instance.Stats;
+        var player = Player.Instance;
 
         if (hpSlider != null)
         {
-            hpSlider.maxValue = stats.MaxHealth;
-            hpSlider.value = stats.Health;
+            hpSlider.maxValue = player.MaxHealth;
+            hpSlider.value = player.Health;
         }
 
         if (energySlider != null)
         {
-            energySlider.maxValue = stats.MaxEnergy;
-            energySlider.value = stats.Energy;
+            energySlider.maxValue = player.MaxEnergy;
+            energySlider.value = player.Energy;
         }
 
-        if (hpText != null) hpText.text = $"{stats.Health}/{stats.MaxHealth}";
-        if (energyText != null) energyText.text = $"{stats.Energy}/{stats.MaxEnergy}";
+        if (hpText != null) hpText.text = $"{player.Health}/{player.MaxHealth}";
+        if (energyText != null) energyText.text = $"{player.Energy}/{player.MaxEnergy}";
     }
 }

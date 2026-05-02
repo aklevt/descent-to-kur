@@ -1,6 +1,7 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace Abilities
 {
@@ -9,11 +10,13 @@ namespace Abilities
     {
         public int moveRange = 4;
 
-        public override List<Vector3Int> GetTargetCellsFrom(Vector3Int position, BaseEntity actor)
+        public override List<Vector3Int> GetTargetCellsFrom(Vector3Int position, Entity actor)
         {
-            var maxAvailableDistance = (actor is EnemyBase) 
-                ? moveRange
-                : Mathf.Min(moveRange, actor.Stats.Energy);
+            // Грамотно переписать
+            //var maxAvailableDistance = (actor is BaseEnemy) 
+            //    ? moveRange
+            //    : Mathf.Min(moveRange, actor.Energy);
+            var maxAvailableDistance = moveRange / energyCost;
 
             if (maxAvailableDistance <= 0) return new List<Vector3Int>();
             
@@ -24,14 +27,17 @@ namespace Abilities
             );
         }
 
-        public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)
+        public override IEnumerator Execute(Entity actor, Vector3Int targetCell)
         {
             var distance = Mathf.Abs(targetCell.x - actor.CurrentCell.x) + 
                            Mathf.Abs(targetCell.y - actor.CurrentCell.y);
 
-            if (actor is PlayerMovement)
+            if (actor is Player)
             {
-                actor.Stats.SpendEnergy(distance);
+                var player = (Player)actor;
+                player.SpendEnergy(distance);
+                //Stats.Energy = Mathf.Max(0, actor.Stats.Energy - distance);
+                //SpendEnergy(distance);
             }
             
             actor.MoveToCell(targetCell);

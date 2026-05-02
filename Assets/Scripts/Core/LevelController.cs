@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement; // Для перезагрузки сцены
 
 public class LevelController : MonoBehaviour 
 {
-    private readonly List<EnemyBase> activeEnemies = new();
+    private readonly List<BaseEnemy> activeEnemies = new();
     private bool isGameOver;
 
     private IEnumerator Start() 
@@ -15,10 +15,10 @@ public class LevelController : MonoBehaviour
         yield return null;
         Debug.Log("Инициализация первого уровня");
 
-        var playerHealth = PlayerMovement.Instance.GetComponent<Health>();
+        var playerHealth = Player.Instance.GetComponent<Health>();
         playerHealth.OnDeath += HandlePlayerDeath;
 
-        var enemiesOnScene = FindObjectsByType<EnemyBase>(FindObjectsSortMode.None);
+        var enemiesOnScene = FindObjectsByType<BaseEnemy>(FindObjectsSortMode.None);
         foreach (var enemy in enemiesOnScene)
         {
             activeEnemies.Add(enemy);
@@ -31,7 +31,7 @@ public class LevelController : MonoBehaviour
 
     private void HandleEnemyDeath(GameObject enemyObject)
     {
-        var enemy = enemyObject.GetComponent<EnemyBase>();
+        var enemy = enemyObject.GetComponent<BaseEnemy>();
         if (activeEnemies.Contains(enemy))
         {
             activeEnemies.Remove(enemy);

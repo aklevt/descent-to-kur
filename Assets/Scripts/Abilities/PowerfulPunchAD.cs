@@ -12,12 +12,12 @@ namespace Abilities
         public int FreezePower = 3;
         public int Damage = 20;
 
-        public override List<Vector3Int> GetTargetCellsFrom(Vector3Int origin, BaseEntity caster)
+        public override List<Vector3Int> GetTargetCellsFrom(Vector3Int origin, Entity caster)
         {
             return GridManager.Instance.GetAttackableCellsInRadius(origin, 1);
         }
 
-        public override List<Vector3Int> GetEffectCells(Vector3Int hoveredCell, BaseEntity actor)
+        public override List<Vector3Int> GetEffectCells(Vector3Int hoveredCell, Entity actor)
         {
             var effectCells = new List<Vector3Int>();
             Vector3Int rayVector;
@@ -57,7 +57,7 @@ namespace Abilities
             
         }
 
-        public override bool IsValidTarget(Vector3Int targetCell, BaseEntity caster)
+        public override bool IsValidTarget(Vector3Int targetCell, Entity caster)
         {
             foreach (var cell in GetEffectCells(targetCell, caster))
             {
@@ -68,7 +68,7 @@ namespace Abilities
             return false;
         }
 
-        public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)
+        public override IEnumerator Execute(Entity actor, Vector3Int targetCell)
         {
             CameraFollow.Instance?.ShakeMedium();
             var knobackVector = targetCell - actor.CurrentCell;
@@ -78,16 +78,16 @@ namespace Abilities
                 if (target != null)
                 {
                     var targetHealth = target.GetComponent<Health>();
-                    var entity = target.GetComponent<BaseEntity>();
+                    var entity = target.GetComponent<Entity>();
                     KnobackEnemy(knobackVector, entity);
-                    entity.Stats.Freeze = Math.Max(entity.Stats.Freeze, FreezePower);
+                    entity.Freeze = Math.Max(entity.Freeze, FreezePower);
                     targetHealth?.TakeDamage(Damage);
                     yield return null;
                 }
             }
         }
 
-        private void KnobackEnemy(Vector3Int direction, BaseEntity entity)
+        private void KnobackEnemy(Vector3Int direction, Entity entity)
         {
             var canKnoback = GridManager.Instance.IsCellWalkable(entity.CurrentCell + direction);
             var canFarKnoback = GridManager.Instance.IsCellWalkable(entity.CurrentCell + 2 * direction);
