@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
@@ -6,8 +6,8 @@ using UnityEngine;
 
 namespace Abilities
 {
-    [CreateAssetMenu(fileName = "PowerfulPunchAbility", menuName = "Abilities/PowerfulPunch")]
-    public class PowerfulPunchAD : AbilityData
+    [CreateAssetMenu(fileName = "PowerfulPunch", menuName = "Abilities/PowerfulPunch")]
+    public class PowerfulPunch : Ability
     {
         public int FreezePower = 3;
         public int Damage = 20;

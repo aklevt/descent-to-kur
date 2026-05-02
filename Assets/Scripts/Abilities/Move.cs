@@ -5,8 +5,8 @@ using static UnityEngine.EventSystems.EventTrigger;
 
 namespace Abilities
 {
-    [CreateAssetMenu(fileName = "MoveAbility", menuName = "Abilities/Move")]
-    public class MoveAbilityData : AbilityData
+    [CreateAssetMenu(fileName = "Move", menuName = "Abilities/Move")]
+    public class Move : Ability
     {
         public int moveRange = 4;
 
@@ -16,7 +16,8 @@ namespace Abilities
             //var maxAvailableDistance = (actor is BaseEnemy) 
             //    ? moveRange
             //    : Mathf.Min(moveRange, actor.Energy);
-            var maxAvailableDistance = moveRange / energyCost;
+            var player = (Player)actor;
+            var maxAvailableDistance = Mathf.Min(moveRange, player.Energy / energyCost);
 
             if (maxAvailableDistance <= 0) return new List<Vector3Int>();
             
@@ -35,7 +36,7 @@ namespace Abilities
             if (actor is Player)
             {
                 var player = (Player)actor;
-                player.SpendEnergy(distance);
+                player.SpendEnergy(distance * energyCost);
                 //Stats.Energy = Mathf.Max(0, actor.Stats.Energy - distance);
                 //SpendEnergy(distance);
             }

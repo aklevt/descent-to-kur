@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,7 +8,7 @@ namespace Abilities
     /// Базовый класс для всех способностей в игре. 
     /// Отвечает за логику поиска целей, визуализацию и исполнение способности
     /// </summary>
-    public abstract class AbilityData : ScriptableObject
+    public abstract class Ability : ScriptableObject
     {
         public string abilityName;
         

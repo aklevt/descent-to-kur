@@ -1,19 +1,17 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Abilities
 {
-    [CreateAssetMenu(fileName = "RangedAttackAbility", menuName = "Abilities/RangedAttack")]
-    public class RangedAttackAbilityData : AbilityData
+    [CreateAssetMenu(fileName = "SimpleAttack", menuName = "Abilities/SimpleAttack")]
+    public class SimpleAttack : Ability
     {
-        public int MinRange = 3;
-        public int MaxRange = 5;
         public int Damage = 10;
 
         public override List<Vector3Int> GetTargetCellsFrom(Vector3Int origin, Entity actor)
         {
-            return GridManager.Instance.GetAttackableCellsInRadius(origin, MaxRange, MinRange);
+            return GridManager.Instance.GetAttackableCellsInRadius(origin, 1);
         }
 
         public override List<Vector3Int> GetEffectCells(Vector3Int hoveredCell, Entity actor)
@@ -34,16 +32,22 @@ namespace Abilities
         public override bool IsValidTarget(Vector3Int targetCell, Entity actor)
         {
             var target = GridManager.Instance.GetEntityAt(targetCell);
-            return target != null;
+            return target != null && target != actor.gameObject;
         }
-        
+
         public override IEnumerator Execute(Entity actor, Vector3Int targetCell)
         {
             var target = GridManager.Instance.GetEntityAt(targetCell);
-            target.GetComponent<Health>()?.TakeDamage(Damage);
-            CameraFollow.Instance?.ShakeMedium();
+            var targetHealth = target.GetComponent<Health>();
 
-            yield return null;
+            yield return actor.StartCoroutine(actor.PunchAnimation(
+                target.transform.position,
+                () =>
+                {
+                    targetHealth?.TakeDamage(Damage);
+                    CameraFollow.Instance?.ShakeMedium();
+                }
+            ));
         }
     }
 }

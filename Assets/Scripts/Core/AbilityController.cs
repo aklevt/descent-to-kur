@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using Abilities;
 using UnityEngine;
@@ -14,11 +14,11 @@ namespace Core
 
         [SerializeField] private GameObject energyWarningPopup;
 
-        private IReadOnlyList<AbilityData> PlayerAbilities =>
+        private IReadOnlyList<Ability> PlayerAbilities =>
             Player.Instance?.Abilities;
 
         private List<Vector3Int> availableCells = new();
-        private AbilityData selectedAbility;
+        private Ability selectedAbility;
         private bool isExecuting;
         private bool isDead;
 
@@ -98,7 +98,7 @@ namespace Core
         }
 
 
-        private void SelectAbility(AbilityData ability)
+        private void SelectAbility(Ability ability)
         {
             if (selectedAbility == ability) return;
             selectedAbility = ability;
@@ -146,7 +146,7 @@ namespace Core
             isExecuting = true;
             var ability = selectedAbility;
 
-            if ((ability is not MoveAbilityData) && Player.Instance != null)
+            if ((ability is not Move) && Player.Instance != null)
             {
                 //PlayerMovement.Instance.Stats.SpendEnergy(ability.energyCost);
                 Player.Instance.SpendEnergy(ability.energyCost);

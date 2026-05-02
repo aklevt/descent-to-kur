@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Abilities;
@@ -21,7 +21,7 @@ namespace Core
 
         public bool IsSelected { get; private set; }
 
-        public void Setup(AbilityData ability, int index)
+        public void Setup(Ability ability, int index)
         {
             button.gameObject.SetActive(true);
 
