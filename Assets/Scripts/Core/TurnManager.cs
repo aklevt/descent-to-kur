@@ -26,8 +26,8 @@ public class TurnManager : MonoBehaviour
             
             yield return new WaitForSeconds(1.0f);
             yield return ProcessEndOfRound();
-        
-            if (PlayerMovement.Instance.Stats.Health <= 0)
+            
+            if (PlayerMovement.Instance == null || PlayerMovement.Instance.Stats.Health <= 0)
                 yield break;
         
             SetState(TurnState.PlayerTurn);
@@ -52,6 +52,12 @@ public class TurnManager : MonoBehaviour
         {
             if (enemy == null) continue;
             yield return enemy.DoTurn();
+            
+            if (PlayerMovement.Instance == null || PlayerMovement.Instance.Stats.Health <= 0)
+            {
+                Debug.Log("<color=red>[TurnManager]</color> Игрок погиб, последовательность ходов врагов прервана");
+                yield break;
+            }
         }
 
         yield return ProcessEndOfRound();

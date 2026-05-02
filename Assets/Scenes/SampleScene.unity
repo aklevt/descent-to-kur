@@ -2794,7 +2794,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 1610.4, y: -801}
+  m_AnchoredPosition: {x: 1610.4001, y: -801}
   m_SizeDelta: {x: 146.09, y: 180.94}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &806556724
@@ -4155,7 +4155,7 @@ MonoBehaviour:
   roomPrefabs:
   - {fileID: 1108904379850795440, guid: 61036dab59b280943bb7975d566dbf55, type: 3}
   - {fileID: 1108904379850795440, guid: 61036dab59b280943bb7975d566dbf55, type: 3}
-  player: {fileID: 2045205834}
+  player: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
 --- !u!114 &1246193165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6370,17 +6370,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3001576699828800167, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
   m_PrefabInstance: {fileID: 3543739399265217083}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2045205834 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4898059257836333979, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
-  m_PrefabInstance: {fileID: 3543739399265217083}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5565cfab927933244a0850889443c4ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Sprites.PlayerMovement
 --- !u!1 &2089451901
 GameObject:
   m_ObjectHideFlags: 0
