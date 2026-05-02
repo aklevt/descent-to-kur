@@ -17,7 +17,7 @@ public class Player : Entity
         AnimationSpeed = 4;
         Freeze = 0;
         Health = MaxHealth;
-        MaxEnergy = 15;
+        MaxEnergy = 20;
         Energy = MaxEnergy;
     }
 

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: MoveAbility
   m_EditorClassIdentifier: GameScripts::Abilities.MoveAbilityData
   abilityName: "\u0425\u043E\u0434"
-  energyCost: 1
   highlightColor: {r: 1, g: 1, b: 1, a: 1}
   effectColor: {r: 0.4828231, g: 0.6603774, b: 0.65856355, a: 1}
+  energyCost: 3
+  moveRange: 4
