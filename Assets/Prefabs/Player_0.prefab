@@ -32,7 +32,8 @@ Transform:
   m_LocalPosition: {x: -18.5, y: -4.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 2815050848210641064}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1122430972742747490
@@ -115,8 +116,8 @@ MonoBehaviour:
   stats:
     isCustomized: 0
     Freeze: 0
-    Health: 10
-    MaxHealth: 10
+    Health: 5
+    MaxHealth: 5
     Energy: 10
     MaxEnergy: 10
     MoveRange: 3
@@ -124,8 +125,13 @@ MonoBehaviour:
     AttackDamage: 5
     PreferredAttackRange: 1
     MinimumRange: 0
+    RemainingSteps: 0
+    MaxStepsPerRound: 3
+  localAnimationSpeedMultiplier: 1
   spriteRenderer: {fileID: 1122430972742747490}
   animator: {fileID: 0}
+  isGridInitialized: 0
+  projectileSpawnPoint: {fileID: 2815050848210641064}
 --- !u!114 &9028990903933944739
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -169,3 +175,34 @@ MonoBehaviour:
   m_DefaultActionMap: Gameplay
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!1 &2648582787605504025
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2815050848210641064}
+  m_Layer: 0
+  m_Name: ProjectileSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2815050848210641064
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2648582787605504025}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.34000015, y: 0.85, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3001576699828800167}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

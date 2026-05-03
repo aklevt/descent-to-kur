@@ -64,6 +64,10 @@ namespace Abilities
             {
                 spawnPos = rangedEnemy.GetProjectileSpawnPosition();
             }
+            else if (actor is PlayerMovement player)
+            {
+                spawnPos = player.GetProjectileSpawnPosition();
+            }
 
             GameObject chargeEffect = null;
             if (chargeEffectPrefab != null)
