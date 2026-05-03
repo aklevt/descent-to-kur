@@ -13,6 +13,7 @@ namespace Entities
             if (Instance == null)
             {
                 Instance = this;
+                // DontDestroyOnLoad(gameObject);
                 Debug.Log($"<color=cyan>[PlayerMovement]</color> Instance установлен у {name} (ID: {GetInstanceID()})");
             }
             else if (Instance != this)

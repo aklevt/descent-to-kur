@@ -29,7 +29,10 @@ namespace Core
         private void Awake()
         {
             if (Instance == null)
+            {
                 Instance = this;
+                DontDestroyOnLoad(gameObject);
+            }
             else
                 Destroy(gameObject);
         }
@@ -130,36 +133,44 @@ namespace Core
             // Игрок создается из префаба в первой комнате
             // При этом обязательно объекта игрока не должно быть на сцене
             // Иначе возникают трудноотловимые баги /ᐠ｡ꞈ｡ᐟ\
-            if (currentPlayer == null)
+            if (PlayerMovement.Instance != null)
+            {
+                currentPlayer = PlayerMovement.Instance;
+                
+                var health = currentPlayer.GetComponent<Health>();
+                health?.ResetState();
+
+                Debug.Log($"<color=green>[LevelController]</color> Используется существующий игрок: {currentPlayer.name}");
+                if (CameraFollow.Instance != null)
+                {
+                    CameraFollow.Instance.SetPlayerTarget(currentPlayer.transform);
+                }
+
+                currentPlayer.RespawnAt(spawnPos);
+            }
+            else if (currentPlayer == null)
             {
                 if (playerPrefab == null)
                 {
-                    Debug.LogError("[LevelController] playerPrefab не назначен в инспекторе");
+                    Debug.LogError("[LevelController] playerPrefab не назначен");
                     return;
                 }
 
                 var playerGO = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
                 currentPlayer = playerGO.GetComponent<PlayerMovement>();
 
-                // Подписка на смерть происходит только при создании игрока
                 var health = currentPlayer.GetComponent<Health>();
                 if (health != null)
                 {
                     health.OnDeath += HandlePlayerDeath;
                 }
 
-                if (CameraFollow.Instance != null)
-                {
-                    CameraFollow.Instance.SetPlayerTarget(currentPlayer.transform);
-                }
-
-                Debug.Log(
-                    $"<color=green>[LevelController]</color> Игрок создан: {currentPlayer.name} (InstanceID: {currentPlayer.GetInstanceID()})");
-                Debug.Log(
-                    $"<color=green>[LevelController]</color> PlayerMovement.Instance: {PlayerMovement.Instance?.name} (InstanceID: {PlayerMovement.Instance?.GetInstanceID()})");
-
-                if (currentPlayer != PlayerMovement.Instance)
-                    Debug.LogError($"<color=red>[LevelController]</color> currentPlayer != Instance");
+                Debug.Log($"<color=green>[LevelController]</color> Игрок создан: {currentPlayer.name}");
+            }
+            
+            if (CameraFollow.Instance != null)
+            {
+                CameraFollow.Instance.SetPlayerTarget(currentPlayer.transform);
             }
 
             currentPlayer.RespawnAt(spawnPos);
@@ -230,15 +241,17 @@ namespace Core
 
             isGameOver = true;
             Debug.Log("<color=red>[LevelController]</color> Игрок погиб");
-
+            
+            // Объект игрока больше не уничтожается целиком, чтобы менеджеры из-за него не устраивали разборок
+            //
             // Отписаться от события
-            var health = playerObj.GetComponent<Health>();
-            if (health != null)
-            {
-                health.OnDeath -= HandlePlayerDeath;
-            }
-
-            currentPlayer = null;
+            // var health = playerObj.GetComponent<Health>();
+            // if (health != null)
+            // {
+            //     health.OnDeath -= HandlePlayerDeath;
+            // }
+            //
+            // currentPlayer = null;
 
             if (AbilityController.Instance != null)
             {
@@ -264,7 +277,10 @@ namespace Core
             }
 
             // Перезагрузить сцену
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            // SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            
+            // Перезагрузить только комнату
+            LoadRoomByIndex(currentRoomIndex);
         }
     }
 }
