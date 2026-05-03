@@ -29,6 +29,8 @@ namespace Entities
 
         [SerializeField] protected Animator animator;
 
+        public bool isGridInitialized = false;
+
         public Vector3Int CurrentCell { get; private set; }
         public bool IsMoving { get; private set; }
 
@@ -36,6 +38,72 @@ namespace Entities
 
         protected virtual void Start()
         {
+        }
+
+
+        public void RespawnAt(Vector3 worldPosition)
+        {
+            // Пусть дебаги пока что остаются, еще нужны
+            Debug.Log($"<color=orange>[{name}] Дебаг RespawnAt </color>");
+            Debug.Log($"  worldPosition={worldPosition}");
+            Debug.Log($"  isGridInitialized={isGridInitialized}");
+            Debug.Log($"  CurrentCell={CurrentCell}");
+            Debug.Log($"  transform.position={transform.position}");
+
+            if (isGridInitialized && CurrentCell != Vector3Int.zero)
+            {
+                Debug.Log($"<color=orange>[{name}]</color> Unregister в {CurrentCell}");
+
+                if (GridManager.Instance != null)
+                {
+                    GridManager.Instance.UnregisterEntity(CurrentCell);
+                }
+            }
+
+            isGridInitialized = false;
+            IsMoving = false;
+
+            FullRestore();
+
+            transform.position = worldPosition;
+            Debug.Log($"<color=orange>[{name}]</color> transform.position = {worldPosition}");
+
+            if (GridManager.Instance == null)
+            {
+                Debug.LogError($"[{name}] GridManager == null");
+                return;
+            }
+
+            CurrentCell = GridManager.Instance.WorldToCell(worldPosition);
+            Debug.Log($"<color=orange>[{name}]</color> Результат WorldToCell: {CurrentCell}");
+
+            var cellCenter = GridManager.Instance.GetCellCenterWorld(CurrentCell);
+            cellCenter.z = worldPosition.z;
+
+            transform.position = cellCenter;
+            targetWorldPos = cellCenter;
+
+            Debug.Log($"<color=orange>[{name}]</color> Центр клетки: {cellCenter}");
+
+            GridManager.Instance.RegisterFixedEntity(CurrentCell, gameObject);
+            isGridInitialized = true;
+
+            Debug.Log($"<color=green>[{name}] === Конец дебага RespawnAt ===</color>");
+            Debug.Log($"  CurrentCell={CurrentCell}");
+            Debug.Log($"  transform.position={transform.position}");
+            Debug.Log($"  isGridInitialized={isGridInitialized}");
+        }
+
+        /// <summary>
+        /// Полное восстановление здоровья и ресурсов
+        /// </summary>
+        public void FullRestore()
+        {
+            stats.Health = stats.MaxHealth;
+            stats.Energy = stats.MaxEnergy;
+            stats.Freeze = 0;
+            UpdateVisualStatus();
+            Debug.Log($"<color=green>[{name}]</color> Полное восстановление: HP={stats.Health}, Energy={stats.Energy}");
         }
 
         public void InitializeOnGrid()
@@ -49,6 +117,7 @@ namespace Entities
             IsMoving = false;
 
             GridManager.Instance.RegisterFixedEntity(CurrentCell, gameObject);
+            isGridInitialized = true;
         }
 
 
@@ -75,19 +144,19 @@ namespace Entities
                 }
             }
         }
-        
+
         /// <summary>
         /// Перемещение без регистрации в GridManager (для мертвых сущностей)
         /// </summary>
         public void PhantomMoveToCell(Vector3Int targetCell)
         {
             FlipToTarget(targetCell);
-    
+
             targetWorldPos = GridManager.Instance.GetCellCenterWorld(targetCell);
             targetWorldPos.z = transform.position.z;
             IsMoving = true;
         }
-        
+
         /// <summary>
         /// Проверка на признаки жизни
         /// </summary>
@@ -130,7 +199,9 @@ namespace Entities
             spriteRenderer = GetComponent<SpriteRenderer>();
             animator = GetComponent<Animator>();
 
-            // Установка статов на свякий случай, пусть будет
+            isGridInitialized = false;
+
+            // Установка статов на всякий случай, пусть будет
             if (baseStats != null && !stats.isCustomized)
             {
                 stats.Initialize(baseStats);

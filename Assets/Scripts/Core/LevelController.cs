@@ -14,12 +14,12 @@ namespace Core
     {
         public static LevelController Instance { get; private set; }
 
-        [Header("Level Progression")]
-        [SerializeField] private List<GameObject> roomPrefabs;
+        [Header("Level Progression")] [SerializeField]
+        private List<GameObject> roomPrefabs;
 
-        [Header("Player")]
-        [SerializeField] private PlayerMovement player;
+        [Header("Player")] [SerializeField] private GameObject playerPrefab;
 
+        private PlayerMovement currentPlayer;
         private int currentRoomIndex = 0;
         private RoomController currentRoom;
         private bool isGameOver;
@@ -36,13 +36,15 @@ namespace Core
 
         private void Start()
         {
-            if (player != null)
+            // Диагностика
+            if (currentPlayer != PlayerMovement.Instance)
             {
-                var playerHealth = player.GetComponent<Health>();
-                if (playerHealth != null)
-                {
-                    playerHealth.OnDeath += HandlePlayerDeath;
-                }
+                Debug.LogError(
+                    $"<color=red>[LevelController]</color> player={currentPlayer?.name} ({currentPlayer?.GetInstanceID()}), Instance={PlayerMovement.Instance?.name} ({PlayerMovement.Instance?.GetInstanceID()})");
+            }
+            else
+            {
+                Debug.Log($"<color=green>[LevelController]</color> player == Instance");
             }
 
             if (roomPrefabs != null && roomPrefabs.Count > 0)
@@ -75,7 +77,8 @@ namespace Core
 
             if (currentRoom == null)
             {
-                Debug.LogError($"[LevelController] Префаб комнаты {roomPrefabs[index].name} не содержит RoomController");
+                Debug.LogError(
+                    $"[LevelController] Префаб комнаты {roomPrefabs[index].name} не содержит RoomController");
                 return;
             }
 
@@ -116,21 +119,53 @@ namespace Core
         /// </summary>
         private void SpawnPlayer()
         {
-            if (player == null || currentRoom == null) return;
-
-            GridManager.Instance.UnregisterEntity(player.CurrentCell);
-            
-
-            if (currentRoom.playerSpawnPoint != null)
+            if (currentRoom?.playerSpawnPoint == null)
             {
-                player.transform.position = currentRoom.playerSpawnPoint.position;
-            }
-            else
-            {
-                Debug.LogError("[LevelController] playerSpawnPoint не назначен");
+                Debug.LogError("[LevelController] playerSpawnPoint не найден");
+                return;
             }
 
-            player.InitializeOnGrid();
+            var spawnPos = currentRoom.playerSpawnPoint.position;
+
+            // Игрок создается из префаба в первой комнате
+            // При этом обязательно объекта игрока не должно быть на сцене
+            // Иначе возникают трудноотловимые баги /ᐠ｡ꞈ｡ᐟ\
+            if (currentPlayer == null)
+            {
+                if (playerPrefab == null)
+                {
+                    Debug.LogError("[LevelController] playerPrefab не назначен в инспекторе");
+                    return;
+                }
+
+                var playerGO = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
+                currentPlayer = playerGO.GetComponent<PlayerMovement>();
+
+                // Подписка на смерть происходит только при создании игрока
+                var health = currentPlayer.GetComponent<Health>();
+                if (health != null)
+                {
+                    health.OnDeath += HandlePlayerDeath;
+                }
+
+                if (CameraFollow.Instance != null)
+                {
+                    CameraFollow.Instance.SetPlayerTarget(currentPlayer.transform);
+                }
+
+                Debug.Log(
+                    $"<color=green>[LevelController]</color> Игрок создан: {currentPlayer.name} (InstanceID: {currentPlayer.GetInstanceID()})");
+                Debug.Log(
+                    $"<color=green>[LevelController]</color> PlayerMovement.Instance: {PlayerMovement.Instance?.name} (InstanceID: {PlayerMovement.Instance?.GetInstanceID()})");
+
+                if (currentPlayer != PlayerMovement.Instance)
+                    Debug.LogError($"<color=red>[LevelController]</color> currentPlayer != Instance");
+            }
+
+            currentPlayer.RespawnAt(spawnPos);
+
+            Debug.Log(
+                $"<color=green>[LevelController]</color> Игрок размещен на {spawnPos}, CurrentCell={currentPlayer.CurrentCell}");
 
             CameraFollow.Instance?.ResetFocus();
         }
@@ -142,9 +177,9 @@ namespace Core
         {
             if (isGameOver) return;
             isGameOver = true;
-            
+
             AbilityController.Instance?.BlockInput();
-            
+
             Debug.Log("<color=green>[LevelController]</color> Комната пройдена!");
             StartCoroutine(TransitionToNextRoom());
         }
@@ -196,13 +231,21 @@ namespace Core
             isGameOver = true;
             Debug.Log("<color=red>[LevelController]</color> Игрок погиб");
 
+            // Отписаться от события
+            var health = playerObj.GetComponent<Health>();
+            if (health != null)
+            {
+                health.OnDeath -= HandlePlayerDeath;
+            }
+
+            currentPlayer = null;
+
             if (AbilityController.Instance != null)
             {
                 AbilityController.Instance.DisableAllOverlaysAfterDeath();
             }
 
             TurnManager.Instance.StopAllCoroutines();
-
             CameraFollow.Instance?.ResetToPlayer();
 
             StartCoroutine(ShowDefeatAndRestart());

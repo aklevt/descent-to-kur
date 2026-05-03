@@ -8,8 +8,8 @@ public class InputHandler : MonoBehaviour
     private Camera mainCamera;
     private Vector3Int lastHoveredCell;
     
-    private bool isCameraDragging;
-    private Vector2 dragStartMousePos;
+    // private bool isCameraDragging;
+    // private Vector2 dragStartMousePos;
 
     private void Awake()
     {
@@ -24,9 +24,11 @@ public class InputHandler : MonoBehaviour
         HandleCameraInput();
         
         HandleAbilityHotkeys();
+        
+        HandleEndTurnInput();
 
-        if (Keyboard.current.spaceKey.isPressed)
-            return;
+        // if (Keyboard.current.spaceKey.isPressed)
+        //     return;
 
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
             return;
@@ -44,28 +46,51 @@ public class InputHandler : MonoBehaviour
 
     private void HandleCameraInput()
     {
-        if (Mouse.current.rightButton.wasPressedThisFrame)
+        // ПКМ - возврат камеры к игроку
+        if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
         {
-            CameraFollow.Instance.ResetFocus();
+            CameraFollow.Instance?.ResetFocus();
         }
 
-        if (Keyboard.current.spaceKey.isPressed && Mouse.current.leftButton.wasPressedThisFrame)
-        {
-            isCameraDragging = true;
-            dragStartMousePos = Mouse.current.position.ReadValue();
-            CameraFollow.Instance.StartDrag(dragStartMousePos);
-        }
+        // WASD - перемещение камеры
+        var kb = Keyboard.current;
+        if (kb == null) return;
 
-        if (isCameraDragging && Keyboard.current.spaceKey.isPressed && Mouse.current.leftButton.isPressed)
-        {
-            var currentMousePos = Mouse.current.position.ReadValue();
-            CameraFollow.Instance.UpdateDrag(currentMousePos);
-        }
+        var cameraMovement = Vector2.zero;
 
-        if (isCameraDragging && (!Keyboard.current.spaceKey.isPressed || !Mouse.current.leftButton.isPressed))
+        if (kb.wKey.isPressed) cameraMovement.y += 1f;
+        if (kb.sKey.isPressed) cameraMovement.y -= 1f;
+        if (kb.aKey.isPressed) cameraMovement.x -= 1f;
+        if (kb.dKey.isPressed) cameraMovement.x += 1f;
+
+        if (cameraMovement.sqrMagnitude > 0.01f)
         {
-            isCameraDragging = false;
-            CameraFollow.Instance.EndDrag();
+            CameraFollow.Instance?.MoveFreeLook(cameraMovement.normalized);
+        }
+        
+        // Скролл колеса мыши - зум
+        if (Mouse.current != null)
+        {
+            var scroll = Mouse.current.scroll.ReadValue().y;
+            if (Mathf.Abs(scroll) > 0.1f)
+            {
+                CameraFollow.Instance?.Zoom(scroll * 0.01f);
+            }
+        }
+    }
+
+    private void HandleEndTurnInput()
+    {
+        if (TurnManager.Instance == null || TurnManager.Instance.CurrentState != TurnState.PlayerTurn)
+            return;
+
+        var kb = Keyboard.current;
+        if (kb == null) return;
+
+        // Пробел - завершить ход
+        if (kb.spaceKey.wasPressedThisFrame)
+        {
+            TurnManager.Instance.EndPlayerTurn();
         }
     }
 
