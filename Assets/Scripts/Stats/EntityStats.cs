@@ -17,13 +17,7 @@ namespace Stats
         /// (baseAttackDamage * abilityMultiplier) + abilityLinearModifier, возможно без abilityMultiplier
         /// </summary>
         public int baseAttackDamage = 5;
-		
-		/// <summary>
-        /// Базовая сила дистанционной атаки, сейчас не нужна
-        /// Возможно, будет использоваться для способностей дальней атаки
-        /// </summary>
-        public int rangedAttackDamage = 5;
-		
+
         [Tooltip("На какой дистанции враг предпочитает атаковать")]
         public int preferredAttackRange = 1;
         

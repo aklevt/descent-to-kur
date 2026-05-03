@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Entities;
+using FX;
 using UnityEngine;
 
 namespace Abilities
@@ -8,8 +9,17 @@ namespace Abilities
     [CreateAssetMenu(fileName = "RangedAttackAbility", menuName = "Abilities/RangedAttack")]
     public class RangedAttackAbilityData : AbilityData
     {
+        [Header("Range")]
         public int minRange = 2;
-        public int maxRange = 3;
+        public int maxRange = 4;
+
+        [Header("Projectile")]
+        [SerializeField] private GameObject projectilePrefab;
+        [SerializeField] private float projectileSpeed = 10f;
+        
+        [Header("Charge Effect")]
+        [SerializeField] private GameObject chargeEffectPrefab;
+        [SerializeField] private float chargeTime = 0.3f;
 
         public override List<Vector3Int> GetTargetCellsFrom(Vector3Int origin, BaseEntity actor)
         {
@@ -39,14 +49,67 @@ namespace Abilities
         
         public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)
         {
-            var target = GridManager.Instance.GetEntityAt(targetCell);
-            var damage = GetCalculatedDamage(actor);
-            target.GetComponent<Health>()?.TakeDamage(damage);
-            CameraFollow.Instance?.ShakeMedium();
+            var targetObj = GridManager.Instance.GetEntityAt(targetCell);
+            if (targetObj == null) yield break;
 
-            yield return new WaitForSeconds(actor.GetScaledTime(0.05f)); 
-            // тут наверно будет анимация полёта снаряда
-            // yield return null;
+            var targetPos = targetObj.transform.position + new Vector3(0, 0.5f, 0);
+            var damage = GetCalculatedDamage(actor);
+            
+            actor.FlipToTarget(targetPos);
+            
+            yield return new WaitForSeconds(actor.GetScaledTime(0.1f));
+            
+            var spawnPos = actor.transform.position;
+            if (actor is RangedEnemy rangedEnemy)
+            {
+                spawnPos = rangedEnemy.GetProjectileSpawnPosition();
+            }
+
+            GameObject chargeEffect = null;
+            if (chargeEffectPrefab != null)
+            {
+                chargeEffect = Instantiate(chargeEffectPrefab, spawnPos, Quaternion.identity);
+                yield return new WaitForSeconds(actor.GetScaledTime(chargeTime));
+                Destroy(chargeEffect);
+            }
+
+            // Запуск снаряда
+            if (projectilePrefab != null)
+            {
+                var projectileObj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
+                var projectile = projectileObj.GetComponent<Projectile>();
+
+                if (projectile != null)
+                {
+                    var speedMultiplier = actor.GetAnimationSpeedMultiplier();
+                    
+                    var projectileHit = false;
+                    
+                    projectile.Launch(spawnPos, targetPos, speedMultiplier, () =>
+                    {
+                        targetObj.GetComponent<Health>()?.TakeDamage(damage);
+                        CameraFollow.Instance?.ShakeLight();
+                        projectileHit = true;
+                    });
+
+                    while (!projectileHit && projectileObj != null)
+                    {
+                        yield return null;
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("[RangedAttackAbility] Нет компонента Projectile");
+                    targetObj.GetComponent<Health>()?.TakeDamage(damage);
+                    CameraFollow.Instance?.ShakeMedium();
+                }
+            }
+            else
+            {
+                targetObj.GetComponent<Health>()?.TakeDamage(damage);
+                CameraFollow.Instance?.ShakeMedium();
+                yield return new WaitForSeconds(actor.GetScaledTime(0.05f));
+            }
         }
     }
 }

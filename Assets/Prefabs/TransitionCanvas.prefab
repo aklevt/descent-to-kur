@@ -864,14 +864,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 3823373843484550341}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed30a001e36b7e34bb5ea21a0857723a, type: 3}
+  m_Script: {fileID: 11500000, guid: 3247d223bce7473c854a683a5ae28af9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GameScripts::Core.TransitionUI
   victoryPanel: {fileID: 3460256183639620516}
-  victoryText: {fileID: 8945049999785381362}
-  continueButton: {fileID: 1195513545042417902}
-  fadePanel: {fileID: 6570464835051456533}
-  fadeDuration: 0.5
+  victoryTitle: {fileID: 8945049999785381362}
+  victoryNextButton: {fileID: 1195513545042417902}
+  defeatPanel: {fileID: 3703607730564174470}
+  defeatTitle: {fileID: 1719655493641490905}
+  defeatRetryButton: {fileID: 7098973453158498729}
+  blackOverlayGroup: {fileID: 6570464835051456533}
+  vignetteImage: {fileID: 0}
+  vignetteMaterial: {fileID: 0}
+  colorTransitionDuration: 0.5
+  victoryVignetteColor: {r: 1, g: 1, b: 1, a: 1}
+  defeatVignetteColor: {r: 0.67, g: 0, b: 0, a: 1}
 --- !u!1 &5381141942243210245
 GameObject:
   m_ObjectHideFlags: 0
