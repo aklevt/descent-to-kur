@@ -8,6 +8,7 @@ namespace Stats
         public int maxHealth = 20;
         public int maxEnergy = 3;
         public int moveRange = 1;
+        public int maxStepsPerRound = 3; // Макс. количество ходов для игрока за раунд 
         public float moveSpeed = 3f;
 		
 		/// <summary>

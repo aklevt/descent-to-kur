@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using TMPro;
 
 namespace UI
 {
@@ -10,9 +11,12 @@ namespace UI
     {
         public static UIController Instance { get; private set; }
 
-        [Header("Popups")] [SerializeField] private GameObject energyWarningPopup;
+        [Header("Popups")] 
+        [SerializeField] private GameObject warningPopup;
+        [SerializeField] private TextMeshProUGUI warningText;
 
-        [Header("Durations")] [SerializeField] private float popupDuration = 1.0f;
+        [Header("Durations")] 
+        [SerializeField] private float popupDuration = 1.0f;
 
         private Coroutine currentPopupCoroutine;
 
@@ -34,14 +38,34 @@ namespace UI
         /// </summary>
         public void ShowEnergyWarning()
         {
-            if (energyWarningPopup == null) return;
+            ShowWarning("Недостаточно энергии!");
+        }
+        
+        public void ShowStepsWarning()
+        {
+            ShowWarning("Недостаточно шагов!");
+        }
+        
+        public void ShowStepsEndedWarning()
+        {
+            ShowWarning("Доступные шаги закончились!");
+        }
+        
+        private void ShowWarning(string message)
+        {
+            if (warningPopup == null) return;
+
+            if (warningText != null)
+            {
+                warningText.text = message;
+            }
 
             if (currentPopupCoroutine != null)
             {
                 StopCoroutine(currentPopupCoroutine);
             }
 
-            currentPopupCoroutine = StartCoroutine(ShowPopupRoutine(energyWarningPopup, popupDuration));
+            currentPopupCoroutine = StartCoroutine(ShowPopupRoutine(warningPopup, popupDuration));
         }
 
         private IEnumerator ShowPopupRoutine(GameObject popup, float duration)
@@ -53,8 +77,8 @@ namespace UI
 
         private void HideAllPopups()
         {
-            if (energyWarningPopup != null)
-                energyWarningPopup.SetActive(false);
+            if (warningPopup != null)
+                warningPopup.SetActive(false);
         }
     }
 }

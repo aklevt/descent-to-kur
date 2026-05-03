@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Abilities;
+using Settings;
 using Stats;
 using UnityEngine;
 
@@ -23,6 +24,9 @@ namespace Entities
         private EntityRuntimeStats stats = new();
 
         public EntityRuntimeStats Stats => stats;
+        
+        [Header("Animation Settings")]
+        [SerializeField] private float localAnimationSpeedMultiplier = 1f;
 
         [Header("Components")] [SerializeField]
         protected SpriteRenderer spriteRenderer;
@@ -127,6 +131,14 @@ namespace Entities
             {
                 Debug.Log($"<color=cyan>{name}</color> пропускает ход. Осталось: {stats.Freeze}");
                 return false;
+            }
+            
+            if (this is PlayerMovement)
+            {
+                var maxSteps = Mathf.Min(stats.MoveRange, stats.Energy);
+                stats.ResetSteps(maxSteps);
+        
+                Debug.Log($"<color=green>[{name}]</color> Начало хода. Энергия: {stats.Energy}, Доступно шагов: {stats.RemainingSteps}");
             }
 
             return true;
@@ -248,7 +260,9 @@ namespace Entities
             if (!IsMoving) return;
 
             var dt = Mathf.Min(Time.deltaTime, 0.03f);
-            transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, Stats.MoveSpeed * dt);
+            var scaledSpeed = Stats.MoveSpeed * GetAnimationSpeedMultiplier();
+            
+            transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, scaledSpeed * dt);
 
             if (Vector3.Distance(transform.position, targetWorldPos) < 0.001f)
             {
@@ -266,7 +280,7 @@ namespace Entities
         {
             var startPos = transform.position;
             var punchPos = Vector3.Lerp(startPos, targetPos, 0.3f);
-            var duration = 0.15f;
+            var duration = GetScaledTime(0.15f);
             var elapsed = 0f;
 
             FlipToTarget(targetPos);
@@ -283,7 +297,7 @@ namespace Entities
 
             onHit?.Invoke();
 
-            yield return new WaitForSeconds(0.05f);
+            yield return new WaitForSeconds(GetScaledTime(0.05f));
 
             // Возврат назад
             elapsed = 0f;
@@ -321,6 +335,23 @@ namespace Entities
 
         protected virtual void OnArrivingToTarget()
         {
+        }
+        
+        /// <summary>
+        /// Получить финальную скорость анимации с учётом глобальных и локальных настроек
+        /// </summary>
+        public float GetAnimationSpeedMultiplier()
+        {
+            var globalMultiplier = SettingsManager.Instance?.Settings.globalAnimationSpeedMultiplier ?? 1f;
+            return globalMultiplier * localAnimationSpeedMultiplier;
+        }
+
+        /// <summary>
+        /// Получить время с учётом множителя скорости
+        /// </summary>
+        public float GetScaledTime(float baseTime)
+        {
+            return baseTime / GetAnimationSpeedMultiplier();
         }
     }
 }
