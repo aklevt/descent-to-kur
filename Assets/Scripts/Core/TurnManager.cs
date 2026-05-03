@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Entities;
+using Settings;
 
 public class TurnManager : MonoBehaviour
 {
@@ -24,7 +25,7 @@ public class TurnManager : MonoBehaviour
         {
             Debug.Log("<color=cyan>[TurnManager]</color> Все враги заморожены");
             
-            yield return new WaitForSeconds(1.0f);
+            yield return new WaitForSeconds(SettingsManager.Instance.GetScaledDelay(1.0f));
             yield return ProcessEndOfRound();
             
             if (PlayerMovement.Instance == null || PlayerMovement.Instance.Stats.Health <= 0)
@@ -114,11 +115,11 @@ public class TurnManager : MonoBehaviour
             if (entity != null && entity.Stats.Freeze == 0)
             {
                 entity.UpdateVisualStatus();
-                yield return new WaitForSeconds(0.02f);
+                yield return new WaitForSeconds(SettingsManager.Instance.GetScaledDelay(0.02f));
             }
         }
 
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(SettingsManager.Instance.GetScaledDelay(0.1f));
     }
 
     public void RegisterEnemy(EnemyBase enemy)
@@ -162,8 +163,8 @@ public class TurnManager : MonoBehaviour
 
         if (newState == TurnState.PlayerTurn && PlayerMovement.Instance != null)
         {
-            PlayerMovement.Instance.OnTurnStart();
             PlayerMovement.Instance.Stats.RestoreEnergy(PlayerMovement.Instance.Stats.MaxEnergy);
+            PlayerMovement.Instance.OnTurnStart();
         }
 
         Debug.Log($"<color=yellow>[TurnManager]</color> Ход сменился на: <b>{newState}</b>");

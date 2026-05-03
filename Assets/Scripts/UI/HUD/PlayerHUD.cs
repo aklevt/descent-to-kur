@@ -11,6 +11,12 @@ namespace UI.HUD
         [SerializeField] private Slider energySlider;
         [SerializeField] private TextMeshProUGUI hpText;
         [SerializeField] private TextMeshProUGUI energyText;
+        
+        [SerializeField] private TextMeshProUGUI stepsText;
+        [SerializeField] private Slider stepsSlider;
+
+        private int lastSteps = -1;
+        private int lastEnergy = -1;
 
         private void Update()
         {
@@ -30,8 +36,29 @@ namespace UI.HUD
                 energySlider.value = stats.Energy;
             }
 
-            if (hpText != null) hpText.text = $"{stats.Health}/{stats.MaxHealth}";
-            if (energyText != null) energyText.text = $"{stats.Energy}/{stats.MaxEnergy}";
+            if (hpText != null) 
+                hpText.text = $"{stats.Health}/{stats.MaxHealth}";
+            
+            if (energyText != null) 
+                energyText.text = $"{stats.Energy}/{stats.MaxEnergy}";
+            
+            if (stepsText != null) 
+            {
+                if (stats.RemainingSteps != lastSteps)
+                {
+                    Debug.Log($"<color=cyan>[PlayerHUD]</color> Шаги обновлены: {lastSteps} -> {stats.RemainingSteps}");
+                    lastSteps = stats.RemainingSteps;
+                }
+                
+                stepsText.text = $"Шаги: {stats.RemainingSteps}";
+                stepsText.color = stats.RemainingSteps > 0 ? Color.white : Color.gray;
+            }
+            
+            if (stepsSlider != null)
+            {
+                stepsSlider.maxValue = stats.MaxStepsPerRound;
+                stepsSlider.value = stats.RemainingSteps;
+            }
         }
     }
 }

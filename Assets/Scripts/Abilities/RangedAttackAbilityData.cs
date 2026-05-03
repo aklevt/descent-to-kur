@@ -44,7 +44,9 @@ namespace Abilities
             target.GetComponent<Health>()?.TakeDamage(damage);
             CameraFollow.Instance?.ShakeMedium();
 
-            yield return null;
+            yield return new WaitForSeconds(actor.GetScaledTime(0.05f)); 
+            // тут наверно будет анимация полёта снаряда
+            // yield return null;
         }
     }
 }
