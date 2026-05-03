@@ -4385,6 +4385,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1246193163}
+  - component: {fileID: 1246193171}
   - component: {fileID: 1246193165}
   - component: {fileID: 1246193164}
   - component: {fileID: 1246193166}
@@ -4511,28 +4512,41 @@ MonoBehaviour:
   slots:
   - button: {fileID: 1154997754}
     selectedFrame: {fileID: 327315319}
-    buttonImage: {fileID: 0}
+    buttonImage: {fileID: 1154997755}
     nameText: {fileID: 2089451903}
     hotkeyText: {fileID: 695462658}
     costText: {fileID: 1466684567}
   - button: {fileID: 1016016427}
     selectedFrame: {fileID: 1764812553}
-    buttonImage: {fileID: 0}
+    buttonImage: {fileID: 1016016428}
     nameText: {fileID: 375567745}
     hotkeyText: {fileID: 562990231}
     costText: {fileID: 2114664121}
   - button: {fileID: 1126906922}
     selectedFrame: {fileID: 1072760464}
-    buttonImage: {fileID: 0}
+    buttonImage: {fileID: 1126906920}
     nameText: {fileID: 1866686947}
     hotkeyText: {fileID: 1506061386}
     costText: {fileID: 577754414}
   - button: {fileID: 1262432380}
     selectedFrame: {fileID: 1663381407}
-    buttonImage: {fileID: 0}
+    buttonImage: {fileID: 1262432378}
     nameText: {fileID: 937574501}
     hotkeyText: {fileID: 806556727}
     costText: {fileID: 1460639276}
+--- !u!114 &1246193171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1246193162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fc019c25d9a2c74cb4fd4c9346f64c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GameScripts::Settings.SettingsManager
+  settings: {fileID: 11400000, guid: 27b5412a96797394e933724aff57effe, type: 2}
 --- !u!1 &1262432376
 GameObject:
   m_ObjectHideFlags: 0
