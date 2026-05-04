@@ -61,7 +61,14 @@ public class Health : MonoBehaviour
 
         if (TryGetComponent<Collider2D>(out var col)) col.enabled = false;
 
-        StartCoroutine(FadeOutAndDestroy());
+        if (entity is PlayerMovement)
+        {
+            StartCoroutine(FadeOutPlayer());
+        }
+        else
+        {
+            StartCoroutine(FadeOutAndDestroy());
+        }
     }
 
     private IEnumerator FlashRed()
@@ -75,7 +82,24 @@ public class Health : MonoBehaviour
             entity.UpdateVisualStatus();
         }
     }
+    
+    private IEnumerator FadeOutPlayer()
+    {
+        var elapsed = 0f;
+        var color = spriteRenderer.color;
 
+        while (elapsed < fadeDuration)
+        {
+            elapsed += Time.deltaTime;
+            color.a = Mathf.Lerp(1f, 0f, elapsed / fadeDuration);
+            spriteRenderer.color = color;
+            yield return null;
+        }
+        
+        // Игрок просто скрывается, не уничтожается
+        gameObject.SetActive(false);
+    }
+    
     private IEnumerator FadeOutAndDestroy()
     {
         var elapsed = 0f;
@@ -98,4 +122,26 @@ public class Health : MonoBehaviour
 
         Destroy(gameObject);
     }
+    
+    public void ResetState()
+    {
+        isDying = false;
+    
+        if (spriteRenderer != null)
+        {
+            var color = spriteRenderer.color;
+            color.a = 1f;
+            spriteRenderer.color = color;
+        }
+    
+        if (TryGetComponent<Collider2D>(out var col))
+        {
+            col.enabled = true;
+        }
+    
+        gameObject.SetActive(true);
+    
+        Debug.Log($"<color=green>[Health]</color> {gameObject.name} восстановлен");
+    }
+
 }

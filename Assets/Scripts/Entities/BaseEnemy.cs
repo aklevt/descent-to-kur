@@ -39,13 +39,13 @@ namespace Entities
     
             if (!canAct)
             {
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(GetScaledTime(0.5f));
                 yield break;
             }
 
         
             Debug.Log($"{gameObject.name} готовится к ходу...");
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(GetScaledTime(0.1f));
 
             var bestMove = GetBestMove();
 
@@ -61,11 +61,11 @@ namespace Entities
 
             if (health.IsDead) yield break;
 
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(GetScaledTime(0.1f));
 
             yield return ExecuteAction();
 
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(GetScaledTime(0.1f));
             Debug.Log($"{gameObject.name} закончил ход");
         }
 

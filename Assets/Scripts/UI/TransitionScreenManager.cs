@@ -46,11 +46,22 @@ namespace UI
 
         private void Start()
         {
-            HideAll();
-
+            
             if (vignetteMaterial == null && vignetteImage != null)
             {
                 vignetteMaterial = vignetteImage.material;
+            }
+            
+            ResetVignette();
+            
+            HideAll();
+        }
+        
+        public void ResetVignette()
+        {
+            if (vignetteMaterial != null)
+            {
+                vignetteMaterial.SetColor("_MainColor", Color.black);
             }
         }
 

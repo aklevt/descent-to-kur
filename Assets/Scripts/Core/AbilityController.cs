@@ -108,12 +108,47 @@ namespace Core
                 return;
 
             var targetAbility = abilities[index];
+            
+            if (PlayerMovement.Instance != null)
+            {
+                var stats = PlayerMovement.Instance.Stats;
+                var shouldFlash = false;
+
+                if (targetAbility is MoveAbilityData)
+                {
+                    if (stats.RemainingSteps <= 0 || stats.Energy <= 0)
+                    {
+                        shouldFlash = true;
+                    }
+                }
+                else
+                {
+                    if (!stats.HasEnergyForAction(targetAbility.energyCost))
+                    {
+                        shouldFlash = true;
+                    }
+                }
+
+                if (shouldFlash)
+                {
+                    abilityBar?.TriggerWarningFlash(index);
+                }
+            }
+            
+            if (targetAbility is MoveAbilityData && PlayerMovement.Instance != null)
+            {
+                if (PlayerMovement.Instance.Stats.RemainingSteps <= 0)
+                {
+                    UI.UIController.Instance?.ShowStepsWarning();
+                }
+            }
 
             if (!targetAbility.CanUse(PlayerMovement.Instance))
             {
                 UI.UIController.Instance?.ShowEnergyWarning();
             }
 
+            
             abilityBar?.OnAbilitySelected(index);
             SelectAbility(abilities[index]);
             RefreshAbilityOverlay();

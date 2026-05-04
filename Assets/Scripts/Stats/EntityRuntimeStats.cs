@@ -17,6 +17,8 @@ namespace Stats
         public int AttackDamage;
         public int PreferredAttackRange;
         public int MinimumRange;
+        public int RemainingSteps;
+        public int MaxStepsPerRound;
 
         public EntityRuntimeStats()
         {
@@ -37,6 +39,9 @@ namespace Stats
 
             PreferredAttackRange = so.preferredAttackRange;
             MinimumRange = so.minimumRange;
+            
+            RemainingSteps = 0;
+            MaxStepsPerRound =  so.maxStepsPerRound;
         }
 
         public bool IsDead => Health <= 0;
@@ -44,6 +49,10 @@ namespace Stats
         public bool HasEnergyForAction(int cost) => Energy >= cost;
         public void SpendEnergy(int amount) => Energy = Mathf.Max(0, Energy - amount);
         public void RestoreEnergy(int amount) => Energy = Mathf.Min(MaxEnergy, Energy + amount);
+        
+        public void ResetSteps(int maxSteps) => RemainingSteps = maxSteps;
+        public bool CanMove(int distance) => RemainingSteps >= distance;
+        public void SpendSteps(int distance) => RemainingSteps = Mathf.Max(0, RemainingSteps - distance);
 
         public void ApplyDamage(int amount)
         {

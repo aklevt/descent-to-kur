@@ -10,9 +10,20 @@ namespace Abilities
     {
         public override List<Vector3Int> GetTargetCellsFrom(Vector3Int position, BaseEntity actor)
         {
-            var maxAvailableDistance = (actor is EnemyBase) 
-                ? actor.Stats.MoveRange 
-                : Mathf.Min(actor.Stats.MoveRange, actor.Stats.Energy);
+            int maxAvailableDistance;
+            
+            if (actor is PlayerMovement player)
+            {
+                maxAvailableDistance = Mathf.Min(player.Stats.RemainingSteps, player.Stats.Energy);
+            }
+            else if (actor is EnemyBase)
+            {
+                maxAvailableDistance = actor.Stats.MoveRange;
+            }
+            else
+            {
+                maxAvailableDistance = 0;
+            }
 
             if (maxAvailableDistance <= 0) return new List<Vector3Int>();
             
@@ -28,13 +39,41 @@ namespace Abilities
             var distance = Mathf.Abs(targetCell.x - actor.CurrentCell.x) + 
                            Mathf.Abs(targetCell.y - actor.CurrentCell.y);
 
-            if (actor is PlayerMovement)
+            if (actor is PlayerMovement player)
             {
-                actor.Stats.SpendEnergy(distance);
+                if (!player.Stats.CanMove(distance) || !player.Stats.HasEnergyForAction(distance))
+                {
+                    if (!player.Stats.HasEnergyForAction(distance))
+                        UI.UIController.Instance?.ShowEnergyWarning();
+                    else
+                        UI.UIController.Instance?.ShowStepsWarning();
+                    
+                    yield break;
+                }
+
+                player.Stats.SpendEnergy(distance);
+                player.Stats.SpendSteps(distance);
+                
+                Debug.Log($"<color=cyan>[MoveAbility]</color> Потрачено: {distance}. Осталось энергии: {player.Stats.Energy}, шагов: {player.Stats.RemainingSteps}");
             }
             
             actor.MoveToCell(targetCell);
             while (actor.IsMoving) yield return null;
+            
+            if (actor is PlayerMovement player2)
+            {
+                var hasStepsNow = player2.Stats.RemainingSteps > 0;
+                var hasEnergyNow = player2.Stats.Energy > 0;
+                
+                if (!hasStepsNow && hasEnergyNow)
+                {
+                    Debug.Log("<color=yellow>[MoveAbility]</color> Доступные шаги закончились");
+                    
+                    yield return new WaitForSeconds(player2.GetScaledTime(0.1f));
+                    
+                    UI.UIController.Instance?.ShowStepsEndedWarning();
+                }
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ namespace Stats
         public int maxHealth = 20;
         public int maxEnergy = 3;
         public int moveRange = 1;
+        public int maxStepsPerRound = 3; // Макс. количество ходов для игрока за раунд 
         public float moveSpeed = 3f;
 		
 		/// <summary>
@@ -16,13 +17,7 @@ namespace Stats
         /// (baseAttackDamage * abilityMultiplier) + abilityLinearModifier, возможно без abilityMultiplier
         /// </summary>
         public int baseAttackDamage = 5;
-		
-		/// <summary>
-        /// Базовая сила дистанционной атаки, сейчас не нужна
-        /// Возможно, будет использоваться для способностей дальней атаки
-        /// </summary>
-        public int rangedAttackDamage = 5;
-		
+
         [Tooltip("На какой дистанции враг предпочитает атаковать")]
         public int preferredAttackRange = 1;
         

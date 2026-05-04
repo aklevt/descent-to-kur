@@ -49,6 +49,11 @@ public class RoomController : MonoBehaviour
         {
             GridHighlighter.Instance.UpdateTilemaps(selectionTilemap, effectTilemap);
         }
+        
+        if (CameraFollow.Instance != null && obstacleTilemap != null)
+        {
+            CameraFollow.Instance.SetCameraBounds(obstacleTilemap.localBounds);
+        }
 
         foreach (var enemy in enemiesInRoom)
         {
@@ -85,6 +90,11 @@ public class RoomController : MonoBehaviour
         if (GridHighlighter.Instance != null)
         {
             GridHighlighter.Instance.Clear();
+        }
+        
+        if (CameraFollow.Instance != null)
+        {
+            CameraFollow.Instance.ClearBounds();
         }
     }
 

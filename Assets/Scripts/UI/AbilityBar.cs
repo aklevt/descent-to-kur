@@ -70,5 +70,13 @@ namespace UI
             foreach (var slot in slots)
                 slot.SetSelected(false);
         }
+        
+        public void TriggerWarningFlash(int index)
+        {
+            if (index >= 0 && index < slots.Count)
+            {
+                slots[index].TriggerFlash();
+            }
+        }
     }
 }
