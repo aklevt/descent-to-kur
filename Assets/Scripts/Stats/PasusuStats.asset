@@ -17,6 +17,6 @@ MonoBehaviour:
   moveRange: 1
   maxStepsPerRound: 3
   moveSpeed: 3
-  baseAttackDamage: 5
+  baseAttackDamage: 3
   preferredAttackRange: 3
   minimumRange: 2

@@ -27,6 +27,9 @@ namespace UI
         private Coroutine shakeCoroutine;
         private AbilityData currentAbility;
         private int currentIndex;
+        
+        private Color baseColor = Color.white;
+        private bool isFlashing = false;
 
         public void Setup(AbilityData ability, int index)
         {
@@ -53,6 +56,9 @@ namespace UI
                     costText.gameObject.SetActive(false);
                 }
             }
+            
+            if (buttonImage != null)
+                baseColor = buttonImage.color;
 
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(OnButtonClick);
@@ -91,6 +97,7 @@ namespace UI
             }
 
             AbilityController.Instance.SelectAbilityByIndex(currentIndex);
+            UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
         }
 
         private void PlayWarningEffect()
@@ -100,6 +107,7 @@ namespace UI
             if (shakeCoroutine != null)
             {
                 button.StopCoroutine(shakeCoroutine);
+                buttonImage.color = baseColor;
             }
             
             shakeCoroutine = button.StartCoroutine(FlashRed());
@@ -111,7 +119,7 @@ namespace UI
             buttonImage.color = new Color(1f, 0.3f, 0.3f);
             
             yield return new WaitForSeconds(0.15f);
-            
+            isFlashing = false;
             buttonImage.color = originalColor;
         }
 

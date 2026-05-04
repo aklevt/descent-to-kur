@@ -878,7 +878,7 @@ MonoBehaviour:
   vignetteMaterial: {fileID: 2100000, guid: 615bf0dcdcc458843919a4dc066f0f05, type: 2}
   colorTransitionDuration: 0.5
   victoryVignetteColor: {r: 1, g: 1, b: 1, a: 1}
-  defeatVignetteColor: {r: 0.67, g: 0, b: 0, a: 1}
+  defeatVignetteColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &5381141942243210245
 GameObject:
   m_ObjectHideFlags: 0

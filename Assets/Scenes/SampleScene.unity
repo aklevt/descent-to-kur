@@ -4115,7 +4115,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelController
   roomPrefabs:
   - {fileID: 1108904379850795440, guid: 61036dab59b280943bb7975d566dbf55, type: 3}
-  - {fileID: 1108904379850795440, guid: 61036dab59b280943bb7975d566dbf55, type: 3}
+  - {fileID: 1108904379850795440, guid: 3015d29c37eea864ba9eeebb225753d4, type: 3}
   playerPrefab: {fileID: 39971611221549213, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
 --- !u!114 &1246193165
 MonoBehaviour:
@@ -7159,7 +7159,7 @@ PrefabInstance:
     - target: {fileID: 843479259417896986, guid: a3c6d1502590c5f488d25d0efa7f189b, type: 3}
       propertyPath: playerTarget
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 3001576699828800167, guid: 971cd5dc1690caf44a0e43bf8e7c81b0, type: 3}
     - target: {fileID: 843479259417896986, guid: a3c6d1502590c5f488d25d0efa7f189b, type: 3}
       propertyPath: freeLookSpeed
       value: 15
