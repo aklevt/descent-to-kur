@@ -92,7 +92,7 @@ namespace Core
             SpawnPlayer();
 
             TurnManager.Instance.ResetEnemies();
-            TurnManager.Instance.BeginLevel();
+            StartCoroutine(BeginLevelNextFrame());
 
             if (AbilityController.Instance != null)
             {
@@ -101,6 +101,18 @@ namespace Core
             }
 
             Debug.Log($"<color=green>[LevelController]</color> Комната {index + 1}/{roomPrefabs.Count} загружена");
+        }
+        
+        private IEnumerator BeginLevelNextFrame()
+        {
+            yield return null; // Необходимо чтобы все враги успели заспавниться, прежде чем считать подсветку
+            TurnManager.Instance.BeginLevel();
+    
+            if (AbilityController.Instance != null)
+            {
+                AbilityController.Instance.UnblockInput();
+                AbilityController.Instance.SelectAbilityByIndex(0);
+            }
         }
 
         /// <summary>

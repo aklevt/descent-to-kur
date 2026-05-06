@@ -154,6 +154,18 @@ public class GridManager : MonoBehaviour
     {
         return pathfinder.GetPathDistance(start, target, currentEntity);
     }
+    
+    /// <summary>
+    /// Строит путь между двумя клетками через проходимые клетки
+    /// </summary>
+    /// <param name="start">Начальная клетка</param>
+    /// <param name="target">Целевая клетка</param>
+    /// <param name="currentEntity">Сущность для которой строится путь</param>
+    /// <returns>Список клеток пути или пустой список, если путь не найден</returns>
+    public List<Vector3Int> GetPath(Vector3Int start, Vector3Int target, GameObject currentEntity = null)
+    {
+        return pathfinder.GetPath(start, target, currentEntity);
+    }
 
     public bool IsCellWalkable(Vector3Int cellPos, GameObject currentEntity = null)
         => IsCellPassable(cellPos, CellCheckOptions.ForMovement(currentEntity));

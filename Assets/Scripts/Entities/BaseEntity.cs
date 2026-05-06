@@ -125,6 +125,13 @@ namespace Entities
         {
             isGridInitialized = false;
             IsMoving = false;
+            
+            if (isMovingAlongPath)
+            {
+                StopCoroutine(nameof(MoveAlongPath));
+                isMovingAlongPath = false;
+                currentPath.Clear();
+            }
         }
 
         private void SetupGridPosition(Vector3 worldPosition)
@@ -227,7 +234,64 @@ namespace Entities
 
         #region Grid Movement
 
+        private List<Vector3Int> currentPath = new();
+        private int currentPathIndex = 0;
+        private bool isMovingAlongPath = false;
+
+        /// <summary>
+        /// Запускает движение к целевой клетке по пути из проходимых клеток
+        /// </summary>
         public void MoveToCell(Vector3Int targetCell)
+        {
+            if (isMovingAlongPath)
+            {
+                StopCoroutine(nameof(MoveAlongPath));
+                isMovingAlongPath = false;
+                currentPath.Clear();
+            }
+            
+            var path = GridManager.Instance.GetPath(CurrentCell, targetCell, gameObject);
+            if (path.Count <= 1) return;
+            StartCoroutine(MoveAlongPath(path));
+        }
+
+        /// <summary>
+        /// Корутина для пошагового движения по пути
+        /// </summary>
+        private IEnumerator MoveAlongPath(List<Vector3Int> path)
+        {
+            if (isMovingAlongPath) yield break;
+
+            isMovingAlongPath = true;
+            currentPath = path;
+            currentPathIndex = 1;
+
+            while (currentPathIndex < currentPath.Count)
+            {
+                var nextCell = currentPath[currentPathIndex];
+
+                FlipToTarget(nextCell);
+
+                GridManager.Instance.MoveEntity(CurrentCell, nextCell, gameObject);
+                CurrentCell = nextCell;
+
+                targetWorldPos = GridManager.Instance.GetCellCenterWorld(nextCell);
+                targetWorldPos.z = transform.position.z;
+                IsMoving = true;
+
+                while (IsMoving)
+                {
+                    yield return null;
+                }
+
+                currentPathIndex++;
+            }
+
+            isMovingAlongPath = false;
+            currentPath.Clear();
+        }
+
+        public void MoveDirectly(Vector3Int targetCell)
         {
             FlipToTarget(targetCell);
             GridManager.Instance.MoveEntity(CurrentCell, targetCell, gameObject);
@@ -245,6 +309,13 @@ namespace Entities
         /// <param name="targetCell">Координаты целевой клетки на сетке</param>
         public void TeleportToCell(Vector3Int targetCell)
         {
+            if (isMovingAlongPath)
+            {
+                StopCoroutine(nameof(MoveAlongPath));
+                isMovingAlongPath = false;
+                currentPath.Clear();
+            }
+            
             GridManager.Instance.UnregisterEntity(CurrentCell);
             CurrentCell = targetCell;
             IsMoving = false;
@@ -277,7 +348,7 @@ namespace Entities
             UpdateTargetPosition(CurrentCell);
             transform.position = targetWorldPos;
         }
-        
+
         /// <summary>
         /// Перемещение без регистрации в GridManager (для анимации мертвых сущностей)
         /// </summary>

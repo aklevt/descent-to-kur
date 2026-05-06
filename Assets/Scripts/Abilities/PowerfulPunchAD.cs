@@ -103,9 +103,9 @@ namespace Abilities
             var canKnoback = GridManager.Instance.IsCellWalkable(entity.CurrentCell + direction);
             var canFarKnoback = GridManager.Instance.IsCellWalkable(entity.CurrentCell + 2 * direction);
             if (canKnoback && canFarKnoback)
-                entity.MoveToCell(entity.CurrentCell + 2 * direction);
+                entity.MoveDirectly(entity.CurrentCell + 2 * direction);
             else if (canKnoback)
-                entity.MoveToCell(entity.CurrentCell + direction);
+                entity.MoveDirectly(entity.CurrentCell + direction);
         }
     }
 }
