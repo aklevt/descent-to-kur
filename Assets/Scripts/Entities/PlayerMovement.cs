@@ -5,10 +5,6 @@ namespace Entities
     public class PlayerMovement : BaseEntity
     {
         public static PlayerMovement Instance { get; private set; }
-        
-        // Это переместится в код способности
-        [Header("Ranged Attack")]
-        [SerializeField] private Transform projectileSpawnPoint;
 
         protected override void Awake()
         {
@@ -26,7 +22,8 @@ namespace Entities
                 Destroy(gameObject);
             }
         }
-
+        
+        // Для дебага
         protected override void Start()
         {
             base.Start();
@@ -35,18 +32,6 @@ namespace Entities
             {
                 Debug.LogError($"<color=red>[PlayerMovement]</color> Instance={Instance?.name}, this={name}");
             }
-        }
-        
-        /// <summary>
-        /// Получить позицию спауна снаряда для игрока
-        /// Это переместится в код способности, наверное
-        /// </summary>
-        public Vector3 GetProjectileSpawnPosition()
-        {
-            if (projectileSpawnPoint != null)
-                return projectileSpawnPoint.position;
-            
-            return transform.position;
         }
     }
 }

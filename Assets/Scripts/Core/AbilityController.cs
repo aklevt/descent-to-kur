@@ -220,7 +220,7 @@ namespace Core
             GridHighlighter.Instance.HighlightEffect(effectCells, selectedAbility.effectColor);
         }
 
-        private void RefreshAbilityOverlay()
+        public void RefreshAbilityOverlay()
         {
             ClearSelection();
 

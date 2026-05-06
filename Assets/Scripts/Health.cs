@@ -143,30 +143,4 @@ public class Health : MonoBehaviour
     
         Debug.Log($"<color=green>[Health]</color> {gameObject.name} восстановлен");
     }
-    
-    // Для дебага
-    
-    [ContextMenu("💀 Kill Entity")]
-    private void DebugKillEntity()
-    {
-        if (entity != null)
-        {
-            TakeDamage(entity.Stats.Health);
-        }
-    }
-    
-    [ContextMenu("❤️ Heal to Full")]
-    private void DebugHealFull()
-    {
-        if (entity != null)
-        {
-            entity.Stats.ApplyHeal(entity.Stats.MaxHealth);
-        }
-    }
-    
-    [ContextMenu("💔 Take 5 Damage")]
-    private void DebugTakeDamage()
-    {
-        TakeDamage(5);
-    }
 }

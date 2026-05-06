@@ -24,9 +24,12 @@ namespace Entities
         private EntityRuntimeStats stats = new();
 
         public EntityRuntimeStats Stats => stats;
-        
-        [Header("Animation Settings")]
-        [SerializeField] private float localAnimationSpeedMultiplier = 1f;
+
+        [Header("Animation Settings")] [SerializeField]
+        private float localAnimationSpeedMultiplier = 1f;
+
+        [Header("Combat")] [Tooltip("Смещение точки спауна снаряда относительно центра")] [SerializeField]
+        private Vector2 projectileSpawnOffset = new(0.3f, 0.5f);
 
         [Header("Components")] [SerializeField]
         protected SpriteRenderer spriteRenderer;
@@ -39,6 +42,7 @@ namespace Entities
         public bool IsMoving { get; private set; }
 
         private Vector3 targetWorldPos;
+
 
         protected virtual void Start()
         {
@@ -132,13 +136,14 @@ namespace Entities
                 Debug.Log($"<color=cyan>{name}</color> пропускает ход. Осталось: {stats.Freeze}");
                 return false;
             }
-            
+
             if (this is PlayerMovement)
             {
                 var maxSteps = Mathf.Min(stats.MoveRange, stats.Energy);
                 stats.ResetSteps(maxSteps);
-        
-                Debug.Log($"<color=green>[{name}]</color> Начало хода. Энергия: {stats.Energy}, Доступно шагов: {stats.RemainingSteps}");
+
+                Debug.Log(
+                    $"<color=green>[{name}]</color> Начало хода. Энергия: {stats.Energy}, Доступно шагов: {stats.RemainingSteps}");
             }
 
             return true;
@@ -262,7 +267,7 @@ namespace Entities
             var dt = Mathf.Min(Time.deltaTime, 0.03f);
             var baseSpeed = SettingsManager.Instance?.Settings.baseMoveSpeed ?? 8f;
             var scaledSpeed = baseSpeed * GetAnimationSpeedMultiplier();
-            
+
             transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, scaledSpeed * dt);
 
             if (Vector3.Distance(transform.position, targetWorldPos) < 0.001f)
@@ -337,7 +342,17 @@ namespace Entities
         protected virtual void OnArrivingToTarget()
         {
         }
-        
+
+        /// <summary>
+        /// Возвращает (World) позицию для запуска снаряда с учетом поворота спрайта
+        /// </summary>
+        public virtual Vector3 GetProjectileSpawnPosition()
+        {
+            var directionMultiplier = (spriteRenderer != null && spriteRenderer.flipX) ? -1f : 1f;
+            var offset = new Vector3(projectileSpawnOffset.x * directionMultiplier, projectileSpawnOffset.y, 0f);
+            return transform.position + offset;
+        }
+
         /// <summary>
         /// Получить финальную скорость анимации с учётом глобальных и локальных настроек
         /// </summary>
@@ -354,5 +369,18 @@ namespace Entities
         {
             return baseTime / GetAnimationSpeedMultiplier();
         }
+
+        // Для дебага
+#if UNITY_EDITOR
+        private void OnDrawGizmos()
+        {
+            if (!Application.isPlaying || !isGridInitialized) return;
+
+            // Точка спауна снаряда
+            Gizmos.color = Color.yellow;
+            var spawnPos = GetProjectileSpawnPosition();
+            Gizmos.DrawWireSphere(spawnPos, 0.1f);
+        }
+#endif
     }
 }

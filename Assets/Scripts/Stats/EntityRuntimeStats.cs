@@ -9,32 +9,24 @@ namespace Stats
         [Tooltip("Если true, статы были изменены вручную в инспекторе")]
         public bool isCustomized;
 
-        [Header("❤️ Health")]
+        [Header("Common")]
         public int Health;
-        
         public int MaxHealth;
-
-        [Header("⚡ Energy (Player Only)")]
-        public int Energy;
-        
-        public int MaxEnergy;
-
-        [Header("🎯 Combat")]
-        public int AttackDamage;
-        
-        public int PreferredAttackRange;
-        
-        public int MinimumRange;
-
-        [Header("🚶 Movement")]
         public int MoveRange;
-        
-        public int RemainingSteps;
-        
-        public int MaxStepsPerRound;
-        
-        [Header("🧊 Freeze")]
+        public int AttackDamage;
         public int Freeze;
+
+        [Header("Player Only")]
+        public int Energy;
+        public int MaxEnergy;
+        public int RemainingSteps;
+        public int MaxStepsPerRound;
+
+        [Header("Enemies only")]
+        [Tooltip("Предпочитаемая дистанция атаки")]
+        public int PreferredAttackRange;
+        [Tooltip("Минимальная дистанция до игрока (0 = не отступать)")]
+        public int MinimumRange;
 
         public EntityRuntimeStats()
         {
@@ -49,8 +41,8 @@ namespace Stats
             }
 
             // Базовые статы
-            MaxHealth = baseStats.maxHealth;
             Health = MaxHealth;
+            MaxHealth = baseStats.maxHealth;
             MoveRange = baseStats.moveRange;
             AttackDamage = baseStats.baseAttackDamage;
             Freeze = 0;
@@ -58,10 +50,10 @@ namespace Stats
             // Статы игрока
             if (baseStats is PlayerStatsData playerData)
             {
-                MaxEnergy = playerData.maxEnergy;
                 Energy = MaxEnergy;
-                MaxStepsPerRound = playerData.maxStepsPerRound;
+                MaxEnergy = playerData.maxEnergy;
                 RemainingSteps = 0;
+                MaxStepsPerRound = playerData.maxStepsPerRound;
             }
 
             // Статы врагов

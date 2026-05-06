@@ -162,6 +162,7 @@ namespace Entities
         /// 1. Индекс верный 
         /// 2. Способность можно использовать
         /// 3. Есть доступная цель
+        /// Обычные враги всегда используют [0], босс может переопределить ExecuteAction для сложной логики выбора способности
         /// </summary>
         protected IEnumerator TryUseAbility(int abilityIndex)
         {
@@ -178,6 +179,7 @@ namespace Entities
 
         /// <summary>
         /// Реализуют конкретные враги для своего хода
+        /// Переопределение для более сложного поведения (AI, выбора способности)
         /// </summary>
         protected abstract IEnumerator ExecuteAction();
     }

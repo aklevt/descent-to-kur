@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: SimpleAttackAbility
   m_EditorClassIdentifier: GameScripts::Abilities.SimpleAttackAbilityData
   abilityName: "\u0410\u0442\u0430\u043A\u0430"
-  energyCost: 2
+  energyCost: 4
+  bonusDamage: 0
+  overrideBaseDamage: 0
   highlightColor: {r: 0.6862745, g: 0, b: 0, a: 1}
   effectColor: {r: 1, g: 0.2, b: 0.2, a: 0.9}
