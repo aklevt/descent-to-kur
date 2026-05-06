@@ -14,16 +14,13 @@ namespace Entities
     /// </summary>
     public abstract class BaseEntity : MonoBehaviour
     {
+        #region Configuration
+
         [Header("Abilities")] [SerializeField] private List<AbilityData> abilities = new();
-
-        public IReadOnlyList<AbilityData> Abilities => abilities;
-
         [Header("Stats")] [SerializeField] private EntityStatsBase baseStats;
 
         [Header("Live Stats")] [SerializeField]
         private EntityRuntimeStats stats = new();
-
-        public EntityRuntimeStats Stats => stats;
 
         [Header("Animation Settings")] [SerializeField]
         private float localAnimationSpeedMultiplier = 1f;
@@ -36,51 +33,104 @@ namespace Entities
 
         [SerializeField] protected Animator animator;
 
-        public bool isGridInitialized = false;
-
+        public IReadOnlyList<AbilityData> Abilities => abilities;
+        public EntityRuntimeStats Stats => stats;
         public Vector3Int CurrentCell { get; private set; }
-        public bool IsMoving { get; private set; }
+        public bool IsMoving { private set; get; }
+        public bool isGridInitialized = false;
+        public bool IsFreeze => stats.Freeze > 0;
 
         private Vector3 targetWorldPos;
 
+        #endregion
+
+        #region Initialization
+
+        /// <summary>
+        /// Инициализация статов из базовых настроек
+        /// </summary>
+        private void InitializeStats()
+        {
+            if (baseStats != null && !stats.isCustomized)
+            {
+                stats.Initialize(baseStats);
+            }
+
+            stats.Health = stats.MaxHealth;
+            stats.Energy = stats.MaxEnergy;
+            stats.Freeze = 0;
+        }
+
+        protected virtual void Awake()
+        {
+            spriteRenderer = GetComponent<SpriteRenderer>();
+            animator = GetComponent<Animator>();
+
+            isGridInitialized = false;
+
+            // Установка статов на всякий случай, пусть будет
+            // Намеренно продублирована логика. Даже если в инспекторе изменить здоровье (isCustomized == true), оно сбросится после респауна
+            InitializeStats();
+        }
 
         protected virtual void Start()
         {
         }
 
+        private void Update()
+        {
+            MoveSmoothly();
+        }
+
+        private void OnValidate()
+        {
+            if (!stats.isCustomized && baseStats != null)
+            {
+                stats.Initialize(baseStats);
+            }
+        }
+
 
         public void RespawnAt(Vector3 worldPosition)
         {
-            // Пусть дебаги пока что остаются, еще нужны
+            // Пусть дебаги пока что остаются, еще нужны будут при склейке сцен
             Debug.Log($"<color=orange>[{name}] Дебаг RespawnAt </color>");
             Debug.Log($"  worldPosition={worldPosition}");
             Debug.Log($"  isGridInitialized={isGridInitialized}");
             Debug.Log($"  CurrentCell={CurrentCell}");
             Debug.Log($"  transform.position={transform.position}");
 
+            UnregisterFromGrid();
+            ResetMovementState();
+            FullRestore();
+            SetupGridPosition(worldPosition);
+            RegisterOnGrid();
+
+            Debug.Log($"<color=green>[{name}] === Конец дебага RespawnAt ===</color>");
+            Debug.Log($"  CurrentCell={CurrentCell}");
+            Debug.Log($"  transform.position={transform.position}");
+            Debug.Log($"  isGridInitialized={isGridInitialized}");
+        }
+
+        private void UnregisterFromGrid()
+        {
             if (isGridInitialized && CurrentCell != Vector3Int.zero)
             {
                 Debug.Log($"<color=orange>[{name}]</color> Unregister в {CurrentCell}");
-
-                if (GridManager.Instance != null)
-                {
-                    GridManager.Instance.UnregisterEntity(CurrentCell);
-                }
+                GridManager.Instance?.UnregisterEntity(CurrentCell);
             }
+        }
 
+        private void ResetMovementState()
+        {
             isGridInitialized = false;
             IsMoving = false;
+        }
 
-            FullRestore();
-
+        private void SetupGridPosition(Vector3 worldPosition)
+        {
             transform.position = worldPosition;
             Debug.Log($"<color=orange>[{name}]</color> transform.position = {worldPosition}");
-
-            if (GridManager.Instance == null)
-            {
-                Debug.LogError($"[{name}] GridManager == null");
-                return;
-            }
 
             CurrentCell = GridManager.Instance.WorldToCell(worldPosition);
             Debug.Log($"<color=orange>[{name}]</color> Результат WorldToCell: {CurrentCell}");
@@ -92,32 +142,17 @@ namespace Entities
             targetWorldPos = cellCenter;
 
             Debug.Log($"<color=orange>[{name}]</color> Центр клетки: {cellCenter}");
-
-            GridManager.Instance.RegisterFixedEntity(CurrentCell, gameObject);
-            isGridInitialized = true;
-
-            Debug.Log($"<color=green>[{name}] === Конец дебага RespawnAt ===</color>");
-            Debug.Log($"  CurrentCell={CurrentCell}");
-            Debug.Log($"  transform.position={transform.position}");
-            Debug.Log($"  isGridInitialized={isGridInitialized}");
         }
 
-        /// <summary>
-        /// Полное восстановление здоровья и ресурсов
-        /// </summary>
-        public void FullRestore()
+        private void RegisterOnGrid()
         {
-            stats.Health = stats.MaxHealth;
-            stats.Energy = stats.MaxEnergy;
-            stats.Freeze = 0;
-            UpdateVisualStatus();
-            Debug.Log($"<color=green>[{name}]</color> Полное восстановление: HP={stats.Health}, Energy={stats.Energy}");
+            GridManager.Instance.RegisterFixedEntity(CurrentCell, gameObject);
+            isGridInitialized = true;
         }
 
         public void InitializeOnGrid()
         {
-            stats.Health = stats.MaxHealth;
-            stats.Freeze = 0;
+            InitializeStats();
             UpdateVisualStatus();
 
             CurrentCell = GridManager.Instance.WorldToCell(transform.position);
@@ -128,6 +163,19 @@ namespace Entities
             isGridInitialized = true;
         }
 
+        /// <summary>
+        /// Полное восстановление здоровья и ресурсов
+        /// </summary>
+        public void FullRestore()
+        {
+            InitializeStats();
+            UpdateVisualStatus();
+            Debug.Log($"<color=green>[{name}]</color> Полное восстановление: HP={stats.Health}, Energy={stats.Energy}");
+        }
+
+        #endregion
+
+        #region Game Logic
 
         public bool OnTurnStart()
         {
@@ -162,27 +210,6 @@ namespace Entities
             }
         }
 
-        /// <summary>
-        /// Перемещение без регистрации в GridManager (для мертвых сущностей)
-        /// </summary>
-        public void PhantomMoveToCell(Vector3Int targetCell)
-        {
-            FlipToTarget(targetCell);
-
-            targetWorldPos = GridManager.Instance.GetCellCenterWorld(targetCell);
-            targetWorldPos.z = transform.position.z;
-            IsMoving = true;
-        }
-
-        /// <summary>
-        /// Проверка на признаки жизни
-        /// </summary>
-        public bool IsPhysicallyDead()
-        {
-            var health = GetComponent<Health>();
-            return health != null && health.IsDead;
-        }
-
         public void Freeze(int turns)
         {
             stats.Freeze = Mathf.Max(stats.Freeze, turns);
@@ -190,48 +217,25 @@ namespace Entities
             Debug.Log($"<color=cyan>{name}</color> заморожен на {stats.Freeze} ходов!");
         }
 
-        public bool IsFreeze => stats.Freeze > 0;
-
-        public void UpdateVisualStatus()
+        public bool IsPhysicallyDead()
         {
-            if (spriteRenderer == null) return;
-            spriteRenderer.color = IsFreeze ? new Color(0.5f, 0.7f, 1f) : Color.white;
+            var health = GetComponent<Health>();
+            return health != null && health.IsDead;
         }
 
-        private void OnValidate()
+        #endregion
+
+        #region Grid Movement
+
+        public void MoveToCell(Vector3Int targetCell)
         {
-            if (!stats.isCustomized && baseStats != null)
-            {
-                stats.Initialize(baseStats);
-            }
-        }
+            FlipToTarget(targetCell);
+            GridManager.Instance.MoveEntity(CurrentCell, targetCell, gameObject);
+            CurrentCell = targetCell;
 
-        private void Update()
-        {
-            MoveSmoothly();
-        }
-
-        protected virtual void Awake()
-        {
-            spriteRenderer = GetComponent<SpriteRenderer>();
-            animator = GetComponent<Animator>();
-
-            isGridInitialized = false;
-
-            // Установка статов на всякий случай, пусть будет
-            if (baseStats != null && !stats.isCustomized)
-            {
-                stats.Initialize(baseStats);
-            }
-
-            // Намеренно продублирована логика. Даже если в инспекторе изменить здоровье (isCustomized == true), оно сбросится после респауна
-            stats.Health = stats.MaxHealth;
-        }
-
-        private void PlaceOnCell()
-        {
-            UpdateTargetPosition(CurrentCell);
-            transform.position = targetWorldPos;
+            targetWorldPos = GridManager.Instance.GetCellCenterWorld(targetCell);
+            targetWorldPos.z = transform.position.z;
+            IsMoving = true;
         }
 
         /// <summary>
@@ -247,17 +251,6 @@ namespace Entities
 
             PlaceOnCell();
             GridManager.Instance.RegisterFixedEntity(CurrentCell, gameObject);
-        }
-
-        public void MoveToCell(Vector3Int targetCell)
-        {
-            FlipToTarget(targetCell);
-            GridManager.Instance.MoveEntity(CurrentCell, targetCell, gameObject);
-            CurrentCell = targetCell;
-
-            targetWorldPos = GridManager.Instance.GetCellCenterWorld(targetCell);
-            targetWorldPos.z = transform.position.z;
-            IsMoving = true;
         }
 
         public void MoveSmoothly()
@@ -278,6 +271,37 @@ namespace Entities
                 OnArrivingToTarget();
             }
         }
+
+        private void PlaceOnCell()
+        {
+            UpdateTargetPosition(CurrentCell);
+            transform.position = targetWorldPos;
+        }
+        
+        /// <summary>
+        /// Перемещение без регистрации в GridManager (для анимации мертвых сущностей)
+        /// </summary>
+        public void PhantomMoveToCell(Vector3Int targetCell)
+        {
+            FlipToTarget(targetCell);
+            targetWorldPos = GridManager.Instance.GetCellCenterWorld(targetCell);
+            targetWorldPos.z = transform.position.z;
+            IsMoving = true;
+        }
+
+        private void UpdateTargetPosition(Vector3Int cell)
+        {
+            targetWorldPos = GridManager.Instance.GetCellCenterWorld(cell);
+            targetWorldPos.z = transform.position.z;
+        }
+
+        protected virtual void OnArrivingToTarget()
+        {
+        }
+
+        #endregion
+
+        #region Animation & Visual Effects
 
         /// <summary>
         /// Простейшая анимация удара с возможностью вызова действия в сам момент удара
@@ -317,12 +341,6 @@ namespace Entities
             transform.position = startPos;
         }
 
-        private void UpdateSpriteFlip(float horizontalDirection)
-        {
-            if (horizontalDirection != 0)
-                spriteRenderer.flipX = horizontalDirection < 0;
-        }
-
         public void FlipToTarget(Vector3Int targetCell)
         {
             UpdateSpriteFlip(targetCell.x - CurrentCell.x);
@@ -333,14 +351,16 @@ namespace Entities
             UpdateSpriteFlip(targetPosition.x - transform.position.x);
         }
 
-        private void UpdateTargetPosition(Vector3Int cell)
+        private void UpdateSpriteFlip(float horizontalDirection)
         {
-            targetWorldPos = GridManager.Instance.GetCellCenterWorld(cell);
-            targetWorldPos.z = transform.position.z;
+            if (horizontalDirection != 0)
+                spriteRenderer.flipX = horizontalDirection < 0;
         }
 
-        protected virtual void OnArrivingToTarget()
+        public void UpdateVisualStatus()
         {
+            if (spriteRenderer == null) return;
+            spriteRenderer.color = IsFreeze ? new Color(0.5f, 0.7f, 1f) : Color.white;
         }
 
         /// <summary>
@@ -352,6 +372,10 @@ namespace Entities
             var offset = new Vector3(projectileSpawnOffset.x * directionMultiplier, projectileSpawnOffset.y, 0f);
             return transform.position + offset;
         }
+
+        #endregion
+
+        #region Animation Settings & Editor
 
         /// <summary>
         /// Получить финальную скорость анимации с учётом глобальных и локальных настроек
@@ -382,5 +406,7 @@ namespace Entities
             Gizmos.DrawWireSphere(spawnPos, 0.1f);
         }
 #endif
+
+        #endregion
     }
 }
