@@ -36,8 +36,8 @@ namespace Abilities
 
         public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)
         {
-            var distance = Mathf.Abs(targetCell.x - actor.CurrentCell.x) + 
-                           Mathf.Abs(targetCell.y - actor.CurrentCell.y);
+            var path = GridManager.Instance.GetPath(actor.CurrentCell, targetCell, actor.gameObject);
+            var distance = path.Count > 0 ? path.Count - 1 : 0; // (path включает стартовую клетку)
 
             if (actor is PlayerMovement player)
             {

@@ -59,6 +59,7 @@ public class GridPathfinder
                 queue.Enqueue((next, dist + 1));
             }
         }
+
         if (iterations >= MaxPathfindingIterations)
             LogIterationLimitExceeded("GetPathDistance", $"{start} -> {target}");
         return int.MaxValue;
@@ -124,10 +125,12 @@ public class GridPathfinder
                 queue.Enqueue((next, steps + 1));
             }
         }
+
         if (iterations >= MaxRangeSearchIterations)
         {
             LogIterationLimitExceeded("GetCellsBFS", $"{startPos}, range={range}");
         }
+
         return new List<Vector3Int>(result);
     }
 
@@ -156,6 +159,72 @@ public class GridPathfinder
         }
 
         return cells;
+    }
+
+    /// <summary>
+    /// Строит путь от начальной до целевой клетки через проходимые клетки (BFS)
+    /// </summary>
+    /// <param name="start">Начальная клетка</param>
+    /// <param name="target">Целевая клетка</param>
+    /// <param name="currentEntity">Сущность для которой строится путь</param>
+    /// <returns>Список клеток пути (включая start и target) или пустой список если путь не найден</returns>
+    public List<Vector3Int> GetPath(Vector3Int start, Vector3Int target, GameObject currentEntity = null)
+    {
+        if (start == target) return new List<Vector3Int> { start };
+
+        var options = CellCheckOptions.ForMovement(currentEntity);
+        var queue = new Queue<Vector3Int>();
+        var visited = new HashSet<Vector3Int> { start };
+        var parent = new Dictionary<Vector3Int, Vector3Int>();
+
+        queue.Enqueue(start);
+        var iterations = 0;
+
+        while (queue.Count > 0 && iterations < MaxPathfindingIterations)
+        {
+            iterations++;
+            var current = queue.Dequeue();
+
+            foreach (var dir in AdjacentDirections)
+            {
+                var next = current + dir;
+
+                if (next == target)
+                {
+                    parent[next] = current;
+                    return ReconstructPath(parent, start, target);
+                }
+
+                if (visited.Contains(next) || !gridManager.IsCellPassable(next, options))
+                    continue;
+
+                visited.Add(next);
+                parent[next] = current;
+                queue.Enqueue(next);
+            }
+        }
+
+        if (iterations >= MaxPathfindingIterations)
+            LogIterationLimitExceeded("GetPath", $"{start} -> {target}");
+
+        return new List<Vector3Int>();
+    }
+
+    private List<Vector3Int> ReconstructPath(Dictionary<Vector3Int, Vector3Int> parent, Vector3Int start,
+        Vector3Int target)
+    {
+        var path = new List<Vector3Int>();
+        var current = target;
+
+        while (current != start)
+        {
+            path.Add(current);
+            current = parent[current];
+        }
+
+        path.Add(start);
+        path.Reverse();
+        return path;
     }
 
     private static void LogIterationLimitExceeded(string operation, string details)

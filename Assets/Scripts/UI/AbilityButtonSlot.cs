@@ -29,7 +29,6 @@ namespace UI
         private int currentIndex;
         
         private Color baseColor = Color.white;
-        private bool isFlashing = false;
 
         public void Setup(AbilityData ability, int index)
         {
@@ -57,8 +56,17 @@ namespace UI
                 }
             }
             
+            if (shakeCoroutine != null && button != null)
+            {
+                button.StopCoroutine(shakeCoroutine);
+                shakeCoroutine = null;
+            }
+            
             if (buttonImage != null)
-                baseColor = buttonImage.color;
+            {
+                baseColor = Color.white;
+                buttonImage.color = baseColor;
+            }
 
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(OnButtonClick);
@@ -115,12 +123,13 @@ namespace UI
 
         private IEnumerator FlashRed()
         {
-            var originalColor = buttonImage.color;
+            var colorBeforeFlash  = baseColor;
             buttonImage.color = new Color(1f, 0.3f, 0.3f);
             
             yield return new WaitForSeconds(0.15f);
-            isFlashing = false;
-            buttonImage.color = originalColor;
+            
+            buttonImage.color = colorBeforeFlash ;
+            shakeCoroutine = null;
         }
 
         public void Hide()

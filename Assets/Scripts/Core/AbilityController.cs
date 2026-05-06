@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Abilities;
 using Entities;
+using Stats;
 using UI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,16 +13,20 @@ namespace Core
     {
         public static AbilityController Instance { get; private set; }
 
-        [SerializeField] private AbilityBar abilityBar;
-        
-        private IReadOnlyList<AbilityData> PlayerAbilities =>
-            PlayerMovement.Instance?.Abilities;
+        #region Configuration
 
+        [SerializeField] private AbilityBar abilityBar;
+        private AbilityValidator validator = new AbilityValidator();
         private List<Vector3Int> availableCells = new();
         private AbilityData selectedAbility;
         private bool isExecuting;
         private bool isDead;
         private bool isInputBlocked;
+
+        public List<Vector3Int> AvailableCells => availableCells;
+
+        private IReadOnlyList<AbilityData> PlayerAbilities =>
+            PlayerMovement.Instance?.Abilities;
 
         private bool IsPlayerTurnActive =>
             !isDead &&
@@ -30,7 +35,9 @@ namespace Core
             TurnManager.Instance.CurrentState == TurnState.PlayerTurn &&
             PlayerMovement.Instance != null;
 
-        public List<Vector3Int> AvailableCells => availableCells;
+        #endregion
+
+        #region Initialization
 
         private void Awake()
         {
@@ -59,7 +66,18 @@ namespace Core
             if (ShouldRefreshAbilityGrid())
                 RefreshAbilityOverlay();
         }
-        
+
+        #endregion
+
+        #region Input Control API
+
+        public void BlockInput()
+        {
+            isInputBlocked = true;
+            ClearSelection();
+            abilityBar?.DeselectAllSlots();
+        }
+
         /// <summary>
         /// Разблокировать ввод (при загрузке новой комнаты)
         /// </summary>
@@ -69,10 +87,149 @@ namespace Core
             isDead = false;
         }
 
+        public void DisableAllOverlaysAfterDeath()
+        {
+            isDead = true;
+            selectedAbility = null;
+            ClearSelection();
+        }
+
+        #endregion
+
+        #region Ability Selection
+
+        public void SelectAbilityByIndex(int index)
+        {
+            if (LevelController.Instance != null && !LevelController.Instance.IsLevelLoaded) return;
+
+            var abilities = PlayerAbilities;
+            if (abilities == null || index >= abilities.Count)
+                return;
+
+            var targetAbility = abilities[index];
+
+            CheckAbilityResourcesAndWarn(targetAbility, index);
+
+            abilityBar?.OnAbilitySelected(index);
+            SelectAbility(abilities[index]);
+            RefreshAbilityOverlay();
+        }
+
+        private void CheckAbilityResourcesAndWarn(AbilityData targetAbility, int index)
+        {
+            validator.ValidateAbilityAndWarn(targetAbility, index, abilityBar);
+        }
+
+        private void SelectAbility(AbilityData ability)
+        {
+            if (selectedAbility == ability) return;
+            selectedAbility = ability;
+            RefreshAbilityOverlay();
+        }
+
+        #endregion
+
+        #region Grid Interaction
+
+        public void HandleCellClick(Vector3Int clickedCell)
+        {
+            if (!CanProcessCellClick()) return;
+
+            if (!ValidatePlayerStateForAction()) return;
+
+            if (!ValidateAbilityUsage(clickedCell)) return;
+
+            StartCoroutine(ExecuteSelectedAbility(clickedCell));
+        }
+
+        /// <summary>
+        /// Базовые проверки возможности обработки клика
+        /// </summary>
+        private bool CanProcessCellClick()
+        {
+            return IsPlayerTurnActive && !isExecuting && selectedAbility != null;
+        }
+
+        /// <summary>
+        /// Проверки состояния игрока (заморозка, движение)
+        /// </summary>
+        private bool ValidatePlayerStateForAction()
+        {
+            return validator.IsPlayerReadyForAction();
+        }
+
+        /// <summary>
+        /// Проверки способности и цели
+        /// </summary>
+        private bool ValidateAbilityUsage(Vector3Int targetCell)
+        {
+            return validator.CanUseAbilityOnTarget(selectedAbility, targetCell, availableCells);
+        }
+
+
+        public void HandleCellHover(Vector3Int hoveredCell)
+        {
+            if (!IsPlayerTurnActive) return;
+
+            if (!availableCells.Contains(hoveredCell))
+            {
+                GridHighlighter.Instance.ClearEffect();
+                return;
+            }
+
+            var effectCells = selectedAbility.GetEffectCells(hoveredCell, PlayerMovement.Instance);
+            GridHighlighter.Instance.HighlightEffect(effectCells, selectedAbility.effectColor);
+        }
+
+        #endregion
+
+        #region Execution Coroutines
+
+        private IEnumerator ExecuteSelectedAbility(Vector3Int targetCell)
+        {
+            isExecuting = true;
+            var ability = selectedAbility;
+
+            if ((ability is not MoveAbilityData) && PlayerMovement.Instance != null)
+            {
+                PlayerMovement.Instance.Stats.SpendEnergy(ability.energyCost);
+            }
+
+            ClearSelection();
+            yield return ability.Execute(PlayerMovement.Instance, targetCell);
+
+            isExecuting = false;
+            RefreshAbilityOverlay();
+        }
+
+        #endregion
+
+        #region Overlay Updates
+
+        public void RefreshAbilityOverlay()
+        {
+            ClearSelection();
+
+            if (!IsPlayerTurnActive || selectedAbility == null) return;
+
+            availableCells = selectedAbility.GetTargetCells(PlayerMovement.Instance);
+            GridHighlighter.Instance.HighlightCells(availableCells, selectedAbility.highlightColor);
+        }
+
+        private void ClearSelection()
+        {
+            availableCells.Clear();
+            GridHighlighter.Instance.Clear();
+        }
+
         private bool ShouldRefreshAbilityGrid() =>
             !PlayerMovement.Instance.IsMoving &&
             selectedAbility != null &&
             availableCells.Count == 0;
+
+        #endregion
+
+        #region Event Handlers
 
         private void HandleTurnChanged(TurnState newState)
         {
@@ -91,156 +248,7 @@ namespace Core
                 ClearSelection();
             }
         }
-        
-        public void BlockInput()
-        {
-            isInputBlocked = true;
-            ClearSelection();
-            abilityBar?.DeselectAllSlots();
-        }
 
-        public void SelectAbilityByIndex(int index)
-        {
-            if (LevelController.Instance != null && !LevelController.Instance.IsLevelLoaded) return;
-            
-            var abilities = PlayerAbilities;
-            if (abilities == null || index >= abilities.Count)
-                return;
-
-            var targetAbility = abilities[index];
-            
-            if (PlayerMovement.Instance != null)
-            {
-                var stats = PlayerMovement.Instance.Stats;
-                var shouldFlash = false;
-
-                if (targetAbility is MoveAbilityData)
-                {
-                    if (stats.RemainingSteps <= 0 || stats.Energy <= 0)
-                    {
-                        shouldFlash = true;
-                    }
-                }
-                else
-                {
-                    if (!stats.HasEnergyForAction(targetAbility.energyCost))
-                    {
-                        shouldFlash = true;
-                    }
-                }
-
-                if (shouldFlash)
-                {
-                    abilityBar?.TriggerWarningFlash(index);
-                }
-            }
-            
-            if (targetAbility is MoveAbilityData && PlayerMovement.Instance != null)
-            {
-                if (PlayerMovement.Instance.Stats.RemainingSteps <= 0)
-                {
-                    UI.UIController.Instance?.ShowStepsWarning();
-                }
-            }
-
-            if (!targetAbility.CanUse(PlayerMovement.Instance))
-            {
-                UI.UIController.Instance?.ShowEnergyWarning();
-            }
-
-            
-            abilityBar?.OnAbilitySelected(index);
-            SelectAbility(abilities[index]);
-            RefreshAbilityOverlay();
-        }
-
-
-        private void SelectAbility(AbilityData ability)
-        {
-            if (selectedAbility == ability) return;
-            selectedAbility = ability;
-            RefreshAbilityOverlay();
-        }
-
-        public void HandleCellClick(Vector3Int clickedCell)
-        {
-            if (!IsPlayerTurnActive || isExecuting) return;
-            
-            if (PlayerMovement.Instance.IsFreeze)
-            {
-                Debug.Log("Игрок заморожен, пропуск хода");
-                return;
-            }
-            
-            if (PlayerMovement.Instance.IsMoving) return;
-            if (selectedAbility == null) return;
-
-            if (!selectedAbility.CanUse(PlayerMovement.Instance))
-            {
-                UI.UIController.Instance?.ShowEnergyWarning();
-                return;
-            }
-
-            if (!availableCells.Contains(clickedCell)) return;
-
-            if (!selectedAbility.IsValidTarget(clickedCell, PlayerMovement.Instance))
-                return;
-
-            StartCoroutine(ExecuteSelectedAbility(clickedCell));
-        }
-        
-        private IEnumerator ExecuteSelectedAbility(Vector3Int targetCell)
-        {
-            isExecuting = true;
-            var ability = selectedAbility;
-
-            if ((ability is not MoveAbilityData) && PlayerMovement.Instance != null)
-            {
-                PlayerMovement.Instance.Stats.SpendEnergy(ability.energyCost);
-            }
-
-            ClearSelection();
-            yield return ability.Execute(PlayerMovement.Instance, targetCell);
-
-            isExecuting = false;
-            RefreshAbilityOverlay();
-        }
-
-        public void HandleCellHover(Vector3Int hoveredCell)
-        {
-            if (!IsPlayerTurnActive) return;
-
-            if (!availableCells.Contains(hoveredCell))
-            {
-                GridHighlighter.Instance.ClearEffect();
-                return;
-            }
-
-            var effectCells = selectedAbility.GetEffectCells(hoveredCell, PlayerMovement.Instance);
-            GridHighlighter.Instance.HighlightEffect(effectCells, selectedAbility.effectColor);
-        }
-
-        public void RefreshAbilityOverlay()
-        {
-            ClearSelection();
-
-            if (!IsPlayerTurnActive || selectedAbility == null) return;
-
-            availableCells = selectedAbility.GetTargetCells(PlayerMovement.Instance);
-            GridHighlighter.Instance.HighlightCells(availableCells, selectedAbility.highlightColor);
-        }
-
-        private void ClearSelection()
-        {
-            availableCells.Clear();
-            GridHighlighter.Instance.Clear();
-        }
-
-        public void DisableAllOverlaysAfterDeath()
-        {
-            isDead = true;
-            selectedAbility = null;
-            ClearSelection();
-        }
+        #endregion
     }
 }
