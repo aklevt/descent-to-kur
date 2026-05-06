@@ -87,7 +87,7 @@ namespace Entities
                 return CurrentCell;
             }
 
-            var possibleMoves = GridManager.Instance.GetWalkableTilesInRange(
+            var possibleMoves = GridManager.Instance.GetWalkableCellsInRange(
                 CurrentCell, Stats.MoveRange, gameObject
             );
 

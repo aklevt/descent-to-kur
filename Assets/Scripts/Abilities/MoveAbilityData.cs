@@ -27,7 +27,7 @@ namespace Abilities
 
             if (maxAvailableDistance <= 0) return new List<Vector3Int>();
             
-            return GridManager.Instance.GetWalkableTilesInRange(
+            return GridManager.Instance.GetWalkableCellsInRange(
                 position,
                 maxAvailableDistance,
                 actor.gameObject
