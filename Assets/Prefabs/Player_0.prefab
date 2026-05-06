@@ -115,23 +115,22 @@ MonoBehaviour:
   baseStats: {fileID: 11400000, guid: 43b02efb37ef8ac41aedc492ac640db1, type: 2}
   stats:
     isCustomized: 0
-    Freeze: 0
-    Health: 5
-    MaxHealth: 5
+    Health: 20
+    MaxHealth: 20
     Energy: 10
     MaxEnergy: 10
-    MoveRange: 3
-    MoveSpeed: 3
     AttackDamage: 5
     PreferredAttackRange: 1
     MinimumRange: 0
+    MoveRange: 3
     RemainingSteps: 0
     MaxStepsPerRound: 3
+    Freeze: 0
   localAnimationSpeedMultiplier: 1
+  projectileSpawnOffset: {x: 0.4, y: 0.8}
   spriteRenderer: {fileID: 1122430972742747490}
   animator: {fileID: 0}
   isGridInitialized: 0
-  projectileSpawnPoint: {fileID: 2815050848210641064}
 --- !u!114 &9028990903933944739
 MonoBehaviour:
   m_ObjectHideFlags: 0

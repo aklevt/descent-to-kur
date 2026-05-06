@@ -71,6 +71,9 @@ namespace Abilities
 
         public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)
         {
+            var targetPos = GridManager.Instance.GetCellCenterWorld(targetCell);
+            actor.FlipToTarget(targetPos);
+            
             CameraFollow.Instance?.ShakeMedium();
             var knockbackVector = targetCell - actor.CurrentCell;
             var targets = GetEffectCells(targetCell, actor);

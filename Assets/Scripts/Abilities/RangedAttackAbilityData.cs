@@ -9,16 +9,15 @@ namespace Abilities
     [CreateAssetMenu(fileName = "RangedAttackAbility", menuName = "Abilities/RangedAttack")]
     public class RangedAttackAbilityData : AbilityData
     {
-        [Header("Range")]
-        public int minRange = 2;
+        [Header("Range")] public int minRange = 2;
         public int maxRange = 4;
 
-        [Header("Projectile")]
-        [SerializeField] private GameObject projectilePrefab;
-        [SerializeField] private float projectileSpeed = 10f;
-        
-        [Header("Charge Effect")]
-        [SerializeField] private GameObject chargeEffectPrefab;
+        [Header("Projectile")] [SerializeField]
+        private GameObject projectilePrefab;
+
+        [Header("Charge Effect")] [SerializeField]
+        private GameObject chargeEffectPrefab;
+
         [SerializeField] private float chargeTime = 0.3f;
 
         public override List<Vector3Int> GetTargetCellsFrom(Vector3Int origin, BaseEntity actor)
@@ -28,7 +27,7 @@ namespace Abilities
 
         public override List<Vector3Int> GetEffectCells(Vector3Int hoveredCell, BaseEntity actor)
             => new List<Vector3Int> { hoveredCell };
-        
+
         public override Vector3Int? ChooseTarget(BaseEntity actor)
         {
             var playerCell = PlayerMovement.Instance?.CurrentCell;
@@ -37,7 +36,7 @@ namespace Abilities
             var available = GetTargetCells(actor);
             return available.Contains(playerCell.Value) ? playerCell : null;
         }
-        
+
         /// <summary>
         /// Требует наличие цели на клетке, так как это не aoe-атака
         /// </summary>
@@ -46,7 +45,7 @@ namespace Abilities
             var target = GridManager.Instance.GetEntityAt(targetCell);
             return target != null;
         }
-        
+
         public override IEnumerator Execute(BaseEntity actor, Vector3Int targetCell)
         {
             var targetObj = GridManager.Instance.GetEntityAt(targetCell);
@@ -54,59 +53,19 @@ namespace Abilities
 
             var targetPos = targetObj.transform.position + new Vector3(0, 0.5f, 0);
             var damage = GetCalculatedDamage(actor);
-            
+
             actor.FlipToTarget(targetPos);
-            
+
             yield return new WaitForSeconds(actor.GetScaledTime(0.1f));
-            
-            var spawnPos = actor.transform.position;
-            if (actor is RangedEnemy rangedEnemy)
-            {
-                spawnPos = rangedEnemy.GetProjectileSpawnPosition();
-            }
-            else if (actor is PlayerMovement player)
-            {
-                spawnPos = player.GetProjectileSpawnPosition();
-            }
 
-            GameObject chargeEffect = null;
-            if (chargeEffectPrefab != null)
-            {
-                chargeEffect = Instantiate(chargeEffectPrefab, spawnPos, Quaternion.identity);
-                yield return new WaitForSeconds(actor.GetScaledTime(chargeTime));
-                Destroy(chargeEffect);
-            }
+            // Эффект подготовки (Particle system)
+            var spawnPos = actor.GetProjectileSpawnPosition();
+            yield return PlayChargeEffect(spawnPos, actor);
 
-            // Запуск снаряда
+            // Запуск снаряда (в world-координатах)
             if (projectilePrefab != null)
             {
-                var projectileObj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
-                var projectile = projectileObj.GetComponent<Projectile>();
-
-                if (projectile != null)
-                {
-                    var speedMultiplier = actor.GetAnimationSpeedMultiplier();
-                    
-                    var projectileHit = false;
-                    
-                    projectile.Launch(spawnPos, targetPos, speedMultiplier, () =>
-                    {
-                        targetObj.GetComponent<Health>()?.TakeDamage(damage);
-                        CameraFollow.Instance?.ShakeLight();
-                        projectileHit = true;
-                    });
-
-                    while (!projectileHit && projectileObj != null)
-                    {
-                        yield return null;
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning("[RangedAttackAbility] Нет компонента Projectile");
-                    targetObj.GetComponent<Health>()?.TakeDamage(damage);
-                    CameraFollow.Instance?.ShakeMedium();
-                }
+                yield return LaunchProjectile(spawnPos, targetPos, targetObj, damage, actor);
             }
             else
             {
@@ -114,6 +73,50 @@ namespace Abilities
                 CameraFollow.Instance?.ShakeMedium();
                 yield return new WaitForSeconds(actor.GetScaledTime(0.05f));
             }
+        }
+
+        private IEnumerator PlayChargeEffect(Vector3 spawnPos, BaseEntity actor)
+        {
+            if (chargeEffectPrefab == null) yield break;
+
+            var chargeEffect = Instantiate(chargeEffectPrefab, spawnPos, Quaternion.identity);
+            yield return new WaitForSeconds(actor.GetScaledTime(chargeTime));
+            Destroy(chargeEffect);
+        }
+
+        private IEnumerator LaunchProjectile(Vector3 spawnPos, Vector3 targetPos, GameObject targetObj, int damage,
+            BaseEntity actor)
+        {
+            var projectileObj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
+            var projectile = projectileObj.GetComponent<Projectile>();
+
+            if (projectile != null)
+            {
+                var projectileHit = false;
+                var speedMultiplier = actor.GetAnimationSpeedMultiplier();
+
+                projectile.Launch(spawnPos, targetPos, speedMultiplier, () =>
+                {
+                    ApplyDamage(targetObj, damage);
+                    projectileHit = true;
+                });
+
+                while (!projectileHit && projectileObj != null)
+                {
+                    yield return null;
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[RangedAttackAbility] Нет компонента Projectile");
+                ApplyDamage(targetObj, damage);
+            }
+        }
+
+        private void ApplyDamage(GameObject targetObj, int damage)
+        {
+            targetObj.GetComponent<Health>()?.TakeDamage(damage);
+            CameraFollow.Instance?.ShakeLight();
         }
     }
 }

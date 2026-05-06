@@ -9,14 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f9160e6f132d754ba837181f7ec87c2, type: 3}
-  m_Name: PasusuStats
+  m_Script: {fileID: 11500000, guid: f35bc3a3345e9614e81a1e7e5bb3b60a, type: 3}
+  m_Name: MumiaStats
   m_EditorClassIdentifier: GameScripts::Stats.EntityStats
-  maxHealth: 10
-  maxEnergy: 3
-  moveRange: 1
-  maxStepsPerRound: 3
-  moveSpeed: 3
-  baseAttackDamage: 3
-  preferredAttackRange: 3
-  minimumRange: 2
+  maxHealth: 15
+  moveRange: 2
+  baseAttackDamage: 5
+  preferredAttackRange: 1
+  minimumRange: 0

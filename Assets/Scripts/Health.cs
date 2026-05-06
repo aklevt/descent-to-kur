@@ -123,7 +123,7 @@ public class Health : MonoBehaviour
         Destroy(gameObject);
     }
     
-    public void ResetState()
+    public void ResetDeathState()
     {
         isDying = false;
     
@@ -143,5 +143,4 @@ public class Health : MonoBehaviour
     
         Debug.Log($"<color=green>[Health]</color> {gameObject.name} восстановлен");
     }
-
 }
