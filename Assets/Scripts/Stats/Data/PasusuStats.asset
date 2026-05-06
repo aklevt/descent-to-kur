@@ -9,9 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e6f61ca7182326f4494fd92f32eb0eaa, type: 3}
-  m_Name: DefaultGameSettings
-  m_EditorClassIdentifier: GameScripts::Settings.GameSettings
-  globalAnimationSpeedMultiplier: 3
-  enemyTurnDelay: 0.1
-  roundEndDelay: 0.1
+  m_Script: {fileID: 11500000, guid: f35bc3a3345e9614e81a1e7e5bb3b60a, type: 3}
+  m_Name: PasusuStats
+  m_EditorClassIdentifier: GameScripts::Stats.EntityStats
+  maxHealth: 10
+  moveRange: 2
+  baseAttackDamage: 3
+  preferredAttackRange: 4
+  minimumRange: 2

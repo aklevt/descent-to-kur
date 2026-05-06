@@ -18,7 +18,7 @@ namespace Entities
 
         public IReadOnlyList<AbilityData> Abilities => abilities;
 
-        [Header("Stats")] [SerializeField] private EntityStats baseStats;
+        [Header("Stats")] [SerializeField] private EntityStatsBase baseStats;
 
         [Header("Live Stats")] [SerializeField]
         private EntityRuntimeStats stats = new();
@@ -260,7 +260,8 @@ namespace Entities
             if (!IsMoving) return;
 
             var dt = Mathf.Min(Time.deltaTime, 0.03f);
-            var scaledSpeed = Stats.MoveSpeed * GetAnimationSpeedMultiplier();
+            var baseSpeed = SettingsManager.Instance?.Settings.baseMoveSpeed ?? 8f;
+            var scaledSpeed = baseSpeed * GetAnimationSpeedMultiplier();
             
             transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, scaledSpeed * dt);
 

@@ -138,7 +138,7 @@ namespace Core
                 currentPlayer = PlayerMovement.Instance;
                 
                 var health = currentPlayer.GetComponent<Health>();
-                health?.ResetState();
+                health?.ResetDeathState();
 
                 Debug.Log($"<color=green>[LevelController]</color> Используется существующий игрок: {currentPlayer.name}");
                 if (CameraFollow.Instance != null)

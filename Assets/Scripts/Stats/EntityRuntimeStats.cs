@@ -5,43 +5,71 @@ namespace Stats
     [System.Serializable]
     public class EntityRuntimeStats
     {
+        [Header("⚙️ Configuration")]
+        [Tooltip("Если true, статы были изменены вручную в инспекторе")]
         public bool isCustomized;
 
-        public int Freeze;
+        [Header("❤️ Health")]
         public int Health;
+        
         public int MaxHealth;
+
+        [Header("⚡ Energy (Player Only)")]
         public int Energy;
+        
         public int MaxEnergy;
-        public int MoveRange;
-        public float MoveSpeed;
+
+        [Header("🎯 Combat")]
         public int AttackDamage;
+        
         public int PreferredAttackRange;
+        
         public int MinimumRange;
+
+        [Header("🚶 Movement")]
+        public int MoveRange;
+        
         public int RemainingSteps;
+        
         public int MaxStepsPerRound;
+        
+        [Header("🧊 Freeze")]
+        public int Freeze;
 
         public EntityRuntimeStats()
         {
         }
 
-        public void Initialize(EntityStats so)
+        public void Initialize(EntityStatsBase baseStats)
         {
-            if (so == null) return;
-            MaxHealth = so.maxHealth;
+            if (baseStats == null)
+            {
+                Debug.LogWarning("[EntityRuntimeStats]");
+                return;
+            }
+
+            // Базовые статы
+            MaxHealth = baseStats.maxHealth;
             Health = MaxHealth;
+            MoveRange = baseStats.moveRange;
+            AttackDamage = baseStats.baseAttackDamage;
+            Freeze = 0;
 
-            MaxEnergy = so.maxEnergy;
-            Energy = MaxEnergy;
+            // Статы игрока
+            if (baseStats is PlayerStatsData playerData)
+            {
+                MaxEnergy = playerData.maxEnergy;
+                Energy = MaxEnergy;
+                MaxStepsPerRound = playerData.maxStepsPerRound;
+                RemainingSteps = 0;
+            }
 
-            MoveRange = so.moveRange;
-            MoveSpeed = so.moveSpeed;
-            AttackDamage = so.baseAttackDamage;
-
-            PreferredAttackRange = so.preferredAttackRange;
-            MinimumRange = so.minimumRange;
-            
-            RemainingSteps = 0;
-            MaxStepsPerRound =  so.maxStepsPerRound;
+            // Статы врагов
+            if (baseStats is EnemyStatsData enemyData)
+            {
+                PreferredAttackRange = enemyData.preferredAttackRange;
+                MinimumRange = enemyData.minimumRange;
+            }
         }
 
         public bool IsDead => Health <= 0;

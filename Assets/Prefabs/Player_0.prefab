@@ -116,11 +116,11 @@ MonoBehaviour:
   stats:
     isCustomized: 0
     Freeze: 0
-    Health: 5
-    MaxHealth: 5
-    Energy: 10
-    MaxEnergy: 10
-    MoveRange: 3
+    Health: 20
+    MaxHealth: 20
+    Energy: 3
+    MaxEnergy: 3
+    MoveRange: 1
     MoveSpeed: 3
     AttackDamage: 5
     PreferredAttackRange: 1
