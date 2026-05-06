@@ -10,6 +10,11 @@ public class GridManager : MonoBehaviour
     [SerializeField] private Tilemap obstaclesTilemap;
 
     private readonly Dictionary<Vector3Int, GameObject> entitiesOnGrid = new();
+    
+    // Константы для защиты от зависания
+    private const int MaxPathfindingIterations = 10000;
+    private const int MaxRangeSearchIterations = 5000;
+    private const int MaxAttackRangeLimit = 50;
 
     public void MoveEntity(Vector3Int from, Vector3Int to, GameObject entity)
     {
@@ -76,9 +81,12 @@ public class GridManager : MonoBehaviour
         queue.Enqueue((start, 0));
 
         var directions = new[] { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+        
+        var iterations = 0;
 
-        while (queue.Count > 0)
+        while (queue.Count > 0 && iterations < MaxPathfindingIterations)
         {
+            iterations++;
             var (current, dist) = queue.Dequeue();
 
             foreach (var dir in directions)
@@ -94,7 +102,12 @@ public class GridManager : MonoBehaviour
                 queue.Enqueue((next, dist + 1));
             }
         }
-
+        
+        if (iterations >= MaxPathfindingIterations)
+        {
+            Debug.LogWarning($"[GridManager] Превышен лимит итераций {start} -> {target}");
+        }
+        
         return int.MaxValue;
     }
 
@@ -109,9 +122,12 @@ public class GridManager : MonoBehaviour
         queue.Enqueue((startPos, 0));
 
         var directions = new[] { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
-
-        while (queue.Count > 0)
+        
+        var iterations = 0;
+        
+        while (queue.Count > 0 && iterations < MaxRangeSearchIterations)
         {
+            iterations++;
             var (pos, steps) = queue.Dequeue();
 
             if (steps > 0 && IsCellWalkable(pos, currentEntity))
@@ -135,6 +151,11 @@ public class GridManager : MonoBehaviour
                 visited.Add(next);
                 queue.Enqueue((next, steps + 1));
             }
+        }
+        
+        if (iterations >= MaxRangeSearchIterations)
+        {
+            Debug.LogWarning($"[GridManager] Превышен лимит итераций {startPos}; {range}");
         }
 
         return result.ToList();
@@ -177,6 +198,8 @@ public class GridManager : MonoBehaviour
     /// /// </summary>
     public List<Vector3Int> GetAttackableCellsInRadius(Vector3Int center, int maxRange, int minRange = 1)
     {
+        maxRange = Mathf.Min(maxRange, MaxAttackRangeLimit);
+        
         var cells = new List<Vector3Int>();
 
         for (var x = -maxRange; x <= maxRange; x++)
