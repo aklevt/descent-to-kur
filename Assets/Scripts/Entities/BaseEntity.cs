@@ -94,6 +94,8 @@ namespace Entities
 
         public void RespawnAt(Vector3 worldPosition)
         {
+            StopAllCoroutines();
+            
             // Пусть дебаги пока что остаются, еще нужны будут при склейке сцен
             Debug.Log($"<color=orange>[{name}] Дебаг RespawnAt </color>");
             Debug.Log($"  worldPosition={worldPosition}");

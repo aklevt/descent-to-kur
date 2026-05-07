@@ -80,6 +80,9 @@ namespace Core
         /// </summary>
         private void LoadRoomByIndex(int index)
         {
+            UIController.Instance?.SuppressPopups();
+            UIController.Instance?.HideWarning();
+                
             if (index >= roomPrefabs.Count)
             {
                 Debug.Log("<color=cyan>[LevelController]</color> Все комнаты пройдены!");
@@ -112,10 +115,11 @@ namespace Core
             if (AbilityController.Instance != null)
             {
                 AbilityController.Instance.UnblockInput();
-                AbilityController.Instance.SelectAbilityByIndex(0);
+                // AbilityController.Instance.SelectAbilityByIndex(0);
             }
 
             Debug.Log($"<color=green>[LevelController]</color> Комната {index + 1}/{roomPrefabs.Count} загружена");
+            UIController.Instance?.UnsuppressPopups();
         }
         
         private IEnumerator BeginLevelNextFrame()
@@ -138,6 +142,7 @@ namespace Core
             {
                 AbilityController.Instance.SelectAbilityByIndex(0);
             }
+            UIController.Instance?.UnsuppressPopups();
         }
 
         /// <summary>
@@ -145,6 +150,12 @@ namespace Core
         /// </summary>
         private void UnloadCurrentRoom()
         {
+            if (AbilityController.Instance != null)
+                AbilityController.Instance.CancelExecution();
+            
+            if (currentPlayer != null)
+                currentPlayer.StopAllCoroutines();
+            
             if (currentRoom != null)
             {
                 currentRoom.OnRoomCleared -= HandleRoomCleared;

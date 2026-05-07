@@ -201,6 +201,12 @@ namespace Core
             isExecuting = false;
             RefreshAbilityOverlay();
         }
+        
+        public void CancelExecution()
+        {
+            StopAllCoroutines();
+            isExecuting = false;
+        }
 
         #endregion
 

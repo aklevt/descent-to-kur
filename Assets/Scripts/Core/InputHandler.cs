@@ -18,6 +18,8 @@ public class InputHandler : MonoBehaviour
 
     private void Update()
     {
+        if (!Application.isFocused) return;
+        
         HandlePauseInput();
         
         if (Core.LevelController.Instance == null || !Core.LevelController.Instance.IsLevelLoaded)
