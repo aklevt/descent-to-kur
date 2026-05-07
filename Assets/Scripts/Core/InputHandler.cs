@@ -18,7 +18,13 @@ public class InputHandler : MonoBehaviour
 
     private void Update()
     {
+        HandlePauseInput();
+        
         if (Core.LevelController.Instance == null || !Core.LevelController.Instance.IsLevelLoaded)
+            return;
+        
+        if (GameStateManager.Instance != null && 
+            GameStateManager.Instance.CurrentState == GameState.Paused)
             return;
 
         HandleCameraInput();
@@ -42,6 +48,18 @@ public class InputHandler : MonoBehaviour
         if (Mouse.current == null) return;
 
         HandleCellHover();
+    }
+    
+    private void HandlePauseInput()
+    {
+        var kb = Keyboard.current;
+        if (kb == null) return;
+
+        if (kb.escapeKey.wasPressedThisFrame)
+        {
+            Debug.Log("Pause");
+            UI.UIManager.Instance?.TogglePause();
+        }
     }
 
     private void HandleCameraInput()
