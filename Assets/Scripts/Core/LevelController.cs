@@ -59,6 +59,21 @@ namespace Core
                 Debug.LogError("[LevelController] Нет комнат для загрузки");
             }
         }
+        
+        /// <summary>
+        /// Перезагрузить текущую комнату (для кнопки рестарта)
+        /// </summary>
+        public void RestartCurrentRoom()
+        {
+            Debug.Log("<color=yellow>[LevelController]</color> Перезагрузка комнаты");
+            
+            if (GameStateManager.Instance?.CurrentState == GameState.Paused)
+            {
+                GameStateManager.Instance.SetState(GameState.Gameplay);
+            }
+            
+            LoadRoomByIndex(currentRoomIndex);
+        }
 
         /// <summary>
         /// Загрузить комнату по индексу
@@ -108,9 +123,19 @@ namespace Core
             yield return null; // Необходимо чтобы все враги успели заспавниться, прежде чем считать подсветку
             TurnManager.Instance.BeginLevel();
     
+            // if (AbilityController.Instance != null)
+            // {
+            //     AbilityController.Instance.UnblockInput();
+            //     AbilityController.Instance.SelectAbilityByIndex(0);
+            // }
+            
+            if (GameStateManager.Instance != null)
+            {
+                GameStateManager.Instance.SetState(GameState.Gameplay);
+            }
+            
             if (AbilityController.Instance != null)
             {
-                AbilityController.Instance.UnblockInput();
                 AbilityController.Instance.SelectAbilityByIndex(0);
             }
         }

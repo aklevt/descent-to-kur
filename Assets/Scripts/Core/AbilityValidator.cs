@@ -18,6 +18,8 @@ namespace Core
         public void ValidateAbilityAndWarn(AbilityData ability, int abilityIndex, AbilityBar abilityBar)
         {
             if (PlayerMovement.Instance == null) return;
+            if (GameStateManager.Instance?.CurrentState != GameState.Gameplay) return;
+            if (TurnManager.Instance?.CurrentState != TurnState.PlayerTurn) return;
             
             var stats = PlayerMovement.Instance.Stats;
             
@@ -76,6 +78,10 @@ namespace Core
 
         private void ShowAbilityWarnings(AbilityData ability, EntityRuntimeStats stats)
         {
+            if (GameStateManager.Instance?.CurrentState != GameState.Gameplay) return;
+            if (TurnManager.Instance?.CurrentState != TurnState.PlayerTurn)
+                return;
+            
             if (ability is MoveAbilityData && stats.RemainingSteps <= 0)
             {
                 UIController.Instance?.ShowStepsWarning();

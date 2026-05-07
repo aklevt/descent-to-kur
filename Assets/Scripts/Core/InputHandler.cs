@@ -24,7 +24,7 @@ public class InputHandler : MonoBehaviour
             return;
         
         if (GameStateManager.Instance != null && 
-            GameStateManager.Instance.CurrentState == GameState.Paused)
+            GameStateManager.Instance.CurrentState != GameState.Gameplay)
             return;
 
         HandleCameraInput();
@@ -56,10 +56,7 @@ public class InputHandler : MonoBehaviour
         if (kb == null) return;
 
         if (kb.escapeKey.wasPressedThisFrame)
-        {
-            Debug.Log("Pause");
-            UI.UIManager.Instance?.TogglePause();
-        }
+            UI.UIManager.Instance?.HandleEscapePress();        
     }
 
     private void HandleCameraInput()

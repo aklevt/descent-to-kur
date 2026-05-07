@@ -59,6 +59,7 @@ namespace Entities
             stats.Health = stats.MaxHealth;
             stats.Energy = stats.MaxEnergy;
             stats.Freeze = 0;
+            stats.RemainingSteps = 0;
         }
 
         protected virtual void Awake()

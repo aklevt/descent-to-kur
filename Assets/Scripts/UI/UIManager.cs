@@ -11,6 +11,10 @@ namespace UI
 
         [Header("UI Panels")]
         [SerializeField] private PauseMenu pauseMenu;
+        
+        [Header("Overlay")]
+        [SerializeField] private CanvasGroup darkenOverlay;
+        [SerializeField] private float overlayAlpha = 0.5f;
 
         private void Awake()
         {
@@ -24,6 +28,47 @@ namespace UI
         {
             if (pauseMenu != null)
                 pauseMenu.Hide();
+                
+            if (darkenOverlay != null)
+            {
+                darkenOverlay.alpha = 0f;
+                darkenOverlay.gameObject.SetActive(false);
+                darkenOverlay.blocksRaycasts = false;
+            }
+        }
+
+        /// <summary>
+        /// Обработка нажатия ESC (универсальная)
+        /// </summary>
+        public void HandleEscapePress()
+        {
+            if (Core.GameStateManager.Instance == null) return;
+
+            var state = Core.GameStateManager.Instance.CurrentState;
+
+            switch (state)
+            {
+                case Core.GameState.Paused:
+                    ClosePause();
+                    break;
+
+                case Core.GameState.Gameplay:
+                    OpenPause();
+                    break;
+
+                case Core.GameState.GameOver:
+                case Core.GameState.Transition:
+                    TransitionScreenManager.Instance?.SkipScreen();
+                    break;
+
+                case Core.GameState.Dialog:
+                case Core.GameState.Tutorial:
+                    break;
+                    break;
+                    break;
+                    break;
+                    break;
+            }
         }
 
         /// <summary>
@@ -32,9 +77,7 @@ namespace UI
         public void TogglePause()
         {
             if (Core.GameStateManager.Instance == null) return;
-            
-            Debug.Log("Pause toggle");
-            
+
             if (Core.GameStateManager.Instance.CurrentState == Core.GameState.Paused)
             {
                 ClosePause();
@@ -50,6 +93,8 @@ namespace UI
             if (pauseMenu != null)
                 pauseMenu.Show();
             
+            ShowDarkenOverlay();
+            
             Core.GameStateManager.Instance?.SetState(Core.GameState.Paused);
         }
 
@@ -58,10 +103,38 @@ namespace UI
             if (pauseMenu != null)
                 pauseMenu.Hide();
             
+            HideDarkenOverlay();
+            
             Core.GameStateManager.Instance?.SetState(Core.GameState.Gameplay);
         }
 
-        // public void ShowDialog(DialogData data) { }
-        // public void CloseDialog() { }
+        private void ShowDarkenOverlay()
+        {
+            if (darkenOverlay != null)
+            {
+                darkenOverlay.alpha = overlayAlpha;
+                darkenOverlay.gameObject.SetActive(true);
+            }
+        }
+
+        private void HideDarkenOverlay()
+        {
+            if (darkenOverlay != null)
+            {
+                darkenOverlay.alpha = 0f;
+                darkenOverlay.gameObject.SetActive(false);
+            }
+        }
+
+
+        // public void ShowDialog(DialogData data) 
+        // { 
+        //     Core.GameStateManager.Instance?.SetState(Core.GameState.Dialog);
+        // }
+        // 
+        // public void CloseDialog() 
+        // { 
+        //     Core.GameStateManager.Instance?.ReturnToGameplay();
+        // }
     }
 }
