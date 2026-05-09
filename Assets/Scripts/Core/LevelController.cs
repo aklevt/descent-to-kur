@@ -65,12 +65,18 @@ namespace Core
         /// </summary>
         public void RestartCurrentRoom()
         {
+            if (GameStateManager.Instance?.CurrentState is GameState.Transition or GameState.GameOver)
+                return;
+            
             Debug.Log("<color=yellow>[LevelController]</color> Перезагрузка комнаты");
 
             if (GameStateManager.Instance?.CurrentState == GameState.Paused)
             {
                 GameStateManager.Instance.SetState(GameState.Gameplay);
             }
+            
+            StopAllCoroutines();
+            isGameOver = false;
 
             LoadRoomByIndex(currentRoomIndex);
         }
@@ -139,7 +145,7 @@ namespace Core
             //     AbilityController.Instance.SelectAbilityByIndex(0);
             // }
 
-            if (GameStateManager.Instance != null)
+            if (GameStateManager.Instance != null && !isGameOver)
             {
                 GameStateManager.Instance.SetState(GameState.Gameplay);
             }
@@ -246,6 +252,8 @@ namespace Core
             isGameOver = true;
 
             AbilityController.Instance?.BlockInput();
+            
+            GameStateManager.Instance?.SetState(GameState.Transition);
 
             Debug.Log("<color=green>[LevelController]</color> Комната пройдена!");
             StartCoroutine(TransitionToNextRoom());
@@ -296,6 +304,8 @@ namespace Core
             if (isGameOver) return;
 
             isGameOver = true;
+            GameStateManager.Instance?.SetState(GameState.GameOver);
+
             Debug.Log("<color=red>[LevelController]</color> Игрок погиб");
 
             // Объект игрока больше не уничтожается целиком, чтобы менеджеры из-за него не устраивали разборок
@@ -331,6 +341,8 @@ namespace Core
             {
                 yield return TransitionScreenManager.Instance.ShowDefeatScreen("ПОРАЖЕНИЕ!");
             }
+            
+            isGameOver = false;
 
             // Перезагрузить сцену
             // SceneManager.LoadScene(SceneManager.GetActiveScene().name);
