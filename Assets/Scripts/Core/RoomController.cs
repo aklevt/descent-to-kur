@@ -1,8 +1,11 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Entities;
+using UI;
+using UI.Dialogue;
 
 /// <summary>
 /// Управляет инициализацией, отслеживанием врагов, проверкой целей в пределах комнаты
@@ -10,14 +13,12 @@ using Entities;
 /// </summary>
 public class RoomController : MonoBehaviour
 {
-    [Header("Room Setup")]
-    public Tilemap obstacleTilemap;
+    [Header("Room Setup")] public Tilemap obstacleTilemap;
     public Tilemap selectionTilemap;
     public Tilemap effectTilemap;
     public Transform playerSpawnPoint;
 
-    [Header("Objective")]
-    [SerializeField] private RoomObjectiveType objectiveType = RoomObjectiveType.KillAllEnemies;
+    [Header("Objective")] [SerializeField] private RoomObjectiveType objectiveType = RoomObjectiveType.KillAllEnemies;
     [SerializeField] private string victoryMessage = "Комната пройдена";
 
     public RoomObjectiveType ObjectiveType => objectiveType;
@@ -29,13 +30,15 @@ public class RoomController : MonoBehaviour
     public event Action OnRoomCleared;
 
     private List<EnemyBase> enemiesInRoom = new();
+    private List<RoomDialogueTrigger> dialogueTriggers = new();
     private bool isCleared = false;
 
     private void Awake()
     {
         enemiesInRoom = new List<EnemyBase>(GetComponentsInChildren<EnemyBase>());
+        dialogueTriggers = new List<RoomDialogueTrigger>(GetComponentsInChildren<RoomDialogueTrigger>());
     }
-    
+
     public void Initialize()
     {
         isCleared = false;
@@ -49,12 +52,18 @@ public class RoomController : MonoBehaviour
         {
             GridHighlighter.Instance.UpdateTilemaps(selectionTilemap, effectTilemap);
         }
-        
+
         if (CameraFollow.Instance != null && obstacleTilemap != null)
         {
             CameraFollow.Instance.SetCameraBounds(obstacleTilemap.localBounds);
         }
+        
+        if (FogSystemManager.Instance != null)
+        {
+            FogSystemManager.Instance.OnRoomChanged();
+        }
 
+        // Инициализация врагов
         foreach (var enemy in enemiesInRoom)
         {
             if (enemy != null)
@@ -67,7 +76,20 @@ public class RoomController : MonoBehaviour
             }
         }
 
+        // Инициализация диалогов
+
+        foreach (var trigger in dialogueTriggers)
+        {
+            if (trigger != null)
+            {
+                trigger.Initialize();
+            }
+        }
+
         Debug.Log($"<color=cyan>[RoomController]</color> Комната инициализирована. Врагов: {enemiesInRoom.Count}");
+        Debug.Log($"<color=cyan>[RoomController]</color> Диалогов: {dialogueTriggers.Count}");
+
+        // TriggerDialoguesOfType(UI.DialogueTriggerType.OnRoomEnter);
     }
 
     /// <summary>
@@ -87,15 +109,46 @@ public class RoomController : MonoBehaviour
             }
         }
 
+        foreach (var trigger in dialogueTriggers)
+        {
+            if (trigger != null)
+            {
+                trigger.Cleanup();
+            }
+        }
+
+
         if (GridHighlighter.Instance != null)
         {
             GridHighlighter.Instance.Clear();
         }
-        
+
         if (CameraFollow.Instance != null)
         {
             CameraFollow.Instance.ClearBounds();
         }
+    }
+    
+    /// <summary>
+    /// Запустить все диалоги указанного типа последовательно
+    /// </summary>
+    public IEnumerator TriggerDialoguesOfTypeSequential(UI.DialogueTriggerType type)
+    {
+        var dialoguesOfType = dialogueTriggers.FindAll(t => t != null && t.TriggerType == type);
+    
+        Debug.Log($"<color=yellow>[RoomController]</color> Найдено диалогов типа {type}: {dialoguesOfType.Count}");
+    
+        foreach (var trigger in dialoguesOfType)
+        {
+            Debug.Log($"<color=yellow>[RoomController]</color> Запускаем диалог: {trigger.DialogueData?.name}");
+            trigger.TriggerDialogue();
+        
+            yield return new WaitUntil(() => 
+                DialogueManager.Instance == null || !DialogueManager.Instance.IsDialogueActive);
+        }
+    
+        Debug.Log($"<color=yellow>[RoomController]</color> Все диалоги типа {type} завершены");
+
     }
 
     private void HandleEnemyDeath(GameObject enemyObj)
@@ -117,6 +170,7 @@ public class RoomController : MonoBehaviour
                 {
                     CompleteRoom();
                 }
+
                 break;
 
             case RoomObjectiveType.BossFight:
@@ -125,6 +179,7 @@ public class RoomController : MonoBehaviour
                 {
                     CompleteRoom();
                 }
+
                 break;
         }
     }
@@ -138,6 +193,7 @@ public class RoomController : MonoBehaviour
                 return false;
             }
         }
+
         return enemiesInRoom.Count > 0;
     }
 
@@ -168,7 +224,7 @@ public class RoomController : MonoBehaviour
 /// </summary>
 public enum RoomObjectiveType
 {
-    KillAllEnemies,      
+    KillAllEnemies,
     BossFight
 }
 

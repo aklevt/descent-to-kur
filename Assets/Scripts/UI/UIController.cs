@@ -54,6 +54,7 @@ namespace UI
         private void ShowWarning(string message)
         {
             if (warningPopup == null) return;
+            if (isSuppressed) return;
 
             if (warningText != null)
             {
@@ -80,5 +81,28 @@ namespace UI
             if (warningPopup != null)
                 warningPopup.SetActive(false);
         }
+        
+        public void HideWarning()
+        {
+            if (currentPopupCoroutine != null)
+            {
+                StopCoroutine(currentPopupCoroutine);
+                currentPopupCoroutine = null;
+            }
+            HideAllPopups();
+        }
+        private bool isSuppressed = false;
+
+        public void SuppressPopups()
+        {
+            isSuppressed = true;
+            HideWarning();
+        }
+
+        public void UnsuppressPopups()
+        {
+            isSuppressed = false;
+        }
+
     }
 }

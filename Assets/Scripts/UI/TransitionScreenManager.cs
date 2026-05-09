@@ -35,6 +35,9 @@ namespace UI
         private Color victoryVignetteColor = Color.white;
 
         [SerializeField] private Color defeatVignetteColor = new Color(0.67f, 0f, 0f, 1f);
+        
+        private bool canSkip = false;
+        private bool skipRequested = false;
 
         private void Awake()
         {
@@ -64,6 +67,17 @@ namespace UI
                 vignetteMaterial.SetColor("_MainColor", Color.black);
             }
         }
+        
+        /// <summary>
+        /// Пропустить текущий экран (по ESC)
+        /// </summary>
+        public void SkipScreen()
+        {
+            if (canSkip)
+            {
+                skipRequested = true;
+            }
+        }
 
         public IEnumerator ShowVictoryScreen(string title = "ПОБЕДА!")
         {
@@ -71,6 +85,8 @@ namespace UI
             {
                 yield break;
             }
+            
+            Core.GameStateManager.Instance?.SetState(Core.GameState.GameOver);
 
             victoryPanel.SetActive(true);
             if (victoryTitle != null)
@@ -88,6 +104,8 @@ namespace UI
             yield return StartCoroutine(ChangeVignetteColorWithTextFade(Color.black, victoryTitle, false));
 
             HideVictoryScreen();
+            
+            Core.GameStateManager.Instance?.SetState(Core.GameState.Transition);
         }
 
         public IEnumerator ShowDefeatScreen(string title = "ПОРАЖЕНИЕ!")
@@ -96,6 +114,8 @@ namespace UI
             {
                 yield break;
             }
+            
+            Core.GameStateManager.Instance?.SetState(Core.GameState.GameOver);
 
             defeatPanel.SetActive(true);
             if (defeatTitle != null)
@@ -113,6 +133,8 @@ namespace UI
             yield return StartCoroutine(ChangeVignetteColorWithTextFade(Color.black, defeatTitle, false));
 
             HideDefeatScreen();
+            
+            Core.GameStateManager.Instance?.SetState(Core.GameState.Transition);
         }
 
         private IEnumerator ChangeVignetteColorWithTextFade(Color targetColor, TextMeshProUGUI textToFade,
@@ -161,7 +183,7 @@ namespace UI
             };
             victoryNextButton.onClick.AddListener(listener);
 
-            while (!buttonPressed)
+            while (!buttonPressed && !skipRequested)
             {
                 yield return null;
             }
@@ -179,7 +201,7 @@ namespace UI
             };
             defeatRetryButton.onClick.AddListener(listener);
 
-            while (!buttonPressed)
+            while (!buttonPressed && !skipRequested)
             {
                 yield return null;
             }

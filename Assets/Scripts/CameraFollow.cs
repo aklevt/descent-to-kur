@@ -246,10 +246,17 @@ public class CameraFollow : MonoBehaviour
         var elapsed = 0f;
         while (elapsed < duration)
         {
-            elapsed += Time.deltaTime;
-            var t = elapsed / duration;
-            shakeOffset = Random.insideUnitSphere * Mathf.Lerp(intensity, 0f, t);
-            shakeOffset.z = 0;
+            if (Time.timeScale > 0f) 
+            {
+                elapsed += Time.deltaTime;
+                var t = elapsed / duration;
+                shakeOffset = Random.insideUnitSphere * Mathf.Lerp(intensity, 0f, t);
+                shakeOffset.z = 0;
+            }
+            else
+            {
+                shakeOffset = Vector3.zero;
+            }
             yield return null;
         }
 

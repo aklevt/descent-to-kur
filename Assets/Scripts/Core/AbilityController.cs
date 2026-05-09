@@ -22,6 +22,7 @@ namespace Core
         private bool isExecuting;
         private bool isDead;
         private bool isInputBlocked;
+        private bool needsHoverUpdate;
 
         public List<Vector3Int> AvailableCells => availableCells;
 
@@ -125,6 +126,7 @@ namespace Core
             if (selectedAbility == ability) return;
             selectedAbility = ability;
             RefreshAbilityOverlay();
+            RequestHoverUpdate();
         }
 
         #endregion
@@ -180,6 +182,24 @@ namespace Core
             var effectCells = selectedAbility.GetEffectCells(hoveredCell, PlayerMovement.Instance);
             GridHighlighter.Instance.HighlightEffect(effectCells, selectedAbility.effectColor);
         }
+        
+        /// <summary>
+        /// Запросить обновление подсветки эффекта
+        /// </summary>
+        public void RequestHoverUpdate()
+        {
+            needsHoverUpdate = true;
+        }
+
+        /// <summary>
+        /// Проверить и сбросить флаг запроса обновления подсветки
+        /// </summary>
+        public bool ConsumeHoverUpdateRequest()
+        {
+            if (!needsHoverUpdate) return false;
+            needsHoverUpdate = false;
+            return true;
+        }
 
         #endregion
 
@@ -200,6 +220,12 @@ namespace Core
 
             isExecuting = false;
             RefreshAbilityOverlay();
+        }
+        
+        public void CancelExecution()
+        {
+            StopAllCoroutines();
+            isExecuting = false;
         }
 
         #endregion

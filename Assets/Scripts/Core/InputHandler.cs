@@ -1,140 +1,214 @@
-using Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-public class InputHandler : MonoBehaviour
+namespace Core
 {
-    private Camera mainCamera;
-    private Vector3Int lastHoveredCell;
+    public class InputHandler : MonoBehaviour
+    {
+        private Camera mainCamera;
+        private Vector3Int lastHoveredCell;
+
+        private void Awake()
+        {
+            mainCamera = Camera.main;
+        }
+
+        private void Update()
+        {
+            if (!Application.isFocused) return;
+            
+            HandleSystemInput();
+            
+            if (!IsLevelReady()) return;
+            
+            var gameState = GameStateManager.Instance?.CurrentState ?? GameState.Gameplay;
+            
+            switch (gameState)
+            {
+                case GameState.Gameplay:
+                    HandleGameplayInput();
+                    break;
+                    
+                case GameState.Dialog:
+                case GameState.Tutorial:
+                    HandleCameraInput(); 
+                    break;
+                    
+                case GameState.Paused:
+                case GameState.GameOver:
+                case GameState.Transition:
+                    break;
+            }
+        }
+        
+        /// <summary>
+        /// Системный ввод, который работает всегда
+        /// </summary>
+        private void HandleSystemInput()
+        {
+            if (Keyboard.current?.escapeKey.wasPressedThisFrame == true)
+            {
+                UI.UIManager.Instance?.HandleEscapePress();
+            }
+        }
+        
+        /// <summary>
+        /// Ввод во время геймплея
+        /// </summary>
+        private void HandleGameplayInput()
+        {
+            HandleCameraInput();
+            HandleAbilityHotkeys();
+            HandleEndTurnInput();
+            HandleMouseInput();
+            
+            if (AbilityController.Instance?.ConsumeHoverUpdateRequest() == true)
+            {
+                ForceHandleCellHover();
+            }
+        }
+
+        private void HandleCameraInput()
+        {
+            // ПКМ - возврат камеры к игроку
+            if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
+            {
+                CameraFollow.Instance?.ResetFocus();
+            }
+
+            // WASD - перемещение камеры
+            var movement = GetCameraMovementInput();
+            if (movement.sqrMagnitude > 0.01f)
+            {
+                CameraFollow.Instance?.MoveFreeLook(movement.normalized);
+            }
+        
+            // Скролл колеса мыши - зум
+            var scrollDelta = Mouse.current?.scroll.ReadValue().y ?? 0f;
+            if (Mathf.Abs(scrollDelta) > 0.1f)
+            {
+                CameraFollow.Instance?.Zoom(scrollDelta * 0.01f);
+            }
+        }
+
+        private void HandleAbilityHotkeys()
+        {
+            if (!IsPlayerTurn()) return;
+
+            var kb = Keyboard.current;
+            if (kb == null) return;
+
+            for (var i = 0; i < 9; i++)
+            {
+                var key = (Key)((int)Key.Digit1 + i);
+                if (kb[key].wasPressedThisFrame)
+                {
+                    AbilityController.Instance.SelectAbilityByIndex(i);
+                    break;
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Принудительно обрабатывает текущую позицию мыши
+        /// </summary>
+        private void ForceHandleCellHover()
+        {
+            if (Mouse.current == null) return;
     
-    // private bool isCameraDragging;
-    // private Vector2 dragStartMousePos;
+            var mousePos = Mouse.current.position.ReadValue();
+            var worldPoint = mainCamera.ScreenToWorldPoint(
+                new Vector3(mousePos.x, mousePos.y, -mainCamera.transform.position.z));
+            var hoveredCell = GridManager.Instance?.WorldToCell(worldPoint) ?? Vector3Int.zero;
 
-    private void Awake()
-    {
-        mainCamera = Camera.main;
-    }
-
-    private void Update()
-    {
-        if (Core.LevelController.Instance == null || !Core.LevelController.Instance.IsLevelLoaded)
-            return;
-
-        HandleCameraInput();
-        
-        HandleAbilityHotkeys();
-        
-        HandleEndTurnInput();
-
-        // if (Keyboard.current.spaceKey.isPressed)
-        //     return;
-
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-            return;
-
-        if (TurnManager.Instance == null || TurnManager.Instance.CurrentState != TurnState.PlayerTurn)
-            return;
-
-        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
-            HandleMouseClick();
-
-        if (Mouse.current == null) return;
-
-        HandleCellHover();
-    }
-
-    private void HandleCameraInput()
-    {
-        // ПКМ - возврат камеры к игроку
-        if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
-        {
-            CameraFollow.Instance?.ResetFocus();
-        }
-
-        // WASD - перемещение камеры
-        var kb = Keyboard.current;
-        if (kb == null) return;
-
-        var cameraMovement = Vector2.zero;
-
-        if (kb.wKey.isPressed) cameraMovement.y += 1f;
-        if (kb.sKey.isPressed) cameraMovement.y -= 1f;
-        if (kb.aKey.isPressed) cameraMovement.x -= 1f;
-        if (kb.dKey.isPressed) cameraMovement.x += 1f;
-
-        if (cameraMovement.sqrMagnitude > 0.01f)
-        {
-            CameraFollow.Instance?.MoveFreeLook(cameraMovement.normalized);
-        }
-        
-        // Скролл колеса мыши - зум
-        if (Mouse.current != null)
-        {
-            var scroll = Mouse.current.scroll.ReadValue().y;
-            if (Mathf.Abs(scroll) > 0.1f)
-            {
-                CameraFollow.Instance?.Zoom(scroll * 0.01f);
-            }
-        }
-    }
-
-    private void HandleEndTurnInput()
-    {
-        if (TurnManager.Instance == null || TurnManager.Instance.CurrentState != TurnState.PlayerTurn)
-            return;
-
-        var kb = Keyboard.current;
-        if (kb == null) return;
-
-        // Пробел - завершить ход
-        if (kb.spaceKey.wasPressedThisFrame)
-        {
-            TurnManager.Instance.EndPlayerTurn();
-        }
-    }
-
-    private void HandleAbilityHotkeys()
-    {
-        if (TurnManager.Instance == null || TurnManager.Instance.CurrentState != TurnState.PlayerTurn)
-            return;
-
-        var kb = Keyboard.current;
-        if (kb == null) return;
-
-        for (var i = 0; i < 9; i++)
-        {
-            var key = (Key)((int)Key.Digit1 + i);
-
-            if (kb[key].wasPressedThisFrame)
-            {
-                AbilityController.Instance.SelectAbilityByIndex(i);
-                break;
-            }
-        }
-    }
-
-    private void HandleMouseClick()
-    {
-        var mousePos = Mouse.current.position.ReadValue();
-        var worldPoint = mainCamera.ScreenToWorldPoint(
-            new Vector3(mousePos.x, mousePos.y, -mainCamera.transform.position.z));
-        var clickedCell = GridManager.Instance.WorldToCell(worldPoint);
-
-        AbilityController.Instance.HandleCellClick(clickedCell);
-    }
-
-    private void HandleCellHover()
-    {
-        var mousePos = Mouse.current.position.ReadValue();
-        var worldPoint = mainCamera.ScreenToWorldPoint(
-            new Vector3(mousePos.x, mousePos.y, -mainCamera.transform.position.z));
-        var hoveredCell = GridManager.Instance.WorldToCell(worldPoint);
-
-        if (hoveredCell != lastHoveredCell)
-        {
+            AbilityController.Instance?.HandleCellHover(hoveredCell);
             lastHoveredCell = hoveredCell;
-            AbilityController.Instance.HandleCellHover(hoveredCell);
         }
+
+        private void HandleEndTurnInput()
+        {
+            if (!IsPlayerTurn()) return;
+
+            // Пробел - завершить ход
+            if (Keyboard.current?.spaceKey.wasPressedThisFrame == true)
+            {
+                TurnManager.Instance?.EndPlayerTurn();
+            }
+        }
+        
+        /// <summary>
+        /// Обработка ввода мышью
+        /// </summary>
+        private void HandleMouseInput()
+        {
+            if (Mouse.current == null) return;
+            if (IsPointerOverUI()) return;
+            if (!IsPlayerTurn()) return;
+            
+            if (Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                HandleMouseClick();
+            }
+            
+            HandleCellHover();
+        }
+
+        private void HandleMouseClick()
+        {
+            var mousePos = Mouse.current.position.ReadValue();
+            var worldPoint = mainCamera.ScreenToWorldPoint(
+                new Vector3(mousePos.x, mousePos.y, -mainCamera.transform.position.z));
+            var clickedCell = GridManager.Instance.WorldToCell(worldPoint);
+
+            AbilityController.Instance.HandleCellClick(clickedCell);
+        }
+
+        private void HandleCellHover()
+        {
+            var mousePos = Mouse.current.position.ReadValue();
+            var worldPoint = mainCamera.ScreenToWorldPoint(
+                new Vector3(mousePos.x, mousePos.y, -mainCamera.transform.position.z));
+            var hoveredCell = GridManager.Instance.WorldToCell(worldPoint);
+
+            if (hoveredCell != lastHoveredCell)
+            {
+                lastHoveredCell = hoveredCell;
+                AbilityController.Instance.HandleCellHover(hoveredCell);
+            }
+        }
+        
+        private Vector2 GetCameraMovementInput()
+        {
+            var kb = Keyboard.current;
+            if (kb == null) return Vector2.zero;
+
+            var movement = Vector2.zero;
+            if (kb.wKey.isPressed) movement.y += 1f;
+            if (kb.sKey.isPressed) movement.y -= 1f;
+            if (kb.aKey.isPressed) movement.x -= 1f;
+            if (kb.dKey.isPressed) movement.x += 1f;
+
+            return movement;
+        }
+        
+        #region Helper Methods
+
+        private bool IsLevelReady()
+        {
+            return Core.LevelController.Instance?.IsLevelLoaded == true;
+        }
+
+        private bool IsPlayerTurn()
+        {
+            return TurnManager.Instance?.CurrentState == TurnState.PlayerTurn;
+        }
+
+        private bool IsPointerOverUI()
+        {
+            return EventSystem.current?.IsPointerOverGameObject() == true;
+        }
+
+        #endregion
     }
 }

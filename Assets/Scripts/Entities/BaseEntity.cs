@@ -58,6 +58,7 @@ namespace Entities
 
             stats.Health = stats.MaxHealth;
             stats.Energy = stats.MaxEnergy;
+            stats.RemainingSteps = stats.MaxStepsPerRound;
             stats.Freeze = 0;
         }
 
@@ -93,6 +94,8 @@ namespace Entities
 
         public void RespawnAt(Vector3 worldPosition)
         {
+            StopAllCoroutines();
+            
             // Пусть дебаги пока что остаются, еще нужны будут при склейке сцен
             Debug.Log($"<color=orange>[{name}] Дебаг RespawnAt </color>");
             Debug.Log($"  worldPosition={worldPosition}");
@@ -194,7 +197,7 @@ namespace Entities
 
             if (this is PlayerMovement)
             {
-                var maxSteps = Mathf.Min(stats.MoveRange, stats.Energy);
+                var maxSteps = Mathf.Min(stats.MaxStepsPerRound, stats.Energy);
                 stats.ResetSteps(maxSteps);
 
                 Debug.Log(
