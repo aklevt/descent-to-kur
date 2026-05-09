@@ -41,8 +41,8 @@ namespace Stats
             }
 
             // Базовые статы
-            Health = MaxHealth;
             MaxHealth = baseStats.maxHealth;
+            Health = MaxHealth;
             MoveRange = baseStats.moveRange;
             AttackDamage = baseStats.baseAttackDamage;
             Freeze = 0;
@@ -50,10 +50,10 @@ namespace Stats
             // Статы игрока
             if (baseStats is PlayerStatsData playerData)
             {
-                Energy = MaxEnergy;
                 MaxEnergy = playerData.maxEnergy;
-                RemainingSteps = 0;
+                Energy = MaxEnergy;
                 MaxStepsPerRound = playerData.maxStepsPerRound;
+                RemainingSteps = MaxStepsPerRound;
             }
 
             // Статы врагов

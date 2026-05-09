@@ -1,3 +1,4 @@
+using UI.Dialogue;
 using UnityEngine;
 
 namespace UI
@@ -38,11 +39,13 @@ namespace UI
         }
 
         /// <summary>
-        /// Обработка нажатия ESC (универсальная)
+        /// Обработка нажатия ESC
         /// </summary>
         public void HandleEscapePress()
         {
             if (Core.GameStateManager.Instance == null) return;
+    
+            if (Core.GameStateManager.Instance.CurrentState == Core.GameState.Transition) return;
 
             var state = Core.GameStateManager.Instance.CurrentState;
 
@@ -62,6 +65,8 @@ namespace UI
                     break;
 
                 case Core.GameState.Dialog:
+                    DialogueManager.Instance?.SkipDialogue();
+                    break;
                 case Core.GameState.Tutorial:
                     break;
                     break;

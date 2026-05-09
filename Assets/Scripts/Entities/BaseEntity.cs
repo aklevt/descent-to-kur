@@ -58,8 +58,8 @@ namespace Entities
 
             stats.Health = stats.MaxHealth;
             stats.Energy = stats.MaxEnergy;
+            stats.RemainingSteps = stats.MaxStepsPerRound;
             stats.Freeze = 0;
-            stats.RemainingSteps = 0;
         }
 
         protected virtual void Awake()
@@ -197,7 +197,7 @@ namespace Entities
 
             if (this is PlayerMovement)
             {
-                var maxSteps = Mathf.Min(stats.MoveRange, stats.Energy);
+                var maxSteps = Mathf.Min(stats.MaxStepsPerRound, stats.Energy);
                 stats.ResetSteps(maxSteps);
 
                 Debug.Log(

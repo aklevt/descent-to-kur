@@ -22,7 +22,7 @@ namespace UI
             if (quitButton != null)
                 quitButton.onClick.AddListener(OnQuitClicked);
 
-            Hide();
+            // Hide();
         }
 
         public void Show()

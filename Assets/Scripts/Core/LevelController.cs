@@ -59,19 +59,19 @@ namespace Core
                 Debug.LogError("[LevelController] Нет комнат для загрузки");
             }
         }
-        
+
         /// <summary>
         /// Перезагрузить текущую комнату (для кнопки рестарта)
         /// </summary>
         public void RestartCurrentRoom()
         {
             Debug.Log("<color=yellow>[LevelController]</color> Перезагрузка комнаты");
-            
+
             if (GameStateManager.Instance?.CurrentState == GameState.Paused)
             {
                 GameStateManager.Instance.SetState(GameState.Gameplay);
             }
-            
+
             LoadRoomByIndex(currentRoomIndex);
         }
 
@@ -82,7 +82,7 @@ namespace Core
         {
             UIController.Instance?.SuppressPopups();
             UIController.Instance?.HideWarning();
-                
+
             if (index >= roomPrefabs.Count)
             {
                 Debug.Log("<color=cyan>[LevelController]</color> Все комнаты пройдены!");
@@ -121,27 +121,34 @@ namespace Core
             Debug.Log($"<color=green>[LevelController]</color> Комната {index + 1}/{roomPrefabs.Count} загружена");
             UIController.Instance?.UnsuppressPopups();
         }
-        
+
         private IEnumerator BeginLevelNextFrame()
         {
             yield return null; // Необходимо чтобы все враги успели заспавниться, прежде чем считать подсветку
+
+            if (currentRoom != null)
+            {
+                yield return currentRoom.TriggerDialoguesOfTypeSequential(UI.DialogueTriggerType.OnRoomEnter);
+            }
+
             TurnManager.Instance.BeginLevel();
-    
+
             // if (AbilityController.Instance != null)
             // {
             //     AbilityController.Instance.UnblockInput();
             //     AbilityController.Instance.SelectAbilityByIndex(0);
             // }
-            
+
             if (GameStateManager.Instance != null)
             {
                 GameStateManager.Instance.SetState(GameState.Gameplay);
             }
-            
+
             if (AbilityController.Instance != null)
             {
                 AbilityController.Instance.SelectAbilityByIndex(0);
             }
+
             UIController.Instance?.UnsuppressPopups();
         }
 
@@ -152,10 +159,10 @@ namespace Core
         {
             if (AbilityController.Instance != null)
                 AbilityController.Instance.CancelExecution();
-            
+
             if (currentPlayer != null)
                 currentPlayer.StopAllCoroutines();
-            
+
             if (currentRoom != null)
             {
                 currentRoom.OnRoomCleared -= HandleRoomCleared;
@@ -184,11 +191,12 @@ namespace Core
             if (PlayerMovement.Instance != null)
             {
                 currentPlayer = PlayerMovement.Instance;
-                
+
                 var health = currentPlayer.GetComponent<Health>();
                 health?.ResetDeathState();
 
-                Debug.Log($"<color=green>[LevelController]</color> Используется существующий игрок: {currentPlayer.name}");
+                Debug.Log(
+                    $"<color=green>[LevelController]</color> Используется существующий игрок: {currentPlayer.name}");
                 if (CameraFollow.Instance != null)
                 {
                     CameraFollow.Instance.SetPlayerTarget(currentPlayer.transform);
@@ -215,7 +223,7 @@ namespace Core
 
                 Debug.Log($"<color=green>[LevelController]</color> Игрок создан: {currentPlayer.name}");
             }
-            
+
             if (CameraFollow.Instance != null)
             {
                 CameraFollow.Instance.SetPlayerTarget(currentPlayer.transform);
@@ -289,7 +297,7 @@ namespace Core
 
             isGameOver = true;
             Debug.Log("<color=red>[LevelController]</color> Игрок погиб");
-            
+
             // Объект игрока больше не уничтожается целиком, чтобы менеджеры из-за него не устраивали разборок
             //
             // Отписаться от события
@@ -326,7 +334,7 @@ namespace Core
 
             // Перезагрузить сцену
             // SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            
+
             // Перезагрузить только комнату
             LoadRoomByIndex(currentRoomIndex);
         }
