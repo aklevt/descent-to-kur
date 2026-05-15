@@ -20,6 +20,12 @@ namespace Entities
             var playerCell = PlayerMovement.Instance.CurrentCell;
             var currentDistance = ManhattanDistance(enemy.CurrentCell, playerCell);
             
+            if (!enemy.Stats.IsInDetectionRange(enemy.CurrentCell, playerCell))
+            {
+                Debug.Log($"[{enemy.gameObject.name}] Игрок вне радиуса обнаружения ({currentDistance} > {enemy.Stats.DetectionRadius})");
+                return null;
+            }
+            
             // Проверка дистанции
             var tooClose = enemy.Stats.MinimumRange > 0 && currentDistance < enemy.Stats.MinimumRange;
             var inAttackRange = !tooClose && currentDistance <= enemy.Stats.PreferredAttackRange;

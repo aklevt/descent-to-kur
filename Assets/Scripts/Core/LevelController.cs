@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Core.Room;
 using Entities;
 using UI;
 using UnityEngine;
@@ -39,17 +40,6 @@ namespace Core
 
         private void Start()
         {
-            // Диагностика
-            if (currentPlayer != PlayerMovement.Instance)
-            {
-                Debug.LogError(
-                    $"<color=red>[LevelController]</color> player={currentPlayer?.name} ({currentPlayer?.GetInstanceID()}), Instance={PlayerMovement.Instance?.name} ({PlayerMovement.Instance?.GetInstanceID()})");
-            }
-            else
-            {
-                Debug.Log($"<color=green>[LevelController]</color> player == Instance");
-            }
-
             if (roomPrefabs != null && roomPrefabs.Count > 0)
             {
                 LoadRoomByIndex(currentRoomIndex);
@@ -67,14 +57,14 @@ namespace Core
         {
             if (GameStateManager.Instance?.CurrentState is GameState.Transition or GameState.GameOver)
                 return;
-            
+
             Debug.Log("<color=yellow>[LevelController]</color> Перезагрузка комнаты");
 
             if (GameStateManager.Instance?.CurrentState == GameState.Paused)
             {
                 GameStateManager.Instance.SetState(GameState.Gameplay);
             }
-            
+
             StopAllCoroutines();
             isGameOver = false;
 
@@ -97,6 +87,7 @@ namespace Core
 
             UnloadCurrentRoom();
 
+
             isGameOver = false;
 
             var roomInstance = Instantiate(roomPrefabs[index], Vector3.zero, Quaternion.identity);
@@ -110,7 +101,6 @@ namespace Core
             }
 
             currentRoom.OnRoomCleared += HandleRoomCleared;
-
             currentRoom.Initialize();
 
             SpawnPlayer();
@@ -134,7 +124,7 @@ namespace Core
 
             if (currentRoom != null)
             {
-                yield return currentRoom.TriggerDialoguesOfTypeSequential(UI.DialogueTriggerType.OnRoomEnter);
+                yield return currentRoom.TriggerDialoguesOfTypeSequential(DialogueTriggerType.OnRoomEnter);
             }
 
             TurnManager.Instance.BeginLevel();
@@ -240,7 +230,12 @@ namespace Core
             Debug.Log(
                 $"<color=green>[LevelController]</color> Игрок размещен на {spawnPos}, CurrentCell={currentPlayer.CurrentCell}");
 
-            CameraFollow.Instance?.ResetFocus();
+            if (CameraFollow.Instance != null)
+            {
+                CameraFollow.Instance.SetPlayerTarget(currentPlayer.transform);
+                CameraFollow.Instance.ResetFocus();
+                CameraFollow.Instance.SnapToTarget();
+            }
         }
 
         /// <summary>
@@ -252,7 +247,7 @@ namespace Core
             isGameOver = true;
 
             AbilityController.Instance?.BlockInput();
-            
+
             GameStateManager.Instance?.SetState(GameState.Transition);
 
             Debug.Log("<color=green>[LevelController]</color> Комната пройдена!");
@@ -341,7 +336,7 @@ namespace Core
             {
                 yield return TransitionScreenManager.Instance.ShowDefeatScreen("ПОРАЖЕНИЕ!");
             }
-            
+
             isGameOver = false;
 
             // Перезагрузить сцену
@@ -349,6 +344,34 @@ namespace Core
 
             // Перезагрузить только комнату
             LoadRoomByIndex(currentRoomIndex);
+        }
+
+        /// <summary>
+        /// Принудительный переход к следующей комнате (для редактора)
+        /// </summary>
+        public void ForceNextRoom()
+        {
+            if (currentRoomIndex >= roomPrefabs.Count - 1)
+            {
+                Debug.LogWarning("<color=yellow>[LevelController]</color> Это последняя комната!");
+                return;
+            }
+
+            Debug.Log("<color=green>[LevelController]</color> ПРИНУДИТЕЛЬНЫЙ переход к следующей комнате");
+
+            StopAllCoroutines();
+            isGameOver = true;
+
+            currentRoomIndex++;
+            LoadRoomByIndex(currentRoomIndex);
+        }
+
+        /// <summary>
+        /// Получить информацию о комнатах (для редактора)
+        /// </summary>
+        public (int current, int total) GetRoomInfo()
+        {
+            return (currentRoomIndex, roomPrefabs?.Count ?? 0);
         }
     }
 }

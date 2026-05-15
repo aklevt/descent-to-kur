@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Linq;
+using Core;
+using Core.Room;
 using UnityEngine;
 
 namespace Entities
@@ -42,6 +44,12 @@ namespace Entities
         {
             var health = GetComponent<Health>();
             if (health == null || health.IsDead) yield break;
+            
+            if (RoomController.Current != null && !RoomController.Current.IsEnemyActive(this))
+            {
+                Debug.Log($"<color=grey>[{gameObject.name}]</color> Пропуск хода, т.к. секция неактивна");
+                yield break;
+            }
 
             var canAct = OnTurnStart();
 

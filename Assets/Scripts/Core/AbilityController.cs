@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Abilities;
+using Core.Room;
 using Entities;
 using Stats;
 using UI;
@@ -165,9 +166,19 @@ namespace Core
         /// </summary>
         private bool ValidateAbilityUsage(Vector3Int targetCell)
         {
+            if (RoomController.Current != null)
+            {
+                var roomCheck = RoomController.Current.ValidateActionInRoom(targetCell, selectedAbility);
+        
+                if (!roomCheck.Success)
+                {
+                    UIController.Instance?.ShowWarning(roomCheck.ErrorMessage);
+                    return false;
+                }
+            }
+
             return validator.CanUseAbilityOnTarget(selectedAbility, targetCell, availableCells);
         }
-
 
         public void HandleCellHover(Vector3Int hoveredCell)
         {

@@ -16,7 +16,7 @@ namespace UI.HUD
         [SerializeField] private Slider stepsSlider;
 
         private int lastSteps = -1;
-        private int lastEnergy = -1;
+        private int lastEnergy;
 
         private void Update()
         {

@@ -27,6 +27,8 @@ namespace Stats
         public int PreferredAttackRange;
         [Tooltip("Минимальная дистанция до игрока (0 = не отступать)")]
         public int MinimumRange;
+        [Tooltip("Радиус обнаружения игрока (0 = бесконечный)")]
+        public int DetectionRadius;
 
         public EntityRuntimeStats()
         {
@@ -61,16 +63,28 @@ namespace Stats
             {
                 PreferredAttackRange = enemyData.preferredAttackRange;
                 MinimumRange = enemyData.minimumRange;
+                DetectionRadius = enemyData.detectionRadius;
             }
         }
 
         public bool IsDead => Health <= 0;
+        
+        /// <summary>
+        /// Проверяет, находится ли цель в радиусе обнаружения (0 = бесконечный радиус)
+        /// </summary>
+        public bool IsInDetectionRange(Vector3Int from, Vector3Int target)
+        {
+            if (DetectionRadius <= 0) return true;
+            var distance = Mathf.Abs(from.x - target.x) + Mathf.Abs(from.y - target.y);
+            return distance <= DetectionRadius;
+        }
 
         public bool HasEnergyForAction(int cost) => Energy >= cost;
         public void SpendEnergy(int amount) => Energy = Mathf.Max(0, Energy - amount);
         public void RestoreEnergy(int amount) => Energy = Mathf.Min(MaxEnergy, Energy + amount);
         
-        public void ResetSteps(int maxSteps) => RemainingSteps = maxSteps;
+        public void ResetSteps() => RemainingSteps = Mathf.Min(MaxStepsPerRound, Energy);
+        public void ResetStepsTo(int maxSteps) => RemainingSteps = maxSteps;
         public bool CanMove(int distance) => RemainingSteps >= distance;
         public void SpendSteps(int distance) => RemainingSteps = Mathf.Max(0, RemainingSteps - distance);
 

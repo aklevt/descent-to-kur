@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Core;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -100,10 +101,16 @@ public class GridManager : MonoBehaviour
     /// <returns>true если клетка проходима, false если заблокирована</returns>
     public bool IsCellPassable(Vector3Int cellPos, CellCheckOptions options)
     {
+        // Проверка стен
         if (obstaclesTilemap.HasTile(cellPos)) return false;
+
+        // Проверка логических границ комнаты/секции
+        // if (RoomController.Current != null && !RoomController.Current.IsCellInsideActiveArea(cellPos))
+        //     return false;
 
         if (!options.checkEntities) return true;
 
+        // Проверка сущностей
         if (entitiesOnGrid.TryGetValue(cellPos, out var entityInCell))
         {
             if (entityInCell == null)
@@ -154,7 +161,7 @@ public class GridManager : MonoBehaviour
     {
         return pathfinder.GetPathDistance(start, target, currentEntity);
     }
-    
+
     /// <summary>
     /// Строит путь между двумя клетками через проходимые клетки
     /// </summary>
@@ -162,16 +169,24 @@ public class GridManager : MonoBehaviour
     /// <param name="target">Целевая клетка</param>
     /// <param name="currentEntity">Сущность для которой строится путь</param>
     /// <returns>Список клеток пути или пустой список, если путь не найден</returns>
-    public List<Vector3Int> GetPath(Vector3Int start, Vector3Int target, GameObject currentEntity = null)
+    public List<Vector3Int> GetPath(Vector3Int start, Vector3Int target, GameObject currentEntity = null, System.Func<Vector3Int, bool> boundaryCheck = null)
     {
-        return pathfinder.GetPath(start, target, currentEntity);
+        return pathfinder.GetPath(start, target, CellCheckOptions.ForMovement(currentEntity, boundaryCheck));
     }
 
-    public bool IsCellWalkable(Vector3Int cellPos, GameObject currentEntity = null)
-        => IsCellPassable(cellPos, CellCheckOptions.ForMovement(currentEntity));
 
-    public List<Vector3Int> GetWalkableCellsInRange(Vector3Int startPos, int range, GameObject currentEntity = null)
-        => GetCellsInRange(startPos, range, 1, CellCheckOptions.ForMovement(currentEntity));
+    public bool IsCellWalkable(Vector3Int cellPos, GameObject currentEntity = null)
+    {
+        if (!IsCellPassable(cellPos, CellCheckOptions.ForMovement(currentEntity)))
+            return false;
+
+        return true;
+    }
+
+    public List<Vector3Int> GetWalkableCellsInRange(Vector3Int startPos, int range, GameObject currentEntity = null,
+        System.Func<Vector3Int, bool> boundaryCheck = null)
+        => GetCellsInRange(startPos, range, 1, CellCheckOptions.ForMovement(currentEntity, boundaryCheck));
+
 
     public List<Vector3Int> GetAttackableCellsInRadius(Vector3Int center, int maxRange, int minRange = 1)
         => GetCellsInRange(center, maxRange, minRange, CellCheckOptions.ForAttack());

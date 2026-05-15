@@ -1,7 +1,7 @@
 using UI.Dialogue;
 using UnityEngine;
 
-namespace UI
+namespace Core.Room
 {
     public class RoomDialogueTrigger : MonoBehaviour
     {

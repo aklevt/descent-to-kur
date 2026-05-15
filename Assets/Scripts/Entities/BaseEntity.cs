@@ -41,6 +41,8 @@ namespace Entities
         public bool IsFreeze => stats.Freeze > 0;
 
         private Vector3 targetWorldPos;
+        
+        public event Action<Vector3Int> OnCellChanged;
 
         #endregion
 
@@ -108,6 +110,8 @@ namespace Entities
             FullRestore();
             SetupGridPosition(worldPosition);
             RegisterOnGrid();
+            
+            OnCellChanged?.Invoke(CurrentCell);
 
             Debug.Log($"<color=green>[{name}] === Конец дебага RespawnAt ===</color>");
             Debug.Log($"  CurrentCell={CurrentCell}");
@@ -198,7 +202,7 @@ namespace Entities
             if (this is PlayerMovement)
             {
                 var maxSteps = Mathf.Min(stats.MaxStepsPerRound, stats.Energy);
-                stats.ResetSteps(maxSteps);
+                stats.ResetStepsTo(maxSteps);
 
                 Debug.Log(
                     $"<color=green>[{name}]</color> Начало хода. Энергия: {stats.Energy}, Доступно шагов: {stats.RemainingSteps}");
@@ -277,7 +281,9 @@ namespace Entities
 
                 GridManager.Instance.MoveEntity(CurrentCell, nextCell, gameObject);
                 CurrentCell = nextCell;
-
+                
+                OnCellChanged?.Invoke(CurrentCell);
+                
                 targetWorldPos = GridManager.Instance.GetCellCenterWorld(nextCell);
                 targetWorldPos.z = transform.position.z;
                 IsMoving = true;
@@ -299,6 +305,8 @@ namespace Entities
             FlipToTarget(targetCell);
             GridManager.Instance.MoveEntity(CurrentCell, targetCell, gameObject);
             CurrentCell = targetCell;
+            
+            OnCellChanged?.Invoke(CurrentCell);
 
             targetWorldPos = GridManager.Instance.GetCellCenterWorld(targetCell);
             targetWorldPos.z = transform.position.z;
@@ -325,6 +333,8 @@ namespace Entities
 
             PlaceOnCell();
             GridManager.Instance.RegisterFixedEntity(CurrentCell, gameObject);
+            
+            OnCellChanged?.Invoke(CurrentCell);
         }
 
         public void MoveSmoothly()
