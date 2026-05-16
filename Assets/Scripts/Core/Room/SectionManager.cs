@@ -57,12 +57,9 @@ namespace Core.Room
 
             foreach (var section in sections)
                 section.Initialize();
-
-
+            
             if (sections.Count > 0)
                 ActivateSection(0);
-
-            SubscribeToPlayer();
         }
 
         /// <summary>
@@ -82,6 +79,24 @@ namespace Core.Room
         #endregion
         
         #region Player Event Handling
+        
+        /// <summary>
+        /// Прямая подписка на событие изменения клетки игрока. Вызывается из RoomController.
+        /// </summary>
+        public void LinkPlayer(PlayerMovement player)
+        {
+            UnsubscribeFromPlayer();
+
+            if (player != null)
+            {
+                player.OnCellChanged += HandlePlayerCellChanged;
+                Debug.Log("<color=green>[SectionManager]</color> Успешная подписка на игрока из секции");
+            }
+            else
+            {
+                Debug.LogError("<color=red>[SectionManager]</color> Null вместо игрока");
+            }
+        }
 
         /// <summary>
         /// Подписаться на событие изменения клетки игрока

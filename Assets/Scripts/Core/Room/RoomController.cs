@@ -17,9 +17,12 @@ namespace Core.Room
     {
         #region Properties
 
-        [Header("Room Setup")] public Tilemap obstacleTilemap;
-        public Tilemap selectionTilemap;
-        public Tilemap effectTilemap;
+        [Header("Room Setup")] // ❗ Не используется
+        public Tilemap wallsTilemap;
+        public Tilemap obstacleTilemap;
+        public Tilemap highlightTilemap;
+        public Tilemap effectHighlightTilemap;
+        
         public Transform playerSpawnPoint;
 
         [Header("Objective")] [SerializeField]
@@ -49,6 +52,20 @@ namespace Core.Room
         private void Awake()
         {
             Current = this;
+            
+            // Автоматический поиск тайлмапов по именам внутри вложенного префаба Grid
+            // В наследниках Base_Grid можно изменять только сами тайлмапы
+            if (obstacleTilemap == null) 
+                obstacleTilemap = transform.Find("Grid/Walls_Tilemap")?.GetComponent<Tilemap>();
+            
+            if (wallsTilemap == null) 
+                wallsTilemap = transform.Find("Grid/Walls_Tilemap")?.GetComponent<Tilemap>();
+    
+            if (highlightTilemap == null) 
+                highlightTilemap = transform.Find("Grid/Highlight_Tilemap")?.GetComponent<Tilemap>();
+        
+            if (effectHighlightTilemap == null) 
+                effectHighlightTilemap = transform.Find("Grid/EffectHighlightTilemap")?.GetComponent<Tilemap>();
 
             sectionManager = GetComponentInChildren<SectionManager>();
             boundarySystem.Initialize(sectionManager);
@@ -71,7 +88,7 @@ namespace Core.Room
             GridManager.Instance?.UpdateObstacles(obstacleTilemap);
 
             // Настройка подсветки
-            GridHighlighter.Instance?.UpdateTilemaps(selectionTilemap, effectTilemap);
+            GridHighlighter.Instance?.UpdateTilemaps(highlightTilemap, effectHighlightTilemap);
 
             // Инициализация врагов
             foreach (var enemy in enemiesInRoom)
@@ -121,6 +138,17 @@ namespace Core.Room
 
             Debug.Log(
                 $"<color=cyan>[RoomController]</color> Комната инициализирована. Врагов: {enemiesInRoom.Count}, Секций: {(sectionManager != null ? "есть" : "нет")}");
+        }
+        
+        /// <summary>
+        /// Передает ссылку на созданного игрока внутренним системам комнаты
+        /// </summary>
+        public void LinkPlayerToRoom(PlayerMovement player)
+        {
+            if (sectionManager != null)
+            {
+                sectionManager.LinkPlayer(player);
+            }
         }
 
         public void Cleanup()

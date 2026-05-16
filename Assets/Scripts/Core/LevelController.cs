@@ -104,6 +104,11 @@ namespace Core
             currentRoom.Initialize();
 
             SpawnPlayer();
+            
+            if (currentRoom != null && currentPlayer != null)
+            {
+                currentRoom.LinkPlayerToRoom(currentPlayer);
+            }
 
             TurnManager.Instance.ResetEnemies();
             StartCoroutine(BeginLevelNextFrame());
