@@ -37,9 +37,9 @@ public class FogSystemManager : MonoBehaviour
     public void ScaleToCurrentRoom()
     {
         var roomController = FindFirstObjectByType<RoomController>();
-        if (roomController?.obstacleTilemap != null)
+        if (roomController?.wallsTilemap != null)
         {
-            ScaleToTilemap(roomController.obstacleTilemap);
+            ScaleToTilemap(roomController.wallsTilemap);
         }
         else
         {

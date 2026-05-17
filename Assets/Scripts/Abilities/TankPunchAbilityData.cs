@@ -87,9 +87,17 @@ namespace Abilities
             {
                 var checkCell = target.CurrentCell + direction * i;
                 
-                if (!GridManager.Instance.IsCellWalkable(checkCell))
+                if (!GridManager.Instance.IsCellKnockbackable(checkCell))
+                {
                     break;
-                    
+                }
+        
+                if (GridManager.Instance.HasBlockingTileObject(checkCell))
+                {
+                    finalCell = checkCell;
+                    break;
+                }
+        
                 finalCell = checkCell;
             }
 

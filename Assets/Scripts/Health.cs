@@ -41,6 +41,30 @@ public class Health : MonoBehaviour
             StartCoroutine(FlashRed());
         }
     }
+    
+    public void Heal(int amount)
+    {
+        if (isDying || IsDead || !entity) return;
+
+        entity.Stats.ApplyHeal(amount);
+    
+        Debug.Log($"{gameObject.name} получил исцеление: {amount}. ХП: {entity.Stats.Health}/{entity.Stats.MaxHealth}");
+
+        StartCoroutine(FlashGreen());
+    }
+
+    private IEnumerator FlashGreen()
+    {
+        if (spriteRenderer == null) yield break;
+    
+        spriteRenderer.color = Color.green;
+        yield return new WaitForSeconds(0.1f);
+    
+        if (entity != null)
+        {
+            entity.UpdateVisualStatus();
+        }
+    }
 
     private void Die()
     {

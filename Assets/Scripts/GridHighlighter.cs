@@ -10,6 +10,7 @@ public class GridHighlighter : MonoBehaviour
     [SerializeField] private Tilemap effectTilemap;
     [SerializeField] private Color highlightColor = new(1, 1, 1, 0.8f);
     [SerializeField] private TileBase highlightTile;
+    [SerializeField] private TileBase defaultEffectTile;
 
     private void Awake()
     {
@@ -25,29 +26,34 @@ public class GridHighlighter : MonoBehaviour
         effectTilemap = effect;
     }
 
-    public void HighlightCells(List<Vector3Int> cells, Color? color = null)
+    public void HighlightCells(List<Vector3Int> cells, Color? color = null, TileBase customTile = null)
     {
         if (selectionTilemap == null) return;
         
         selectionTilemap.ClearAllTiles();
         var baseColor = color ?? highlightColor;
-        var finalColor = new Color(baseColor.r, baseColor.g, baseColor.b, 0.8f);
+        var finalColor = new Color(baseColor.r, baseColor.g, baseColor.b, baseColor.a);
+        
+        var tileToSet = customTile != null ? customTile : highlightTile;
+        
         foreach (var cell in cells)
         {
-            SetTile(selectionTilemap, cell, finalColor);
+            SetTile(selectionTilemap, cell, tileToSet, finalColor);
         }
     }
     
-    public void HighlightEffect(List<Vector3Int> cells, Color? color = null)
-    {
+    public void HighlightEffect(List<Vector3Int> cells, Color? color = null, TileBase customTile = null)    {
         if (effectTilemap == null) return;
         
         effectTilemap.ClearAllTiles();
         var baseColor = color ?? highlightColor;
-        var finalColor = new Color(baseColor.r, baseColor.g, baseColor.b, 0.8f);
+        var finalColor = new Color(baseColor.r, baseColor.g, baseColor.b, 0.99f);
+        
+        var tileToSet = customTile != null ? customTile : defaultEffectTile;
+        
         foreach (var cell in cells)
         {
-            SetTile(effectTilemap, cell, finalColor);
+            SetTile(effectTilemap, cell, tileToSet, finalColor);
         }
     }
     
@@ -62,9 +68,9 @@ public class GridHighlighter : MonoBehaviour
             effectTilemap.ClearAllTiles();
     }
 
-    private void SetTile(Tilemap tilemap, Vector3Int cell, Color color)
-    {
-        tilemap.SetTile(cell, highlightTile);
+    private void SetTile(Tilemap tilemap, Vector3Int cell, TileBase tile, Color color)
+    {       
+        tilemap.SetTile(cell, tile);
         tilemap.SetTileFlags(cell, TileFlags.None);
         tilemap.SetColor(cell, color);
     }

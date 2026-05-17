@@ -52,8 +52,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c75fa3365273fc0439aed449d3cd81cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GameScripts::RoomData
+  floorTilemap: {fileID: 0}
   wallsTilemap: {fileID: 0}
-  obstacleTilemap: {fileID: 5781693641500076882}
+  wallsInnerTilemap: {fileID: 0}
+  obstaclesTilemap: {fileID: 0}
+  objectsTilemap: {fileID: 0}
+  decorTilemap: {fileID: 0}
   highlightTilemap: {fileID: 0}
   effectHighlightTilemap: {fileID: 0}
   playerSpawnPoint: {fileID: 7901744147490316323}

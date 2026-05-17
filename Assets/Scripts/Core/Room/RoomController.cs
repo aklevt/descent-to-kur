@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Abilities;
 using Entities;
 using UI.Dialogue;
@@ -18,12 +19,19 @@ namespace Core.Room
         #region Properties
 
         [Header("Room Setup")] // ❗ Не используется
+        [Header("Grid Layers")]
+        public Tilemap floorTilemap; // Определяет где можно ходить
+
         public Tilemap wallsTilemap;
-        public Tilemap obstacleTilemap;
-        public Tilemap highlightTilemap;
+        public Tilemap wallsInnerTilemap; // Внутренние стены (блокируют всё)
+        public Tilemap obstaclesTilemap; // Блокируют ходьбу, но не стрельбу
+        public Tilemap objectsTilemap; // Ловушки + хилки
+        public Tilemap decorTilemap;
+
+        [Header("Highlights")] public Tilemap highlightTilemap;
         public Tilemap effectHighlightTilemap;
-        
-        public Transform playerSpawnPoint;
+
+        [Header("Spawn")] public Transform playerSpawnPoint;
 
         [Header("Objective")] [SerializeField]
         private RoomObjectiveType objectiveType = RoomObjectiveType.KillAllEnemies;
@@ -52,19 +60,29 @@ namespace Core.Room
         private void Awake()
         {
             Current = this;
-            
-            // Автоматический поиск тайлмапов по именам внутри вложенного префаба Grid
-            // В наследниках Base_Grid можно изменять только сами тайлмапы
-            if (obstacleTilemap == null) 
-                obstacleTilemap = transform.Find("Grid/Walls_Tilemap")?.GetComponent<Tilemap>();
-            
-            if (wallsTilemap == null) 
+
+            if (floorTilemap == null)
+                floorTilemap = transform.Find("Grid/Floor_Tilemap")?.GetComponent<Tilemap>();
+
+            if (wallsTilemap == null)
                 wallsTilemap = transform.Find("Grid/Walls_Tilemap")?.GetComponent<Tilemap>();
-    
-            if (highlightTilemap == null) 
+
+            if (wallsInnerTilemap == null)
+                wallsInnerTilemap = transform.Find("Grid/Walls_Inner_Tilemap")?.GetComponent<Tilemap>();
+
+            if (obstaclesTilemap == null)
+                obstaclesTilemap = transform.Find("Grid/Obstacles_Tilemap")?.GetComponent<Tilemap>();
+
+            if (objectsTilemap == null)
+                objectsTilemap = transform.Find("Grid/Objects_Tilemap")?.GetComponent<Tilemap>();
+
+            if (decorTilemap == null)
+                decorTilemap = transform.Find("Grid/Decor_Tilemap")?.GetComponent<Tilemap>();
+
+            if (highlightTilemap == null)
                 highlightTilemap = transform.Find("Grid/Highlight_Tilemap")?.GetComponent<Tilemap>();
-        
-            if (effectHighlightTilemap == null) 
+
+            if (effectHighlightTilemap == null)
                 effectHighlightTilemap = transform.Find("Grid/EffectHighlightTilemap")?.GetComponent<Tilemap>();
 
             sectionManager = GetComponentInChildren<SectionManager>();
@@ -73,6 +91,7 @@ namespace Core.Room
             enemiesInRoom = new List<EnemyBase>(GetComponentsInChildren<EnemyBase>());
             dialogueTriggers = new List<RoomDialogueTrigger>(GetComponentsInChildren<RoomDialogueTrigger>());
         }
+
 
         private void OnDestroy()
         {
@@ -85,7 +104,13 @@ namespace Core.Room
             isCleared = false;
             wasSectionCleared = false;
 
-            GridManager.Instance?.UpdateObstacles(obstacleTilemap);
+            GridManager.Instance?.UpdateRoomData(
+                floorTilemap,
+                wallsTilemap,
+                wallsInnerTilemap,
+                obstaclesTilemap,
+                objectsTilemap
+            );
 
             // Настройка подсветки
             GridHighlighter.Instance?.UpdateTilemaps(highlightTilemap, effectHighlightTilemap);
@@ -117,9 +142,9 @@ namespace Core.Room
                 CameraFollow.Instance.ResetZoom();
             }
 
-            if (CameraFollow.Instance != null && obstacleTilemap != null)
+            if (CameraFollow.Instance != null && wallsTilemap != null)
             {
-                var roomBounds = obstacleTilemap.GetComponent<Renderer>().bounds;
+                var roomBounds = wallsTilemap.GetComponent<Renderer>().bounds;
                 CameraFollow.Instance.SetCameraBounds(roomBounds);
                 Debug.Log($"<color=cyan>[RoomController]</color> Базовые границы комнаты установлены: {roomBounds}");
             }
@@ -139,7 +164,7 @@ namespace Core.Room
             Debug.Log(
                 $"<color=cyan>[RoomController]</color> Комната инициализирована. Врагов: {enemiesInRoom.Count}, Секций: {(sectionManager != null ? "есть" : "нет")}");
         }
-        
+
         /// <summary>
         /// Передает ссылку на созданного игрока внутренним системам комнаты
         /// </summary>
@@ -302,7 +327,7 @@ namespace Core.Room
             
             player.Stats.ResetStepsTo(player.Stats.MaxStepsPerRound);
             player.Stats.RestoreEnergy(player.Stats.MaxEnergy);
-            
+
             AbilityController.Instance?.RefreshAbilityOverlay();
         }
 
@@ -370,6 +395,20 @@ namespace Core.Room
             return sectionManager != null
                 ? sectionManager.IsWithinMovementBoundary
                 : null;
+        }
+        
+        public List<EnemyBase> GetActiveEnemiesForTurn()
+        {
+            if (sectionManager != null && sectionManager.CurrentSection != null)
+            {
+                return sectionManager.CurrentSection.Enemies
+                    .Where(e => e != null && !e.IsPhysicallyDead())
+                    .ToList();
+            }
+
+            return enemiesInRoom
+                .Where(e => e != null && e.Stats != null && !e.Stats.IsDead)
+                .ToList();
         }
     }
 

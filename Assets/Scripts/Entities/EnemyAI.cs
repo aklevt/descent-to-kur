@@ -1,6 +1,7 @@
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
+using Abilities;
 using Entities;
 
 namespace Entities
@@ -26,15 +27,32 @@ namespace Entities
                 return null;
             }
             
+            var hasRangedAttack = enemy.Abilities.Count > 0 && enemy.Abilities[0] is RangedAttackAbilityData;
+            
             // Проверка дистанции
             var tooClose = enemy.Stats.MinimumRange > 0 && currentDistance < enemy.Stats.MinimumRange;
             var inAttackRange = !tooClose && currentDistance <= enemy.Stats.PreferredAttackRange;
 
             if (inAttackRange)
             {
-                Debug.Log($"[{enemy.gameObject.name}] Уже на дистанции атаки ({currentDistance}/{enemy.Stats.PreferredAttackRange})");
-                return enemy.CurrentCell;
+                if (hasRangedAttack)
+                {
+                    var canShootFromHere = GridManager.Instance.HasLineOfSight(enemy.CurrentCell, playerCell) 
+                                           && GridManager.Instance.IsCellShootable(playerCell);
+            
+                    if (canShootFromHere)
+                    {
+                        Debug.Log($"[{enemy.gameObject.name}] На дистанции атаки с видимостью ({currentDistance}/{enemy.Stats.PreferredAttackRange})");
+                        return enemy.CurrentCell;
+                    }
+                }
+                else
+                {
+                    Debug.Log($"[{enemy.gameObject.name}] Уже на дистанции атаки ({currentDistance}/{enemy.Stats.PreferredAttackRange})");
+                    return enemy.CurrentCell;
+                }
             }
+
 
             var possibleMoves = GridManager.Instance.GetWalkableCellsInRange(
                 enemy.CurrentCell, enemy.Stats.MoveRange, enemy.gameObject
@@ -44,6 +62,36 @@ namespace Entities
             {
                 Debug.LogWarning($"[{enemy.gameObject.name}] Нет доступных ходов!");
                 return enemy.CurrentCell;
+            }
+            
+            if (hasRangedAttack)
+            {
+                var shootablePositions = GridManager.Instance.GetShootablePositionsTo(
+                    enemy.CurrentCell,
+                    playerCell, 
+                    enemy.Stats.MinimumRange, 
+                    enemy.Stats.PreferredAttackRange, 
+                    enemy.gameObject
+                );
+
+                if (shootablePositions.Count > 0)
+                {
+                    var validMoves = possibleMoves.FindAll(pos => shootablePositions.Contains(pos));
+            
+                    if (validMoves.Count > 0)
+                    {
+                        possibleMoves = validMoves;
+                        Debug.Log($"[{enemy.gameObject.name}] Найдено {possibleMoves.Count} позиций для стрельбы");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[{enemy.gameObject.name}] Позиции для стрельбы есть ({shootablePositions.Count}), но не достижимы за 1 ход");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"[{enemy.gameObject.name}] Нет позиций с линией видимости. Приближаюсь к игроку.");
+                }
             }
 
             return tooClose 

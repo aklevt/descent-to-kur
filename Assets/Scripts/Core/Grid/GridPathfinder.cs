@@ -154,7 +154,9 @@ public class GridPathfinder
 
                 var cellPos = new Vector3Int(center.x + x, center.y + y, center.z);
 
-                if (gridManager.IsCellPassable(cellPos, options))
+                if (options.useBFS 
+                        ? gridManager.IsCellPassable(cellPos, options)
+                        : gridManager.IsCellTargetable(cellPos))
                 {
                     cells.Add(cellPos);
                 }

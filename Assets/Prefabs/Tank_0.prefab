@@ -177,6 +177,8 @@ MonoBehaviour:
   spriteRenderer: {fileID: 3162903598212271331}
   animator: {fileID: 0}
   isGridInitialized: 0
+  isStationary: 0
+  returnToPost: 1
 --- !u!1 &3271288754337739070
 GameObject:
   m_ObjectHideFlags: 0
@@ -236,7 +238,7 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 1268132063
+  m_SortingLayerID: 743415277
   m_SortingOrder: 0
   m_TargetDisplay: 0
 --- !u!114 &8775994325641826833

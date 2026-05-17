@@ -298,6 +298,8 @@ namespace Entities
 
             isMovingAlongPath = false;
             currentPath.Clear();
+            
+            GridManager.Instance.TriggerTileObjectEnter(CurrentCell, this);
         }
 
         public void MoveDirectly(Vector3Int targetCell)
@@ -381,6 +383,10 @@ namespace Entities
 
         protected virtual void OnArrivingToTarget()
         {
+            if (!isMovingAlongPath)
+            {
+                GridManager.Instance.TriggerTileObjectEnter(CurrentCell, this);
+            }
         }
 
         #endregion

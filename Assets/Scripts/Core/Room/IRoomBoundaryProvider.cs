@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Entities;
 using UnityEngine;
 
@@ -34,5 +35,10 @@ namespace Core.Room
         /// Событие изменения границ камеры (при переходе между секциями)
         /// </summary>
         event Action<Bounds> OnCameraBoundsChanged;
+        
+        /// <summary>
+        /// Возвращает список врагов, которые должны ходить в данный момент
+        /// </summary>
+        List<EnemyBase> GetActiveEnemiesForTurn();
     }
 }

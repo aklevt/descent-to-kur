@@ -23,7 +23,7 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private float maxZoom = 8f;
 
     [SerializeField] private bool smoothFollow = true;
-
+    [SerializeField] private float uiYOffset = -1.5f;
 
     [Header("Free Look Settings")] [SerializeField]
     private float freeLookSpeed = 5f;
@@ -112,7 +112,8 @@ public class CameraFollow : MonoBehaviour
         }
         else
         {
-            targetPos = currentTarget.position + offset + focusOffset;
+            var finalOffset = offset + focusOffset + new Vector3(0, uiYOffset, 0);
+            targetPos = currentTarget.position + finalOffset;
         }
 
         if (hasBounds)
@@ -343,7 +344,8 @@ public class CameraFollow : MonoBehaviour
     {
         if (currentTarget == null) return;
 
-        var targetPosition = currentTarget.position + offset + focusOffset;
+        var finalOffset = offset + focusOffset + new Vector3(0, uiYOffset, 0);
+        var targetPosition = currentTarget.position + finalOffset;
 
         if (hasBounds)
         {

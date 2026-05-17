@@ -22,8 +22,25 @@ namespace Abilities
 
         public override List<Vector3Int> GetTargetCellsFrom(Vector3Int origin, BaseEntity actor)
         {
-            return GridManager.Instance.GetAttackableCellsInRadius(origin, maxRange, minRange);
+            var allCells = GridManager.Instance.GetAttackableCellsInRadius(origin, maxRange, minRange);
+            var shootableCells = new List<Vector3Int>();
+
+            foreach (var cell in allCells)
+            {
+                // Клетка простреливаема
+                if (!GridManager.Instance.IsCellShootable(cell))
+                    continue;
+
+                // Есть линия видимости
+                if (!GridManager.Instance.HasLineOfSight(origin, cell))
+                    continue;
+
+                shootableCells.Add(cell);
+            }
+
+            return shootableCells;
         }
+
 
         public override List<Vector3Int> GetEffectCells(Vector3Int hoveredCell, BaseEntity actor)
             => new List<Vector3Int> { hoveredCell };

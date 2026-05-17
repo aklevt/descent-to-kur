@@ -59,7 +59,7 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 1268132063
+  m_SortingLayerID: 743415277
   m_SortingOrder: 0
   m_TargetDisplay: 0
 --- !u!114 &8152214643922246499
@@ -446,6 +446,7 @@ MonoBehaviour:
     MaxStepsPerRound: 3
     PreferredAttackRange: 3
     MinimumRange: 2
+    DetectionRadius: 0
   localAnimationSpeedMultiplier: 1
   projectileSpawnOffset: {x: 0.36, y: 0.9}
   spriteRenderer: {fileID: 1379945844017360337}
